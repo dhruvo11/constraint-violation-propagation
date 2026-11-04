@@ -2,16 +2,20 @@
 import json
 import os
 
-import gradio as gr
+os.environ.setdefault("GRADIO_ANALYTICS_ENABLED", "False")  # works offline; nothing is reported anywhere
+
+import gradio as gr  # noqa: E402
 import numpy as np
 from PIL import Image, ImageDraw
 
-from cvp import pipeline, render, schema, tamper
+from cvp import doctypes, paths, pipeline
+from cvp.core import render, tamper
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-SYSTEM = pipeline.CVP()
-FIELD_NAMES = {**{m: f"Subject mark {m[1]}" for m in schema.MARK_FIELDS}, "total": "Total",
-               "pct": "Percentage", "grade": "Grade", "date": "Date of issue", "roll": "Roll number"}
+DT = doctypes.get("transcript")
+SCHEMA = DT.schema
+SYSTEM = pipeline.CVP(DT)
+FIELD_NAMES = {f.name: f.label for f in SCHEMA.fields}
 CAT_LABELS = {"genuine": "Genuine (no edit)", "T1": "T1 - crude edit", "T2": "T2 - blended (inpainting-like)",
               "T3": "T3 - coherent crude edit", "T4": "T4 - coherent blended edit"}
 
@@ -45,7 +49,7 @@ def report(res, info=None):
     lines.append(f"### Verdict: **{verdict}**  (P(tampered) = {res['p_tamper']:.3f})")
     if res["tampered"]:
         lines.append(f"**Attributed field:** {FIELD_NAMES[res['field']]} (red box)")
-    violated = [c for c in schema.CONSTRAINTS if w[schema.C_INDEX[c]]]
+    violated = sorted(SCHEMA.violated(w), key=SCHEMA.c_index.get)
     if res["cls"] == "coherent":
         lines.append("**Constraint branch:** every constraint holds, so the decision rests on the visual "
                      "branch alone (all 10 fields are candidates).")
@@ -63,40 +67,36 @@ def report(res, info=None):
                      f"{'CORRECT' if ok else 'MISSED'}")
     lines = ["\n\n".join(lines)]
     lines.append("\n| Constraint | Predicate | Status | Residual |\n|---|---|---|---|")
-    pretty = {"c1": "sum of marks = Total", "c2": "Pct = 100 x Total / 500", "c3": "Grade = beta(Pct)",
-              "c5": "2015 <= Issue date <= today", "c6": "Roll No matches 1RUA##DEPT####"}
-    for c in schema.CONSTRAINTS:
-        j = schema.C_INDEX[c]
-        name = pretty.get(c, f"0 <= mark {c[-1]} <= 100")
-        lines.append(f"| {c} | {name} | {'VIOLATED' if w[j] else 'ok'} | {r[j]:+.3f} |")
+    for j, c in enumerate(SCHEMA.constraints):
+        lines.append(f"| {c.name} | {c.text} | {'VIOLATED' if w[j] else 'ok'} | {r[j]:+.3f} |")
     lines.append("\n| Field | OCR read | conf. | max heat |\n|---|---|---|---|")
-    for i, f in enumerate(schema.FIELDS):
+    for i, f in enumerate(SCHEMA.field_names):
         lines.append(f"| {FIELD_NAMES[f]} | `{o['text'][f]}` | {o['conf'][f]:.2f} | {res['pooled'][i, 0]:.2f} |")
     return "\n".join(lines)
 
 
 def class_posterior(res):
-    return {k: float(p) for k, p in zip(schema.CLASSES, res["p_cls"])}
+    return {k: float(p) for k, p in zip(SCHEMA.class_names, res["p_cls"])}
 
 
 def forge(seed, category, field):
     rng = np.random.default_rng(int(seed))
-    doc = render.generate(rng)
+    doc = render.generate(DT, rng)
     cat = next(k for k, v in CAT_LABELS.items() if v == category)
     f = None if field == "random" else next(k for k, v in FIELD_NAMES.items() if v == field)
-    img, info = tamper.apply(doc, cat, rng, field=f if cat in ("T1", "T2") else None)
+    img, info = tamper.apply(doc, DT, cat, rng, field=f if cat in ("T1", "T2") else None)
     res = SYSTEM(img)
     return (Image.fromarray(img), overlay(img, res, info["rects"]), report(res, info), class_posterior(res))
 
 
 def analyse(upload):
-    arr = np.asarray(Image.fromarray(upload).convert("RGB").resize((render.W, render.H)))
+    arr = np.asarray(Image.fromarray(upload).convert("RGB").resize(DT.page))
     res = SYSTEM(arr)
     return overlay(arr, res), report(res), class_posterior(res)
 
 
 def results_md():
-    path = os.path.join(BASE, "results", "results.json")
+    path = os.path.join(paths.results_dir(DT.name), "results.json")
     if not os.path.exists(path):
         return "Run `scripts/evaluate.py` first."
     R = json.load(open(path))["results"]

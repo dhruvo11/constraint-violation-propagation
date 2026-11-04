@@ -1,0 +1,31 @@
+#!/bin/bash
+# One-command setup: creates .venv with every dependency and runs the test suite.
+#   ./setup.sh
+set -e
+cd "$(dirname "$0")"
+
+if ! command -v uv >/dev/null 2>&1; then
+  echo "This project uses uv to manage Python. Install it first:"
+  echo "  brew install uv        (or: curl -LsSf https://astral.sh/uv/install.sh | sh)"
+  exit 1
+fi
+
+if [ ! -x .venv/bin/python ]; then
+  echo "Creating the Python 3.12 environment in .venv ..."
+  uv venv --python 3.12 .venv
+fi
+echo "Installing dependencies (PyTorch is large; the first install can take a while) ..."
+uv pip install --python .venv/bin/python -r requirements.txt
+
+echo "Running the tests ..."
+.venv/bin/python -m pytest
+
+if [ ! -f models/visual_resunet.pt ] || [ ! -f models/ocr_crnn.pt ]; then
+  echo
+  echo "Setup done, but the trained models are missing. Train everything with:"
+  echo "  ./scripts/reproduce.sh"
+else
+  echo
+  echo "Setup done. Start the app by double-clicking 'Start CVP.command' or running:"
+  echo "  .venv/bin/python app.py"
+fi

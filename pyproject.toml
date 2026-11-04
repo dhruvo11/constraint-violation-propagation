@@ -1,0 +1,11 @@
+[project]
+name = "cvp"
+version = "0.2.0"
+description = "Constraint Violation Propagation: attributing document forgery when visual evidence fails"
+requires-python = ">=3.12"
+authors = [{ name = "Harshith Rudresh" }, { name = "Dhruv S P" }]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"

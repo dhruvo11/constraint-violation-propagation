@@ -11,10 +11,13 @@ import numpy as np  # noqa: E402
 from PIL import Image, ImageDraw  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from cvp import pipeline, render, schema, tamper  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from cvp import doctypes, paths, pipeline  # noqa: E402
+from cvp.core import render, tamper  # noqa: E402
 
-BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FIG = os.path.join(BASE, "report", "figures")
+FIG = os.path.join(paths.REPORT, "figures")
+DT = doctypes.get("transcript")
+SCHEMA = DT.schema
 # Fixed categorical order (reference palette, light mode); colour follows the method.
 COLORS = {"CVP": "#2a78d6", "Visual-only": "#eb6834", "Constraint-only": "#1baf7a",
           "Concat fusion": "#eda100", "ELA": "#e87ba4", "CVP (rule)": "#6250d6"}
@@ -118,17 +121,11 @@ def regimes(G):
 
 
 def signatures(S, N):
-    order = ["Subject mark (in range)", "Subject mark (out of range)", "Total", "Percentage", "Grade",
-             "Issue date", "Roll number"]
-    order = [o for o in order if o in S]
-    cols = ["c1", "c2", "c3", "c4", "c5", "c6"]
-    M = []
-    for k in order:
-        v = np.array(S[k])
-        c4 = v[[schema.C_INDEX[f"c4_{m}"] for m in schema.MARK_FIELDS]].max()
-        M.append([v[schema.C_INDEX["c1"]], v[schema.C_INDEX["c2"]], v[schema.C_INDEX["c3"]], c4,
-                  v[schema.C_INDEX["c5"]], v[schema.C_INDEX["c6"]]])
-    M = np.array(M)
+    import evaluate as E
+    E.set_doctype(DT.name)
+    rows = [(label, u) for _, u, label in E.signature_rows() if label in S]
+    order = [label for label, _ in rows]
+    M = np.array([S[label] for label, _ in rows])
     from matplotlib.colors import LinearSegmentedColormap
     cmap = LinearSegmentedColormap.from_list("blue", ["#fcfcfb", "#cde2fb", "#6da7ec", "#2a78d6", "#184f95"])
     fig, ax = plt.subplots(figsize=(3.4, 2.2))
@@ -137,7 +134,7 @@ def signatures(S, N):
         for j in range(M.shape[1]):
             ax.text(j, i, f"{M[i, j]:.2f}".rstrip("0").rstrip(".") if M[i, j] > 0 else "0",
                     ha="center", va="center", fontsize=6.5, color="white" if M[i, j] > 0.6 else INK)
-    ax.set_xticks(range(6), [f"$c_{k}$" for k in range(1, 7)])
+    ax.set_xticks(range(len(SCHEMA.families)), [E.tex_family(f) for f in SCHEMA.families])
     ax.set_yticks(range(len(order)), [f"{o} (n={N[o]})" for o in order], fontsize=6.5)
     ax.tick_params(length=0)
     for s in ax.spines.values():
@@ -148,12 +145,12 @@ def signatures(S, N):
 
 def examples():
     """Qualitative: the same transcript with a T1 and a T2 edit of subject mark 3."""
-    system = pipeline.CVP()
+    system = pipeline.CVP(DT)
     panels = []
     for cat in ["T1", "T2"]:
         rng = np.random.default_rng(11)
-        doc = render.generate(rng)
-        img, info = tamper.apply(doc, cat, rng, field="m3")
+        doc = render.generate(DT, rng)
+        img, info = tamper.apply(doc, DT, cat, rng, field="m3")
         res = system(img)
         H = res["heatmap"]
         a = (np.clip(H, 0, 1) ** 1.5 * 0.7)[..., None]
@@ -174,7 +171,7 @@ def examples():
     for r, (cat, orig, crop, res, info) in enumerate(panels):
         axes[r, 0].imshow(orig)
         axes[r, 1].imshow(crop)
-        sig = ", ".join(c for c in schema.CONSTRAINTS if res["w"][schema.C_INDEX[c]])
+        sig = ", ".join(sorted(SCHEMA.violated(res["w"]), key=SCHEMA.c_index.get))
         axes[r, 0].set_title(f"{cat}: mark 3 edited to {info['values']['m3']} (document as received)", fontsize=7.5)
         axes[r, 1].set_title(f"violated {{{sig}}} -> class '{res['cls']}' (orange); heatmap; "
                              f"attributed: {res['field']}", fontsize=7.5)
@@ -186,12 +183,12 @@ def examples():
 
 def page_example():
     rng = np.random.default_rng(3)
-    doc = render.generate(rng)
+    doc = render.generate(DT, rng)
     Image.fromarray(doc.image).save(os.path.join(FIG, "transcript.png"))
 
 
 def main():
-    S = json.load(open(os.path.join(BASE, "results", "results.json")))
+    S = json.load(open(os.path.join(paths.results_dir(DT.name), "results.json")))
     attribution(S["results"])
     detection(S["results"])
     robustness(S["robustness"])

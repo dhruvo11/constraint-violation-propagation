@@ -13,17 +13,23 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from cvp import pipeline, schema  # noqa: E402
-from cvp.schema import CLASS_INDEX, CLASSES, FIELD_CLASS, FIELDS, MARK_FIELDS  # noqa: E402
+from cvp import doctypes, paths, pipeline  # noqa: E402
 
-BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FEAT, RES, TAB = (os.path.join(BASE, d) for d in ("features", "results", os.path.join("report", "tables")))
 CATS = ["genuine", "T1", "T2", "T3", "T4"]
 METHODS = ["ELA", "Visual-only", "Constraint-only", "Concat fusion", "CVP (rule)", "CVP"]
+TAB = os.path.join(paths.REPORT, "tables")
+DT = doctypes.get("transcript")  # the document type under evaluation; set from --doctype in main()
+S = DT.schema
+
+
+def set_doctype(name):
+    global DT, S
+    DT = doctypes.get(name)
+    S = DT.schema
 
 
 def load(split, cond="clean", tag=""):
-    return dict(np.load(os.path.join(FEAT, f"{split}_{cond}{tag}.npz")))
+    return dict(np.load(os.path.join(paths.feature_dir(DT.name), f"{split}_{cond}{tag}.npz")))
 
 
 def subset(d, mask):
@@ -40,13 +46,20 @@ def class_labels(d):
     y = np.zeros(len(d["category"]), int)
     for i, (c, p) in enumerate(zip(d["category"], d["primary"])):
         if c in (1, 2):
-            y[i] = CLASS_INDEX[FIELD_CLASS[FIELDS[p]]]
+            y[i] = S.class_index[S.field_class[S.field_names[p]]]
     return y
 
 
+def unary_hit(d):
+    """Single-field edits whose own unary constraint broke (e.g. an out-of-range mark)."""
+    return np.array([p >= 0 and S.unary_violated(S.field_names[p], w) for p, w in zip(d["primary"], d["w_true"])])
+
+
 def ambiguous(d):
-    marks = np.isin(d["primary"], [FIELDS.index(m) for m in MARK_FIELDS])
-    return np.isin(d["category"], [1, 2]) & marks & ~d["oor"]
+    """The ambiguity split: T1/T2 edits inside a non-singleton class that no unary
+    constraint points at, so constraint reasoning cannot beat 1/|K| (Proposition 1)."""
+    multi = np.array([p >= 0 and len(S.class_fields[S.field_class[S.field_names[p]]]) > 1 for p in d["primary"]])
+    return np.isin(d["category"], [1, 2]) & multi & ~unary_hit(d)
 
 
 def box_iou(a, b):
@@ -77,7 +90,7 @@ class Heads:
 
     @staticmethod
     def attr_features(d, p):
-        return np.stack([pipeline.attribution_features(p[i], d["w"][i], d["pooled"][i]) for i in range(len(p))])
+        return np.stack([pipeline.attribution_features(p[i], d["w"][i], d["pooled"][i], S) for i in range(len(p))])
 
     @staticmethod
     def vis_features(d):
@@ -92,17 +105,17 @@ class Heads:
         out["ELA"] = (d["ela"][:, :, 1].max(1), d["ela"][:, :, 1])
         out["Visual-only"] = (d["pooled"][:, :, 0].max(1), d["pooled"][:, :, 0])
         # Constraint-only: symbolic signature lookup; ties inside a class broken uniformly at random.
-        cand = np.zeros((n, len(FIELDS)))
+        cand = np.zeros((n, len(S.field_names)))
         for i in range(n):
-            c = schema.candidate_fields(schema.signature_class(d["w"][i]), d["w"][i])
-            cand[i, [FIELDS.index(f) for f in c]] = 1.0 / len(c)
+            c = S.candidate_fields(S.signature_class(d["w"][i]), d["w"][i])
+            cand[i, [S.field_index[f] for f in c]] = 1.0 / len(c)
         out["Constraint-only"] = (d["w"].sum(1), cand)
         pc = self.concat.predict_proba(self.cscaler.transform(np.hstack([d["cfeat"], d["emb"]])))
         out["Concat fusion"] = (1 - pc[:, 0], pc[:, 1:])
         det = pipeline.noisy_or(1 - p[:, 0], self.det.predict_proba(self.vis_features(d))[:, 1])
-        rule = np.zeros((n, len(FIELDS)))
+        rule = np.zeros((n, len(S.field_names)))
         for i in range(n):
-            rule[i, FIELDS.index(pipeline.cvp_rule(p[i], d["w"][i], d["pooled"][i]))] = 1
+            rule[i, S.field_index[pipeline.cvp_rule(p[i], d["w"][i], d["pooled"][i], S)]] = 1
         out["CVP (rule)"] = (det, rule)
         out["CVP"] = (det, A @ self.attr_w)
         self.last_p = p
@@ -192,16 +205,50 @@ def best_thresholds(heads, va):
     return th
 
 
+def signature_rows():
+    """Row labels of the empirical signature table, in class order; a multi-field class
+    gets one row for edits that keep its unary rule and one for edits that break it."""
+    rows = []
+    for k in S.classes:
+        label = DT.class_labels.get(k, k)
+        if len(S.class_fields[k]) > 1:
+            rows += [(k, False, f"{label} ({DT.unary_labels[0]})"), (k, True, f"{label} ({DT.unary_labels[1]})")]
+        else:
+            rows.append((k, None, label))
+    return rows
+
+
 def signature_table(d):
-    """Empirical violation frequency per edited-field type (ground-truth values)."""
+    """Empirical violation frequency per edited-field type (ground-truth values), one column
+    per constraint family. Per-field copies are collapsed per document before averaging, so
+    an out-of-range mark counts its own range rule rather than a fifth of the five."""
     rows = {}
     single = np.isin(d["category"], [1, 2])
+    hit = unary_hit(d)
+    labels = {(k, u): lab for k, u, lab in signature_rows()}
     for i in np.nonzero(single)[0]:
-        f = FIELDS[d["primary"][i]]
-        key = {"total": "Total", "pct": "Percentage", "grade": "Grade", "date": "Issue date",
-               "roll": "Roll number"}.get(f, "Subject mark (out of range)" if d["oor"][i] else "Subject mark (in range)")
-        rows.setdefault(key, []).append(d["w_true"][i])
+        k = S.field_class[S.field_names[d["primary"][i]]]
+        multi = len(S.class_fields[k]) > 1
+        key = labels[(k, bool(hit[i]) if multi else None)]
+        rows.setdefault(key, []).append(family_columns(d["w_true"][i], multi))
     return {k: np.mean(v, 0) for k, v in rows.items()}, {k: len(v) for k, v in rows.items()}
+
+
+def family_columns(v, multi):
+    """Collapse per-field copies of a rule (c4 for each mark) into one column: the copy
+    that fired for a multi-field class, the total otherwise."""
+    cols = []
+    for fam in S.families:
+        idx = [S.c_index[c.name] for c in S.constraints if (c.family or c.name) == fam]
+        cols.append(v[idx].max() if multi else v[idx].sum())
+    return cols
+
+
+def tex_family(fam):
+    members = sum((c.family or c.name) == fam for c in S.constraints)
+    num = fam[1:] if fam[:1] == "c" and fam[1:].isdigit() else None
+    base = f"c_{{{num}}}" if num else f"\\mathrm{{{fam}}}"
+    return f"${base}^{{(\\cdot)}}$" if members > 1 else f"${base}$"
 
 
 def fmt_pct(x):
@@ -244,20 +291,14 @@ def write_tables(res, rob, sig, sig_n, ocr_acc, rho_emp, cand_size, held=None):
                      f"{fmt_pct(res[m]['attr_amb'])}\\\\\n")
         fh.write("\\midrule\nChance ($1/|K|$) & 20.0 & 20.0 & 20.0\\\\\n\\bottomrule\n\\end{tabular}\n")
 
-    order = ["Subject mark (in range)", "Subject mark (out of range)", "Total", "Percentage", "Grade",
-             "Issue date", "Roll number"]
-    cols = ["c1", "c2", "c3", "c4_m1", "c5", "c6"]
     with open(os.path.join(TAB, "signatures.tex"), "w") as fh:
-        fh.write("\\begin{tabular}{lrcccccc}\n\\toprule\nField edited & $n$ & $c_1$ & $c_2$ & $c_3$ & $c_4^{(\\cdot)}$ & $c_5$ & $c_6$\\\\\n\\midrule\n")
-        for k in order:
-            if k not in sig:
+        fh.write("\\begin{tabular}{lr" + "c" * len(S.families) + "}\n\\toprule\nField edited & $n$ & "
+                 + " & ".join(tex_family(f) for f in S.families) + "\\\\\n\\midrule\n")
+        for k, u, label in signature_rows():
+            if label not in sig:
                 continue
-            v = sig[k]
-            c4 = v[[schema.C_INDEX[f"c4_{m}"] for m in MARK_FIELDS]].max() if "mark" in k else \
-                v[[schema.C_INDEX[f"c4_{m}"] for m in MARK_FIELDS]].sum()
-            vals = [v[schema.C_INDEX["c1"]], v[schema.C_INDEX["c2"]], v[schema.C_INDEX["c3"]], c4,
-                    v[schema.C_INDEX["c5"]], v[schema.C_INDEX["c6"]]]
-            fh.write(f"{k} & {sig_n[k]} & " + " & ".join(f"{x:.2f}" for x in vals) + "\\\\\n")
+            vals = sig[label]
+            fh.write(f"{label} & {sig_n[label]} & " + " & ".join(f"{x:.2f}" for x in vals) + "\\\\\n")
         fh.write("\\bottomrule\n\\end{tabular}\n")
 
     with open(os.path.join(TAB, "robustness.tex"), "w") as fh:
@@ -331,11 +372,15 @@ def write_numbers(summary):
             out.append(f"\\newcommand{{\\{name(pre + k + 'AttrTtwo')}}}{{{100 * h[m]['attr_T2']:.1f}}}")
             out.append(f"\\newcommand{{\\{name(pre + k + 'AmbTtwo')}}}{{{100 * h[m]['attr_amb_T2']:.1f}}}")
             out.append(f"\\newcommand{{\\{name(pre + k + 'All')}}}{{{100 * h[m]['attr_all']:.1f}}}")
-    with open(os.path.join(BASE, "report", "numbers.tex"), "w") as fh:
+    with open(os.path.join(paths.REPORT, "numbers.tex"), "w") as fh:
         fh.write("% Generated by scripts/evaluate.py -- do not edit by hand.\n" + "\n".join(out) + "\n")
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--doctype", default="transcript", choices=doctypes.names())
+    set_doctype(ap.parse_args().doctype)
     tr, va, te = without_blended(load("train")), without_blended(load("val")), load("test")
     heads = Heads().fit(tr, va)
     th = best_thresholds(heads, va)
@@ -347,11 +392,11 @@ def main():
     single = np.isin(te["category"], [1, 2])
     cs = []
     for i in np.nonzero(single)[0]:
-        k = CLASSES[int(p[i].argmax())]
-        cs.append(len(schema.candidate_fields(k, te["w"][i])))
+        k = S.class_names[int(p[i].argmax())]
+        cs.append(len(S.candidate_fields(k, te["w"][i])))
     cand_size = float(np.mean(cs))
-    rho_emp = 1 - cand_size / len(FIELDS)
-    rho_th, e_th = schema.reduction_factor([5, 1, 1, 1, 1, 1], 10)
+    rho_emp = 1 - cand_size / len(S.field_names)
+    rho_th, e_th = S.reduction_factor()
 
     rob, ocr_acc = {}, {}
     n_rob = len(load("test", "jpeg60")["category"])  # degraded copies cover the first n_rob test documents
@@ -364,7 +409,7 @@ def main():
     # Visual-training regimes: zero-shot (crude edits only), main (crude + older generator G1),
     # oracle (the evaluated generator G2 itself). Heads are refitted per regime on validation
     # features; only the oracle may see blended documents while fitting.
-    tags = [t for t in ("blind", "oracle") if os.path.exists(os.path.join(FEAT, f"test_clean_{t}.npz"))]
+    tags = [t for t in ("blind", "oracle") if os.path.exists(os.path.join(paths.feature_dir(DT.name), f"test_clean_{t}.npz"))]
     n_reg = min([len(load("test", tag=f"_{t}")["category"]) for t in tags] + [len(te["category"])])
 
     def head(d):
@@ -382,17 +427,17 @@ def main():
     sig, sig_n = signature_table(te)
     write_tables(res, rob, sig, sig_n, ocr_acc, rho_emp, cand_size, held)
     summary = dict(results=res, robustness=rob, ocr_acc=ocr_acc, g_phi_acc=g_acc,
-                   ocr_clean_by_field={f: float(te["ocr_ok"][:, i].mean()) for i, f in enumerate(FIELDS)},
+                   ocr_clean_by_field={f: float(te["ocr_ok"][:, i].mean()) for i, f in enumerate(S.field_names)},
                    cand_size=cand_size, rho_empirical=rho_emp, rho_theory=rho_th, expected_K=e_th,
                    attr_w=heads.attr_w.tolist(), det_threshold=th["CVP"], thresholds=th, heldout=held,
                    signatures={k: v.tolist() for k, v in sig.items()}, signature_n=sig_n,
                    n_test={c: int((te["category"] == i).sum()) for i, c in enumerate(CATS)},
                    n_ambiguous=int(ambiguous(te).sum()), n_regimes=int(n_reg))
-    os.makedirs(RES, exist_ok=True)
-    with open(os.path.join(RES, "results.json"), "w") as fh:
+    os.makedirs(paths.results_dir(DT.name), exist_ok=True)
+    with open(os.path.join(paths.results_dir(DT.name), "results.json"), "w") as fh:
         json.dump(summary, fh, indent=1)
     write_numbers(summary)
-    with open(pipeline.HEADS_PATH, "wb") as fh:
+    with open(pipeline.heads_path(DT.name), "wb") as fh:
         pickle.dump(dict(g_phi=heads.g, g_scaler=heads.scaler, det=heads.det, attr_w=heads.attr_w,
                          det_threshold=th["CVP"]), fh)
     for m in METHODS:

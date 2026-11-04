@@ -11,7 +11,7 @@ features/
 logs/
 models/*.pt
 models/*.pkl
-results/*.png
+results/**/*.png
 *.zip
 
 # LaTeX build output

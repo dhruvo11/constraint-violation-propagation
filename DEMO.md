@@ -2,12 +2,9 @@
 
 ## Start it
 
-```bash
-cd cvp
-.venv/bin/python app.py
-```
-
-Open http://127.0.0.1:7860. Startup takes ~10 s (models load); each analysis takes under 1 s.
+Double-click **Start CVP.command** in the project folder. A Terminal window opens, the
+models load (about 15 s) and the app opens in your browser by itself. Keep that window open
+while presenting; close it to stop. Each analysis takes under a second.
 
 ## What is on screen
 

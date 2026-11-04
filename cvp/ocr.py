@@ -1,4 +1,4 @@
-"""OCR and positional field assignment.
+"""OCR and positional field assignment for template documents.
 
 The page is registered against the template using the header rule, each schema slot is
 cropped, and a small CRNN (conv stack + BiLSTM, CTC-trained on synthetic slot crops)
@@ -6,9 +6,7 @@ reads it with decoding restricted to the slot's character set. The output is a v
 a confidence and a bounding box per field: everything downstream sees only what the
 OCR read, never the ground truth.
 """
-import datetime as dt
 import os
-import re
 import string
 
 import numpy as np
@@ -16,14 +14,8 @@ import torch
 import torch.nn as nn
 from PIL import Image
 
-from .render import ANCHORS, HEADER_RULE, SLOT_WIDTH
-from .schema import FIELDS, GRADES, MARK_FIELDS
-
 ALPHABET = string.digits + string.ascii_uppercase + "./+"
 CHAR_INDEX = {c: i + 1 for i, c in enumerate(ALPHABET)}  # 0 = CTC blank
-CHARSET = {**{m: string.digits for m in MARK_FIELDS}, "total": string.digits,
-           "pct": string.digits + ".", "date": string.digits + "/", "grade": "OABCDF+",
-           "roll": string.digits + string.ascii_uppercase}
 CROP_H, CROP_W = 32, 160
 THRESH = 150
 MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "models", "ocr_crnn.pt")
@@ -47,9 +39,9 @@ class CRNN(nn.Module):
         return self.fc(self.rnn(f)[0])
 
 
-def register(gray):
+def register(gray, header_rule):
     """Estimate the global page offset from the header rule."""
-    x0, y0 = HEADER_RULE
+    x0, y0 = header_rule
     top = max(0, y0 - 16)
     band = gray[top:y0 + 16] < THRESH
     rows = np.nonzero(band.sum(1) > 300)[0]
@@ -60,14 +52,14 @@ def register(gray):
     return int(cols[0] - x0), int(r + top - y0)
 
 
-def slot_rect(f, ox, oy, shape=(832, 640)):
-    ax, ay = ANCHORS[f]
+def slot_rect(doctype, f, ox, oy, shape):
+    ax, ay, width = doctype.slots[f]
     return (max(0, ax + ox - 10), max(0, ay + oy - 8),
-            min(shape[1], ax + ox + SLOT_WIDTH[f]), min(shape[0], ay + oy + 30))
+            min(shape[1], ax + ox + width), min(shape[0], ay + oy + 30))
 
 
-def crop_slot(gray, f, ox, oy):
-    x0, y0, x1, y1 = slot_rect(f, ox, oy, gray.shape)
+def crop_slot(gray, doctype, f, ox, oy):
+    x0, y0, x1, y1 = slot_rect(doctype, f, ox, oy, gray.shape)
     c = gray[y0:y1, x0:x1]
     scale = CROP_H / c.shape[0]
     w = min(CROP_W, max(1, int(round(c.shape[1] * scale))))
@@ -90,32 +82,18 @@ def ink_box(gray, rect):
     return [int(x0 + xs.min()), int(y0 + ys.min()), int(x0 + xs.max() + 1), int(y0 + ys.max() + 1)]
 
 
-def parse(f, s):
-    if f in MARK_FIELDS or f == "total":
-        return int(s) if s.isdigit() else None
-    if f == "pct":
-        return float(s) if re.fullmatch(r"\d{1,3}\.\d{2}", s) else None
-    if f == "grade":
-        return s if s in GRADES else None
-    if f == "date":
-        m = re.fullmatch(r"(\d{2})/(\d{2})/(\d{4})", s)
-        if not m:
-            return None
-        try:
-            return dt.date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
-        except ValueError:
-            return None
-    if f == "roll":
-        return s or None
-    raise KeyError(f)
+_masks = {}
 
 
-_MASKS = {f: torch.tensor([0.0] + [0.0 if c in CHARSET[f] else -1e4 for c in ALPHABET]) for f in FIELDS}
+def _mask(charset):
+    if charset not in _masks:
+        _masks[charset] = torch.tensor([0.0] + [0.0 if c in charset else -1e4 for c in ALPHABET])
+    return _masks[charset]
 
 
-def decode(logits, f):
+def decode(logits, charset):
     """Greedy CTC decoding restricted to the slot's character set."""
-    p = (logits + _MASKS[f]).softmax(-1)
+    p = (logits + _mask(charset)).softmax(-1)
     conf, idx = p.max(-1)
     out, prev, confs = [], 0, []
     for k, c in zip(idx.tolist(), conf.tolist()):
@@ -126,6 +104,10 @@ def decode(logits, f):
     return "".join(out), float(np.mean(confs)) if confs else 0.0
 
 
+def gray_of(img):
+    return np.asarray(img, np.float32).mean(2) if img.ndim == 3 else img.astype(np.float32)
+
+
 class Reader:
     def __init__(self, path=MODEL_PATH, device="cpu"):
         self.model = CRNN()
@@ -134,16 +116,17 @@ class Reader:
         self.device = device
 
     @torch.no_grad()
-    def read(self, img):
+    def read(self, img, doctype):
         """OCR + FieldAssign. Returns dict(values, text, conf, boxes, offset)."""
-        gray = np.asarray(img, np.float32).mean(2) if img.ndim == 3 else img.astype(np.float32)
-        ox, oy = register(gray)
-        crops, rects = zip(*[crop_slot(gray, f, ox, oy) for f in FIELDS])
+        gray = gray_of(img)
+        ox, oy = register(gray, doctype.header_rule)
+        fields = doctype.schema.fields
+        crops, rects = zip(*[crop_slot(gray, doctype, f.name, ox, oy) for f in fields])
         x = torch.from_numpy(np.stack(crops))[:, None].to(self.device)
         logits = self.model(x).float().cpu()
         values, texts, conf, boxes = {}, {}, {}, {}
-        for i, f in enumerate(FIELDS):
-            texts[f], conf[f] = decode(logits[i], f)
-            values[f] = parse(f, texts[f])
-            boxes[f] = ink_box(gray, rects[i])
+        for i, f in enumerate(fields):
+            texts[f.name], conf[f.name] = decode(logits[i], f.charset)
+            values[f.name] = f.parse(texts[f.name])
+            boxes[f.name] = ink_box(gray, rects[i])
         return dict(values=values, text=texts, conf=conf, boxes=boxes, offset=(ox, oy))

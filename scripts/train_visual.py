@@ -15,15 +15,14 @@ import torch.nn.functional as F
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from cvp import schema, visual  # noqa: E402
+from cvp import doctypes, paths, visual  # noqa: E402
 
-ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 P = 256
 
 
-def load_rows(split):
-    with open(os.path.join(ROOT, f"{split}.jsonl")) as fh:
-        return [json.loads(l) for l in fh]
+def load_rows(doctype, split):
+    with open(os.path.join(paths.data_dir(doctype), f"{split}.jsonl")) as fh:
+        return [dict(json.loads(l), doctype=doctype) for l in fh]
 
 
 class PatchSet(torch.utils.data.Dataset):
@@ -36,13 +35,14 @@ class PatchSet(torch.utils.data.Dataset):
     def __getitem__(self, k):
         rng = np.random.default_rng(int(torch.randint(0, 2 ** 31 - 1, (1,))))
         row = self.rows[rng.integers(len(self.rows))]
-        arr = np.asarray(Image.open(os.path.join(ROOT, row["split"], row["id"])).convert("RGB"))
+        arr = np.asarray(Image.open(os.path.join(paths.data_dir(row["doctype"]), row["split"], row["id"])).convert("RGB"))
         h, w = arr.shape[:2]
         u = rng.random()
         if row["rects"] and u < 0.5:
             b = row["rects"][rng.integers(len(row["rects"]))]
         elif u < 0.85:
-            b = row["boxes"][schema.FIELDS[rng.integers(len(schema.FIELDS))]]
+            names = list(row["boxes"])
+            b = row["boxes"][names[rng.integers(len(names))]]
         else:
             b = [rng.integers(w)] * 2 + [rng.integers(h)] * 2
             b = [b[0], b[2], b[1], b[3]]
@@ -71,12 +71,15 @@ def main():
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--workers", type=int, default=3)
     ap.add_argument("--exclude", default="", help="comma-separated categories to hold out from training")
+    ap.add_argument("--doctypes", default=",".join(doctypes.names()), help="document types to train on")
     ap.add_argument("--extra", default="", help="additional training split, e.g. train_g1")
     ap.add_argument("--out", default=visual.MODEL_PATH)
     args = ap.parse_args()
-    rows = [r for r in load_rows("train") if r["category"] not in args.exclude.split(",")]
-    if args.extra:
-        rows += load_rows(args.extra)
+    rows = []
+    for name in args.doctypes.split(","):
+        rows += [r for r in load_rows(name, "train") if r["category"] not in args.exclude.split(",")]
+        if args.extra and os.path.exists(os.path.join(paths.data_dir(name), f"{args.extra}.jsonl")):
+            rows += load_rows(name, args.extra)
     dev = "mps" if torch.backends.mps.is_available() else "cpu"
     model = visual.ResUNet(pretrained=True).to(dev)
     opt = torch.optim.AdamW(model.parameters(), args.lr, weight_decay=1e-4)
