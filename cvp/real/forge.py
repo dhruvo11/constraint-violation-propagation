@@ -247,9 +247,18 @@ def coherent(rg, rng):
 
 
 # ------------------------------------------------------------------ the forger
-def forge(r, category, rng):
+def editable(r):
+    """The fields a single-field (T1/T2) edit of receipt `r` may target: printed, non-zero,
+    and read by at least one rule."""
+    rg = cord.from_lines(r.lines)
+    S, v, words = RS.schema(rg), RS.values(rg), field_words(r)
+    return [f for f in S.field_names if S.constrained(f) and f in words and v[f]]
+
+
+def forge(r, category, rng, field=None):
     """(image as RGB uint8, info) for receipt `r` (loaded with images=True). info: category,
-    edited fields with their old and new values, and the boxes of the edited fields."""
+    edited fields with their old and new values, and the boxes of the edited fields.
+    `field` chooses the target of a single-field (T1/T2) edit (default: a random one)."""
     rg = cord.from_lines(r.lines, rid=r.id, size=r.size)
     img = np.array(Image.open(io.BytesIO(r.image)).convert("RGB"))
     size = (img.shape[1], img.shape[0])
@@ -258,9 +267,9 @@ def forge(r, category, rng):
     v = RS.values(rg)
     changes = {}
     if category in ("T1", "T2"):
-        editable = [f for f in S.field_names if S.constrained(f) and f in words and v[f]]
-        if editable:
-            f = editable[int(rng.integers(len(editable)))]
+        targets = [f for f in S.field_names if S.constrained(f) and f in words and v[f]]
+        if targets:
+            f = field if field in targets else targets[int(rng.integers(len(targets)))]
             changes = {f: other_value(v[f], rng, is_count=f.startswith(("cnt", "qty")))}
     elif category in ("T3", "T4"):
         changes = coherent(rg, rng) or {}

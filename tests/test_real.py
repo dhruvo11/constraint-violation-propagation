@@ -193,3 +193,34 @@ def test_the_visual_view_scales_large_photos_and_pads_narrow_ones():
     assert s == 1.0 and v.shape[:2] == (500, 256)  # padded on the right: boxes keep their coordinates
     v, _ = view.visual_view(narrow)
     assert v.shape[:2] == (500, 200)  # no padding at test time
+
+
+def test_forging_a_receipt_photo_edits_the_chosen_field():
+    """End to end on a small drawn 'photo' with labelled boxes (17,500 + 46,000 = TOTAL 63,500)."""
+    import io
+    import numpy as np
+    from PIL import Image, ImageDraw, ImageFont
+    from cvp.real import forge
+    img = Image.new("RGB", (400, 260), (245, 245, 240))
+    d = ImageDraw.Draw(img)
+    font = ImageFont.truetype(forge.FONTS_BLEND[0], 22)
+    lines = []
+    for cat, group, text, xy in [("menu.price", 3, "17500", (300, 50)), ("menu.price", 4, "46000", (300, 95)),
+                                 ("total.total_price", 5, "63500", (300, 160))]:
+        d.text(xy, text, fill=(20, 20, 20), font=font)
+        l, t, r, b = d.textbbox(xy, text, font=font)
+        quad = {"x1": l, "y1": t, "x2": r, "y2": t, "x3": r, "y3": b, "x4": l, "y4": b}
+        lines.append({"category": cat, "group_id": group, "sub_group_id": 0,
+                      "words": [{"text": text, "is_key": 0, "quad": quad}]})
+    buf = io.BytesIO()
+    img.save(buf, "PNG")
+    r = cord.Receipt(id="drawn", items=[], lines=lines, size=img.size, image=buf.getvalue())
+    assert set(forge.editable(r)) == {"price1", "price2", "total"}
+    out, info = forge.forge(r, "T2", np.random.default_rng(0), field="price2")
+    assert info["edited"] == ["price2"] and info["new"]["price2"] != 46000 and len(info["rects"]) == 1
+    x0, y0, x1, y1 = info["rects"][0]
+    assert np.abs(out[y0:y1, x0:x1].astype(int) - np.asarray(img)[y0:y1, x0:x1]).max() > 60  # the digits changed
+    out, info = forge.forge(r, "T3", np.random.default_rng(1))
+    assert "total" in info["edited"] and any(f.startswith("price") for f in info["edited"])
+    _, info = forge.forge(r, "genuine", np.random.default_rng(2))
+    assert info["edited"] == [] and info["category"] == "genuine"

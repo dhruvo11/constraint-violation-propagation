@@ -143,6 +143,48 @@ def files(split, root=ROOT):
     return sorted(glob.glob(os.path.join(root, "data", f"{split}-*.parquet")))
 
 
+def image_dir(split, root=ROOT):
+    return os.path.join(root, "images", split)
+
+
+def _ext(data):
+    return ".png" if data[:4] == b"\x89PNG" else ".jpg"
+
+
+def export_images(split, root=ROOT):
+    """Write every photo of a split to its own file (once, as stored), so a single receipt
+    can be loaded without reading a whole Parquet file into memory."""
+    out = image_dir(split, root)
+    os.makedirs(out, exist_ok=True)
+    for r in receipts(split, root, images=True):
+        if not glob.glob(os.path.join(out, r.id + ".*")):
+            with open(os.path.join(out, r.id + _ext(r.image)), "wb") as fh:
+                fh.write(r.image)
+
+
+_GT = {}
+
+
+def receipt(split, k, root=ROOT):
+    """Receipt k of a split, with its photo (from the files export_images writes)."""
+    import dataclasses
+    if (split, root) not in _GT:
+        _GT[(split, root)] = list(receipts(split, root))  # ground truth only: small
+    r = _GT[(split, root)][k]
+    found = glob.glob(os.path.join(image_dir(split, root), r.id + ".*"))
+    if not found:
+        export_images(split, root)
+        found = glob.glob(os.path.join(image_dir(split, root), r.id + ".*"))
+    with open(found[0], "rb") as fh:
+        return dataclasses.replace(r, image=fh.read())
+
+
+def count_receipts(split, root=ROOT):
+    if (split, root) not in _GT:
+        _GT[(split, root)] = list(receipts(split, root))
+    return len(_GT[(split, root)])
+
+
 def receipts(split, root=ROOT, images=False):
     """Every receipt of a split, in dataset order; images are loaded only when asked for."""
     import pyarrow.parquet as pq

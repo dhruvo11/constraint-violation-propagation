@@ -58,6 +58,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--split", default="test")
     ap.add_argument("--tag", default="")
+    ap.add_argument("--model", default="", help="visual model of these features: reports CVP's flag rates at its "
+                                                 "validation threshold (results/real/cord_threshold.json)")
     a = ap.parse_args()
     rows = pickle.load(open(os.path.join(paths.BASE, "features", "real", f"cord_{a.split}{a.tag}.pkl"), "rb"))
     y = np.array([d["category"] != "genuine" for d in rows])
@@ -80,6 +82,12 @@ def main():
     summary = dict(dataset="CORD v2", split=a.split, tag=a.tag, documents=len(rows),
                    per_category={c: int((cat == c).sum()) for c in CATS}, n_ambiguous=int(amb.sum()),
                    chance_ambiguous=chance, results=res)
+    tfile = os.path.join(paths.BASE, "results", "real", "cord_threshold.json")
+    if a.model and os.path.exists(tfile) and a.model in json.load(open(tfile)):
+        t = json.load(open(tfile))[a.model]
+        flag = np.array([bool(np.asarray(d["w"]).sum()) or d["hmax"] >= t for d in rows])
+        summary["threshold"] = dict(model=a.model, value=t,
+                                    flagged={c: float(flag[cat == c].mean()) for c in CATS if (cat == c).any()})
     os.makedirs(os.path.join(paths.BASE, "results", "real"), exist_ok=True)
     with open(os.path.join(paths.BASE, "results", "real", f"cord_cvp_{a.split}{a.tag}.json"), "w") as fh:
         json.dump(summary, fh, indent=1)
@@ -102,6 +110,10 @@ def main():
         print(f"  {m:16s} AUC {r['AUC']:.3f} (T1 {r['AUC_T1']:.3f} T2 {r['AUC_T2']:.3f} T3 {r['AUC_T3']:.3f} T4 {r['AUC_T4']:.3f}) | "
               f"attr all {pct(r['attr_all'])} T1 {pct(r['attr_T1'])} T2 {pct(r['attr_T2'])} T3 {pct(r['attr_T3'])} "
               f"T4 {pct(r['attr_T4'])} | ambiguity split {pct(r['attr_amb'])}")
+    if "threshold" in summary:
+        th = summary["threshold"]
+        print(f"  CVP flags at the validation threshold {th['value']:.4f}: " +
+              ", ".join(f"{c} {pct(v)}%" for c, v in th["flagged"].items()))
 
 
 if __name__ == "__main__":
