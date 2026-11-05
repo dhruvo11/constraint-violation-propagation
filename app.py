@@ -15,8 +15,15 @@ from cvp.real import demo as real_demo
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 TYPES = {doctypes.get(n).title: n for n in doctypes.names()}
-CAT_LABELS = {"genuine": "Genuine (no edit)", "T1": "T1 - crude edit", "T2": "T2 - blended (inpainting-like)",
-              "T3": "T3 - coherent crude edit", "T4": "T4 - coherent blended edit"}
+CAT_LABELS = {"genuine": "Genuine (no edit)", "T1": "T1 - obvious edit (pasted text)", "T2": "T2 - smooth AI-style edit",
+              "T3": "T3 - obvious edit, totals fixed too", "T4": "T4 - smooth edit, totals fixed too"}
+HELP = ("**How to use:** pick a document and a kind of forgery, then press **Forge and analyse**. The app makes a "
+        "fake copy of the document (left picture), then checks it like a fraud investigator would (right picture).\n\n"
+        "**Colour key (right picture):** *red glow* = pixels that look edited; *orange boxes* = fields whose maths no "
+        "longer adds up, so one of them is fake; *thick red box* = the field the app blames; *green box* = the field we "
+        "really changed (the answer key, shown only because we made the forgery).\n\n"
+        "**Below the pictures:** the verdict (TAMPERED or GENUINE), which maths rule broke, and whether the app was "
+        "right (CORRECT or MISSED).")
 RANDOM = "random"
 # One illustrative case per type: (type, seed, forgery, field to edit)
 # The scenarios of DEMO.md, in its order; each was checked against the trained system.
@@ -210,6 +217,7 @@ with gr.Blocks(title="CVP - Constraint Violation Propagation") as demo:
                 "produces a tamper heatmap that decides among the fields the rules cannot tell apart.")
     first = doctypes.get("transcript").title
     with gr.Tab("Forge & analyse"):
+        gr.Markdown(HELP)
         with gr.Row():
             with gr.Column(scale=1):
                 dtype = gr.Dropdown(list(TYPES), value=first, label="Document type")
@@ -240,9 +248,11 @@ with gr.Blocks(title="CVP - Constraint Violation Propagation") as demo:
         post2 = gr.Label(label="p(K)")
         gr.Button("Analyse", variant="primary").click(analyse, [dtype2, up], [out2, rep2, post2])
     with gr.Tab("Real receipt"):
-        gr.Markdown("A real photographed receipt from the CORD v2 test set (Indonesian shops; CC BY 4.0). Forge "
-                    "it, or leave it genuine: CVP reads its values with a real OCR (docTR), checks the receipt's "
-                    "own arithmetic, and runs the visual branch on the photo.")
+        gr.Markdown("**How to use:** pick a receipt number (0-99), a kind of forgery and a field, then press **Forge "
+                    "and analyse**. These are real photos of real shop receipts (the CORD v2 dataset). The app reads "
+                    "the numbers with OCR and checks the receipt's own maths (the items add up to the total; cash "
+                    "minus total equals the change), then looks at the photo for edit traces. Same colour key as the "
+                    "first tab.")
         why = real_demo.unavailable()
         if why:
             gr.Markdown(f"**Not available on this machine:** {why}")

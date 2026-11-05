@@ -9,8 +9,8 @@ from . import cord, forge, view
 from . import receipt_schema as RS
 from .receipt_rules import RULES
 
-CAT_LABELS = {"genuine": "Genuine (no edit)", "T1": "T1 - crude edit", "T2": "T2 - blended (inpainting-like)",
-              "T3": "T3 - coherent crude edit", "T4": "T4 - coherent blended edit"}
+CAT_LABELS = {"genuine": "Genuine (no edit)", "T1": "T1 - obvious edit (pasted text)", "T2": "T2 - smooth AI-style edit",
+              "T3": "T3 - obvious edit, totals fixed too", "T4": "T4 - smooth edit, totals fixed too"}
 RANDOM = "random"
 SPLIT = "test"
 _SYSTEM = []
