@@ -1,0 +1,68 @@
+{
+ "ocr": {
+  "genuine": {
+   "receipts": 825,
+   "checkable": 646,
+   "flagged": 111,
+   "change applies": 410,
+   "change holds": 367,
+   "tender applies": 517,
+   "tender holds": 495,
+   "rounding applies": 382,
+   "rounding holds": 342,
+   "total applies": 156,
+   "total holds": 121,
+   "flag_rate": 0.17182662538699692
+  },
+  "forged": {
+   "receipts": 162,
+   "checkable": 121,
+   "flagged": 39,
+   "change applies": 70,
+   "change holds": 48,
+   "tender applies": 102,
+   "tender holds": 91,
+   "rounding applies": 71,
+   "rounding holds": 59,
+   "total applies": 28,
+   "total holds": 21,
+   "flag_rate": 0.32231404958677684
+  }
+ },
+ "transcription": {
+  "genuine": {
+   "receipts": 825,
+   "checkable": 551,
+   "flagged": 160,
+   "change applies": 332,
+   "change holds": 241,
+   "tender applies": 418,
+   "tender holds": 401,
+   "rounding applies": 332,
+   "rounding holds": 271,
+   "total applies": 130,
+   "total holds": 99,
+   "flag_rate": 0.29038112522686027
+  },
+  "forged": {
+   "receipts": 162,
+   "checkable": 107,
+   "flagged": 36,
+   "total applies": 20,
+   "total holds": 16,
+   "change applies": 61,
+   "change holds": 36,
+   "tender applies": 85,
+   "tender holds": 75,
+   "rounding applies": 57,
+   "rounding holds": 49,
+   "flag_rate": 0.3364485981308411
+  }
+ },
+ "missing_from_archive": [
+  [
+   "val",
+   "X51006619709"
+  ]
+ ]
+}

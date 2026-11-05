@@ -33,3 +33,11 @@ Forgeries of real photos read back exactly 98.6% of the time; as read, single-fi
 
 Chance on the ambiguity split: 38.1%. The last regime has seen the blended renderer that made the test forgeries, so it is an upper bound, not a test of unseen blending.
 
+## Real human forgeries (Find it again!, 987 scans)
+
+| Reading | Receipts | Checkable | Flagged by a rule |
+|---|---|---|---|
+| ocr (genuine) | 825 | 646 | 17.2% |
+| ocr (forged) | 162 | 121 | 32.2% |
+| transcription (genuine) | 825 | 551 | 29.0% |
+| transcription (forged) | 162 | 107 | 33.6% |
