@@ -224,3 +224,29 @@ def test_forging_a_receipt_photo_edits_the_chosen_field():
     assert "total" in info["edited"] and any(f.startswith("price") for f in info["edited"])
     _, info = forge.forge(r, "genuine", np.random.default_rng(2))
     assert info["edited"] == [] and info["category"] == "genuine"
+
+
+def test_row_reading_pairs_each_key_with_the_amount_on_its_row():
+    """Keys and amounts share a printed row; a GST summary table below is not read."""
+    from cvp.real import rows
+    def w(text, x, y):
+        return (text, x, y, x + 10 * len(text), y + 16)
+    words = [w("TOTAL", 10, 100), w("SALES", 70, 101), w("(EXCLUDING", 130, 99), w("GST)", 240, 100), w("88.91", 400, 101),
+             w("ROUNDING", 10, 140), w("-0.01", 400, 141),
+             w("TOTAL", 10, 180), w("SALES", 70, 181), w("(INCLUSIVE", 130, 179), w("OF", 240, 180), w("GST)", 270, 180),
+             w("88.90", 400, 181), w("CASH", 10, 220), w("100.00", 400, 221), w("CHANGE", 10, 260), w("11.10", 400, 259),
+             w("GST", 10, 320), w("SUMMARY", 60, 320), w("TOTAL", 10, 360), w("88.91", 300, 361), w("0.00", 400, 360)]
+    rs = rows.group_rows(words)
+    assert len(rs) == 7 and [x[0] for x in rs[0]] == ["TOTAL", "SALES", "(EXCLUDING", "GST)", "88.91"]
+    v = rows.summary(rs)
+    assert v == {"total": 88.90, "subtotal": 88.91, "rounding": -0.01, "cash": 100.00, "change": 11.10}
+
+
+def test_receipt_rules_on_real_human_forgeries_need_their_values():
+    from cvp.real import findit
+    ok = {"subtotal": 88.91, "tax": 0.0, "rounding": -0.01, "total": 88.90, "cash": 100.00, "change": 11.10}
+    assert findit.check(ok) == {"total": True, "change": True, "tender": True, "rounding": True}
+    assert findit.check(dict(ok, total=98.90))["total"] is False and findit.check(dict(ok, change=19.10))["change"] is False
+    no_tax = dict(ok)
+    del no_tax["tax"]
+    assert findit.check(no_tax)["total"] is None  # without the tax line, a gap could be the tax
