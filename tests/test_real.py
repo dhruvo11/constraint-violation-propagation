@@ -179,3 +179,17 @@ def test_coherent_edits_keep_every_rule():
         v = dict(RS.values(r), **ch)
         w, _ = S.evaluate(v)
         assert not S.violated(w), (seed, ch)
+
+
+def test_the_visual_view_scales_large_photos_and_pads_narrow_ones():
+    import numpy as np
+    from cvp.real import view
+    big = np.full((4000, 3000, 3), 200, np.uint8)
+    v, s = view.visual_view(big)
+    assert max(v.shape[:2]) == view.MAX_SIDE and abs(s - view.MAX_SIDE / 4000) < 1e-9
+    assert view.scale_box([400, 800, 1200, 1600], s) == [160, 320, 480, 640]
+    narrow = np.full((500, 200, 3), 200, np.uint8)
+    v, s = view.visual_view(narrow, min_side=256)
+    assert s == 1.0 and v.shape[:2] == (500, 256)  # padded on the right: boxes keep their coordinates
+    v, _ = view.visual_view(narrow)
+    assert v.shape[:2] == (500, 200)  # no padding at test time

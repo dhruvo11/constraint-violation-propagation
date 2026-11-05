@@ -74,6 +74,7 @@ def main():
     ap.add_argument("--doctypes", default=",".join(doctypes.names()), help="document types to train on")
     ap.add_argument("--extra", default="", help="additional training split, e.g. train_g1")
     ap.add_argument("--out", default=visual.MODEL_PATH)
+    ap.add_argument("--init", default="", help="start from these weights (fine-tuning) instead of ImageNet's")
     args = ap.parse_args()
     rows = []
     for name in args.doctypes.split(","):
@@ -81,7 +82,10 @@ def main():
         if args.extra and os.path.exists(os.path.join(paths.data_dir(name), f"{args.extra}.jsonl")):
             rows += load_rows(name, args.extra)
     dev = "mps" if torch.backends.mps.is_available() else "cpu"
-    model = visual.ResUNet(pretrained=True).to(dev)
+    model = visual.ResUNet(pretrained=not args.init)
+    if args.init:
+        model.load_state_dict(torch.load(args.init, map_location="cpu"))
+    model = model.to(dev)
     opt = torch.optim.AdamW(model.parameters(), args.lr, weight_decay=1e-4)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, args.lr, total_steps=args.steps, pct_start=0.1)
     loader = torch.utils.data.DataLoader(PatchSet(rows, "train", args.steps * args.batch), batch_size=args.batch,

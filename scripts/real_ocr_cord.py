@@ -21,18 +21,10 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from cvp import paths  # noqa: E402
-from cvp.real import cord  # noqa: E402
+from cvp.real import cord, read  # noqa: E402
 from cvp.real import receipt_rules as RR  # noqa: E402
 
 FIELDS = ["subtotal", "tax", "service", "discount", "total", "cash", "change", "card", "qty"]
-PAD = 3
-
-
-def box(word, size):
-    q = word["quad"]
-    xs, ys = [q[f"x{i}"] for i in range(1, 5)], [q[f"y{i}"] for i in range(1, 5)]
-    W, H = size
-    return max(0, min(xs) - PAD), max(0, min(ys) - PAD), min(W, max(xs) + PAD), min(H, max(ys) + PAD)
 
 
 def failed(res):
@@ -59,14 +51,8 @@ def main():
         if a.limit and k >= a.limit:
             break
         img = Image.open(io.BytesIO(r.image)).convert("RGB")
-        arr = np.asarray(img)
         vw = [w for line in r.lines for w in cord.value_words(line)]
-        crops = []
-        for w in vw:
-            x0, y0, x1, y1 = box(w, img.size)
-            crops.append(arr[y0:y1, x0:x1] if (x1 > x0 + 1 and y1 > y0 + 1) else np.full((8, 8, 3), 255, np.uint8))
-        out = reco(crops) if crops else []
-        text = {id(w): t for w, (t, _) in zip(vw, out)}
+        text = read.read_values(np.asarray(img), r.lines, reco)  # the shared reading policy
         words += len(vw)
         word_ok += sum(w["text"] == text[id(w)] for w in vw)
         gt = cord.from_lines(r.lines, rid=r.id, size=img.size)
