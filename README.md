@@ -37,6 +37,15 @@ cvp/                      the library
   visual.py               ResNet-18 U-Net over RGB + ELA
   pipeline.py             constraint features, field prior, heads, the CVP system
   paths.py                data/, features/, results/ per document type; models/
+  real/                   real documents (Phase 2): public datasets and the rules they satisfy
+    money.py              amounts and counts as printed on real receipts
+    cord.py               CORD v2 receipts: loader, rebuilding a receipt from its labelled words
+    receipt_rules.py      six receipt rules, robust to real shops' conventions
+    receipt_schema.py     each real receipt's own constraint graph (the core theory applies unchanged)
+    read.py               how CVP reads a real receipt (docTR at the layout labels)
+    forge.py              the T1-T4 forgeries on real photos, with ground truth
+    view.py               what the visual branch sees of a real photo (same in training and testing)
+    system.py, demo.py    CVP end to end on one real photo; the app's "Real receipt" tab
 scripts/
   train_ocr.py            train the OCR on synthetic slot crops
   make_dataset.py         build data/<type>/{train,val,test,train_g1}
@@ -46,7 +55,12 @@ scripts/
   fit_heads.py            fit only the heads the app needs
   make_figures.py         figures per type and across types (PDF for the report, PNG for the app)
   summarize.py            one table across every document type (results/summary.md)
-  reproduce.sh            rebuild everything from scratch
+  select_head.py          choose the attribution head's design on g1 validation data
+  ablate_head.py          every head design on the test set, after the choice
+  reproduce.sh            rebuild every synthetic-data result from scratch
+  real_*.py               real data: rule validity, OCR, forgery check, extraction, evaluation,
+                          threshold; make_real_dataset.py builds real-photo training data
+  reproduce_real.sh       rebuild every real-data result from the downloaded datasets
 tests/                    pytest suite (theory, rules, rendering, forgeries, scoring, models)
 app.py                    the app
 report/                   IEEE LaTeX paper (draft; on hold)
@@ -143,3 +157,11 @@ reduction factor are derived from the declared constraints automatically.
 
 Heavy steps run one at a time; closing memory-hungry apps (browsers, music players)
 during training speeds them up considerably.
+
+The real-data results need the public datasets in `data/real/` (not under version
+control) and the synthetic models above:
+
+```bash
+.venv/bin/hf download naver-clova-ix/cord-v2 --repo-type dataset --local-dir data/real/cord-v2
+./scripts/reproduce_real.sh       # rule validity, OCR, forgeries, fine-tuning, evaluation
+```
