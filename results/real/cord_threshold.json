@@ -1,3 +1,5 @@
 {
- "visual_cord_crude.pt": 0.9803562164306641
+ "visual_cord_crude.pt": 0.9803562164306641,
+ "visual_cord_all.pt": 0.9820137619972229,
+ "visual_resunet.pt": 1.01
 }

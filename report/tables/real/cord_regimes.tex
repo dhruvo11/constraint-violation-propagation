@@ -1,0 +1,17 @@
+\begin{tabular}{llcccccc}
+\toprule
+Visual branch & Method & AUC & AUC T2 & Attr. & Attr. T2 & Attr. T4 & Amb.\\
+\midrule
+synthetic documents only & Visual-only & 0.546 & 0.500 & 60.0 & 11.0 & 56.7 & 40.0\\
+ & Constraint-only & 0.729 & 0.939 & 58.2 & 55.0 & 57.1 & 37.2\\
+ & CVP & 0.746 & 0.928 & 73.1 & 54.1 & 58.3 & 56.2\\
+\midrule
+real photos, crude edits only & Visual-only & 0.751 & 0.498 & 65.4 & 14.3 & 53.3 & 54.4\\
+ & Constraint-only & 0.729 & 0.939 & 58.2 & 55.0 & 57.1 & 37.2\\
+ & CVP & 0.838 & 0.941 & 75.6 & 56.5 & 55.0 & 64.9\\
+\midrule
+real photos, every category & Visual-only & 0.892 & 0.746 & 92.3 & 75.0 & 97.8 & 85.4\\
+ & Constraint-only & 0.729 & 0.939 & 58.2 & 55.0 & 57.1 & 37.2\\
+ & CVP & 0.913 & 0.968 & 93.0 & 84.2 & 97.8 & 88.5\\
+\bottomrule
+\end{tabular}
