@@ -93,6 +93,30 @@ rates over 1,500 test documents per type.
     heatmap picks the validity date.
 17. **Seed 9, genuine.** Every rule holds and there is no heat: GENUINE.
 
+### Real receipt tab: a real photographed receipt (CORD v2 test set)
+
+Here CVP reads a real photo with a real OCR (docTR), checks that receipt's own arithmetic,
+and runs a visual branch fine-tuned on real photos with crude edits only, so blended edits
+are as unseen as an attacker's new tool. The first analysis loads the models (about 12 s).
+
+18. **Receipt 1, genuine.** Three items, total, cash: every rule holds and there is no
+    heat. GENUINE.
+19. **Receipt 1, T1 crude, Price, item 2.** Only "items add up to the total" breaks. The
+    receipt prints no unit prices, so the three item prices and the total fit equally (a
+    Proposition 1 class on a real receipt, four orange boxes); the heatmap finds the patch
+    on item 2.
+20. **The same, T2 blended.** The receipt is still flagged (the sum breaks), but the
+    heatmap sees nothing, so CVP can only guess among the four suspects, and misses. This
+    is the paper's point in one click: the rules know something is wrong, and only visual
+    evidence can say which of the fields it was.
+21. **Receipt 5, T2 blended, random field (the total).** No heat at all, yet the total no
+    longer matches the items or the cash: the rules alone name it.
+22. **Receipt 1, T3 coherent crude.** The forger fixed the total and the cash, so every
+    rule holds; the visual branch catches the crude patches.
+23. **Receipt 1, T4 coherent blended.** Every rule holds and there is no heat: missed.
+    Say plainly that this is the open problem (13% of such forgeries caught on the test
+    set).
+
 ### Results tab
 
 Pick a document type to see its numbers and charts; the last two charts compare every type
