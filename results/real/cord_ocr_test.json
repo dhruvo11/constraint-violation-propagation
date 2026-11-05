@@ -1,0 +1,76 @@
+{
+ "dataset": "CORD v2",
+ "split": "test",
+ "receipts": 100,
+ "ocr": "docTR crnn_vgg16_bn on dataset word boxes",
+ "word_exact": 0.9444132509825941,
+ "words": 1781,
+ "field_accuracy": {
+  "subtotal": {
+   "correct": 65,
+   "of": 65,
+   "rate": 1.0
+  },
+  "tax": {
+   "correct": 41,
+   "of": 41,
+   "rate": 1.0
+  },
+  "service": {
+   "correct": 12,
+   "of": 12,
+   "rate": 1.0
+  },
+  "discount": {
+   "correct": 6,
+   "of": 6,
+   "rate": 1.0
+  },
+  "total": {
+   "correct": 95,
+   "of": 95,
+   "rate": 1.0
+  },
+  "cash": {
+   "correct": 67,
+   "of": 67,
+   "rate": 1.0
+  },
+  "change": {
+   "correct": 55,
+   "of": 56,
+   "rate": 0.9821428571428571
+  },
+  "card": {
+   "correct": 14,
+   "of": 15,
+   "rate": 0.9333333333333333
+  },
+  "qty": {
+   "correct": 29,
+   "of": 29,
+   "rate": 1.0
+  },
+  "item price": {
+   "correct": 243,
+   "of": 246,
+   "rate": 0.9878048780487805
+  },
+  "item count": {
+   "correct": 219,
+   "of": 220,
+   "rate": 0.9954545454545455
+  },
+  "item unit price": {
+   "correct": 60,
+   "of": 67,
+   "rate": 0.8955223880597015
+  }
+ },
+ "receipts_checked": 97,
+ "flagged_true_values": 6,
+ "flagged_as_read": 9,
+ "flagged_both": 6,
+ "false_alarm_true_values": 0.061855670103092786,
+ "false_alarm_as_read": 0.09278350515463918
+}

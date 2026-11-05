@@ -71,6 +71,23 @@ def test_tax_included_prices_and_card_payments_are_genuine_conventions():
     assert res["total"] and res["tender"] and res["change"]
 
 
+def test_receipts_rebuild_from_labelled_words_without_their_keys():
+    """Key words ("TOTAL", "PB1 (10%)") are not part of a value; an item is a group of lines;
+    `read` replaces each value word's text, as an OCR would."""
+    def line(cat, group, *words):
+        return {"category": cat, "group_id": group, "sub_group_id": 0,
+                "words": [{"text": t, "is_key": k, "quad": {}} for t, k in words]}
+    lines = [line("menu.nm", 3, ("ES", 0), ("TEH", 0)), line("menu.cnt", 3, ("2x", 0)),
+             line("menu.price", 3, ("22,000", 0)), line("menu.nm", 4, ("ROTI", 0)), line("menu.price", 4, ("9,000", 0)),
+             line("menu.sub.price", 4, ("1,000", 0)), line("sub_total.tax_price", 5, ("PB1", 1), ("(10%)", 1), ("3,200", 0)),
+             line("total.total_price", 6, ("TOTAL", 1), ("35,200", 0))]
+    r = cord.from_lines(lines)
+    assert [(it.name, it.cnt, it.price, it.addons) for it in r.items] == [("ES TEH", 2, 22000, []), ("ROTI", None, 9000, [1000])]
+    assert r.tax == 3200 and r.total == 35200
+    misread = cord.from_lines(lines, read=lambda w: w["text"].replace("35,200", "36,200"))
+    assert misread.total == 36200 and misread.tax == 3200
+
+
 def test_rules_that_read_missing_values_do_not_apply():
     gt = record()
     del gt["gt_parse"]["total"]["cashprice"], gt["gt_parse"]["total"]["menuqty_cnt"]

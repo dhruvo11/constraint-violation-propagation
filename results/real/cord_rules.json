@@ -1,0 +1,59 @@
+{
+ "dataset": "CORD v2",
+ "splits": [
+  "test"
+ ],
+ "receipts": 100,
+ "receipts_checked": 97,
+ "genuine_flagged": 5,
+ "false_alarm_rate": 0.05154639175257732,
+ "tolerance": 0.005,
+ "rules": {
+  "line": {
+   "description": "count x unit price = price, for each item that prints a unit price",
+   "applies": 63,
+   "holds": 63,
+   "failed": []
+  },
+  "sum": {
+   "description": "item prices (with add-ons, less item discounts) add up to the subtotal",
+   "applies": 62,
+   "holds": 61,
+   "failed": [
+    "test_0048"
+   ]
+  },
+  "total": {
+   "description": "subtotal + tax + service - discount = total (or the prices already include the tax)",
+   "applies": 63,
+   "holds": 61,
+   "failed": [
+    "test_0000",
+    "test_0099"
+   ]
+  },
+  "change": {
+   "description": "cash (+ card) - total = change",
+   "applies": 50,
+   "holds": 48,
+   "failed": [
+    "test_0014",
+    "test_0071"
+   ]
+  },
+  "tender": {
+   "description": "cash (+ card) covers the total",
+   "applies": 61,
+   "holds": 60,
+   "failed": [
+    "test_0014"
+   ]
+  },
+  "count": {
+   "description": "item counts add up to the printed number of items",
+   "applies": 26,
+   "holds": 26,
+   "failed": []
+  }
+ }
+}

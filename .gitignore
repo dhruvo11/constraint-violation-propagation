@@ -24,3 +24,5 @@ report/*.pdf
 
 # Private documents (your own certificates): never committed
 private/
+# Per-word reading logs of the real datasets (large, regenerable)
+results/real/*_reads_*.json

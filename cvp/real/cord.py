@@ -78,6 +78,52 @@ def parse(gt, image=None, rid=""):
                    size=(size.get("width"), size.get("height")), image=image)
 
 
+AMOUNTS = {"sub_total.subtotal_price": "subtotal", "sub_total.tax_price": "tax", "sub_total.service_price": "service",
+           "sub_total.discount_price": "discount", "total.total_price": "total", "total.cashprice": "cash",
+           "total.changeprice": "change", "total.creditcardprice": "card"}
+
+
+def value_words(line):
+    """The words of a labelled line that print its value (not its key, such as "TOTAL")."""
+    return [w for w in line["words"] if not w.get("is_key")]
+
+
+def from_lines(lines, read=None, rid="", size=None):
+    """A Receipt rebuilt from labelled words. `read(word)` gives each value word's text
+    (default: the dataset's transcription), so the same code builds the receipt as an OCR
+    reads it. A menu item is the set of lines sharing a group id; "menu.sub.*" lines are its
+    add-ons."""
+    read = read or (lambda w: w["text"])
+    groups, fields = {}, {}
+    for line in lines:
+        text = " ".join(read(w) for w in value_words(line)).strip()
+        cat = line["category"]
+        if cat.startswith("menu."):
+            groups.setdefault(line["group_id"], []).append((cat, text))
+        elif cat in AMOUNTS:
+            fields[AMOUNTS[cat]] = amount(text)
+        elif cat == "total.menuqty_cnt":
+            fields["qty"] = count(text)
+    items = []
+    for _, entries in sorted(groups.items()):
+        it = Item(name="")
+        for cat, text in entries:
+            if cat == "menu.nm":
+                it.name = text
+            elif cat == "menu.cnt":
+                it.cnt = count(text)
+            elif cat == "menu.unitprice":
+                it.unitprice = amount(text)
+            elif cat == "menu.price":
+                it.price = amount(text)
+            elif cat == "menu.discountprice":
+                it.discount = amount(text)
+            elif cat == "menu.sub.price" and amount(text) is not None:
+                it.addons.append(amount(text))
+        items.append(it)
+    return Receipt(id=rid, items=items, lines=lines, size=size, **fields)
+
+
 def files(split, root=ROOT):
     return sorted(glob.glob(os.path.join(root, "data", f"{split}-*.parquet")))
 
