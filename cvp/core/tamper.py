@@ -38,9 +38,14 @@ def crude_edit(arr, doc, doctype, f, new_text, rng, alt_font=None):
     """Erase the field with a flat fill and retype it in a mismatched font."""
     img = Image.fromarray(arr)
     d = ImageDraw.Draw(img)
-    path, size = alt_font if alt_font is not None else ALT_FONTS[rng.integers(len(ALT_FONTS))]
-    ff = font(path, size)
-    ax, ay = doctype.anchor(f, doc.style)
+    fonts = doctype.alt_fonts(f)  # some fields admit only certain fonts (an MRZ is monospaced)
+    if alt_font is None:
+        pool = fonts or ALT_FONTS
+        path, size = pool[rng.integers(len(pool))]
+    else:
+        path, size = fonts[ALT_FONTS.index(alt_font) % len(fonts)] if fonts else alt_font
+    ff = font(path, max(8, round(size * doctype.font_scale(f))))
+    ax, ay = doctype.place(f, new_text, ff, doc.style)
     xy = (ax + int(rng.integers(-2, 3)), ay + int(rng.integers(-2, 3)))
     new_box = list(d.textbbox(xy, new_text, font=ff))
     rect = _pad(_union(doc.boxes[f], new_box), int(rng.integers(2, 6)), arr.shape)
@@ -86,7 +91,7 @@ def apply(doc: Document, doctype, category, rng, field=None, generator="g2"):
     boxes = {k: list(v) for k, v in doc.boxes.items()}
     rects, edited, primary = [], [], None
     if category in ("T1", "T2"):
-        f = field or schema.field_names[rng.choice(len(schema.field_names), p=doctype.field_probs)]
+        f = field or doctype.pick_field(doc.values, rng)
         values[f] = doctype.violating_value(f, doc.values, rng)
         edited, primary = [f], f
         text = schema.by_name[f].fmt(values[f])

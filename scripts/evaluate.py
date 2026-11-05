@@ -17,15 +17,28 @@ from cvp import doctypes, paths, pipeline  # noqa: E402
 
 CATS = ["genuine", "T1", "T2", "T3", "T4"]
 METHODS = ["ELA", "Visual-only", "Constraint-only", "Concat fusion", "CVP (rule)", "CVP"]
-TAB = os.path.join(paths.REPORT, "tables")
 DT = doctypes.get("transcript")  # the document type under evaluation; set from --doctype in main()
 S = DT.schema
+TAB = os.path.join(paths.REPORT, "tables", DT.name)
+# Design of the learned attribution head. Field prior: "class" spreads each class's posterior
+# over its candidates; "shared" also pools classes that share the observed signature
+# (pipeline.field_prior). Heat: how the pooled heatmap enters (pipeline.attribution_features).
+SHARED = False
+HEAT = "prob"
 
 
 def set_doctype(name):
-    global DT, S
+    global DT, S, TAB
     DT = doctypes.get(name)
     S = DT.schema
+    TAB = os.path.join(paths.REPORT, "tables", name)
+
+
+def nanmean(x):
+    """Mean that is NaN (not a warning) on an empty selection: a type may have no
+    ambiguous edits of some kind at all."""
+    x = np.asarray(x, float)
+    return float(x.mean()) if x.size else float("nan")
 
 
 def load(split, cond="clean", tag=""):
@@ -55,11 +68,23 @@ def unary_hit(d):
     return np.array([p >= 0 and S.unary_violated(S.field_names[p], w) for p, w in zip(d["primary"], d["w_true"])])
 
 
+def consistent_counts(d):
+    """|C(V)|: how many fields the true violation pattern is consistent with."""
+    return np.array([len(S.consistent_fields(w)) for w in d["w_true"]])
+
+
 def ambiguous(d):
-    """The ambiguity split: T1/T2 edits inside a non-singleton class that no unary
-    constraint points at, so constraint reasoning cannot beat 1/|K| (Proposition 1)."""
-    multi = np.array([p >= 0 and len(S.class_fields[S.field_class[S.field_names[p]]]) > 1 for p in d["primary"]])
-    return np.isin(d["category"], [1, 2]) & multi & ~unary_hit(d)
+    """The ambiguity split: T1/T2 edits whose violation pattern is consistent with more
+    than one field, so constraint reasoning alone cannot beat 1/|C(V)|. This covers the
+    edits inside a Proposition-1 class that no unary rule points at (five marks, say) and
+    edits whose signature another class shares (a printed date and its MRZ copy)."""
+    return np.isin(d["category"], [1, 2]) & (consistent_counts(d) > 1)
+
+
+def chance(d):
+    """Expected accuracy of a uniform guess among the consistent fields, on the ambiguity split."""
+    amb = ambiguous(d)
+    return nanmean(1.0 / consistent_counts(d)[amb]) if amb.any() else float("nan")
 
 
 def box_iou(a, b):
@@ -86,11 +111,12 @@ class Heads:
         return self
 
     def p_cls(self, d):
-        return self.g.predict_proba(self.scaler.transform(d["cfeat"]))
+        return pipeline.class_posterior(self.g, self.scaler.transform(d["cfeat"]), len(S.class_names))
 
     @staticmethod
     def attr_features(d, p):
-        return np.stack([pipeline.attribution_features(p[i], d["w"][i], d["pooled"][i], S) for i in range(len(p))])
+        return np.stack([pipeline.attribution_features(p[i], d["w"][i], d["pooled"][i], S, SHARED, HEAT)
+                         for i in range(len(p))])
 
     @staticmethod
     def vis_features(d):
@@ -104,13 +130,15 @@ class Heads:
         out = {}
         out["ELA"] = (d["ela"][:, :, 1].max(1), d["ela"][:, :, 1])
         out["Visual-only"] = (d["pooled"][:, :, 0].max(1), d["pooled"][:, :, 0])
-        # Constraint-only: symbolic signature lookup; ties inside a class broken uniformly at random.
+        # Constraint-only: every field the violation pattern is consistent with, ties broken
+        # uniformly at random (scored by expectation).
         cand = np.zeros((n, len(S.field_names)))
         for i in range(n):
-            c = S.candidate_fields(S.signature_class(d["w"][i]), d["w"][i])
+            c = S.consistent_fields(d["w"][i])
             cand[i, [S.field_index[f] for f in c]] = 1.0 / len(c)
         out["Constraint-only"] = (d["w"].sum(1), cand)
-        pc = self.concat.predict_proba(self.cscaler.transform(np.hstack([d["cfeat"], d["emb"]])))
+        pc = pipeline.class_posterior(self.concat, self.cscaler.transform(np.hstack([d["cfeat"], d["emb"]])),
+                                      len(S.field_names) + 1)
         out["Concat fusion"] = (1 - pc[:, 0], pc[:, 1:])
         det = pipeline.noisy_or(1 - p[:, 0], self.det.predict_proba(self.vis_features(d))[:, 1])
         rule = np.zeros((n, len(S.field_names)))
@@ -128,7 +156,8 @@ def fit_softmax(A, y, l2=1e-3):
     the evidence: more heat or a higher constraint posterior can never make a field less
     suspicious, and the head cannot learn to reward an absence of evidence."""
     A, y = torch.tensor(A, dtype=torch.float64), torch.tensor(y)
-    raw = torch.tensor([0.5, 0.5, -2.0, -2.0], dtype=torch.float64, requires_grad=True)
+    init = [0.5, 0.5] + [-2.0] * (A.shape[-1] - 2)  # prior and max heat on; extra statistics start near off
+    raw = torch.tensor(init, dtype=torch.float64, requires_grad=True)
     opt = torch.optim.LBFGS([raw], max_iter=300, line_search_fn="strong_wolfe")
 
     def closure():
@@ -144,10 +173,13 @@ def fit_softmax(A, y, l2=1e-3):
 
 def attribution_correct(scores, d):
     """Per-document probability that the attributed field is one of the edited fields.
-    Uniform-random tie-breaking (constraint-only) is scored by its expectation."""
+    Exact ties (constraint-only's uniform guess among the consistent fields) are scored by
+    their expectation. Near-equal scores are not ties: a saturated heatmap (sigmoid ~1e-7)
+    still ranks fields by its logits, every method -- and the deployed system -- takes the
+    arg-max, and an arg-max that follows noise is right only at the chance rate."""
     acc = np.zeros(len(scores))
     for i, s in enumerate(scores):
-        top = np.isclose(s, s.max())
+        top = s == s.max()
         acc[i] = (top & d["edited"][i]).sum() / top.sum()
     return acc
 
@@ -169,14 +201,14 @@ def metrics(heads, d, thresholds=None):
             for k in range(5):
                 r[f"rate_{CATS[k]}"] = float((s[d["category"] == k] >= thresholds[m]).mean())
         acc = attribution_correct(sc, d)
-        r["attr_all"] = acc[t].mean()
+        r["attr_all"] = nanmean(acc[t])
         for k in range(1, 5):
-            r[f"attr_{CATS[k]}"] = acc[d["category"] == k].mean()
-        r["attr_amb"] = acc[amb].mean()
-        r["attr_amb_T1"] = acc[amb & (d["category"] == 1)].mean()
-        r["attr_amb_T2"] = acc[amb & (d["category"] == 2)].mean()
-        r["attr_unamb"] = acc[single & ~amb].mean()
-        r["attr_single"] = acc[single].mean()
+            r[f"attr_{CATS[k]}"] = nanmean(acc[d["category"] == k])
+        r["attr_amb"] = nanmean(acc[amb])
+        r["attr_amb_T1"] = nanmean(acc[amb & (d["category"] == 1)])
+        r["attr_amb_T2"] = nanmean(acc[amb & (d["category"] == 2)])
+        r["attr_unamb"] = nanmean(acc[single & ~amb])
+        r["attr_single"] = nanmean(acc[single])
         ious = []
         for i in np.nonzero(single)[0]:
             f = int(np.argmax(sc[i]))
@@ -205,13 +237,18 @@ def best_thresholds(heads, va):
     return th
 
 
+def split_by_unary(k):
+    """A multi-field class whose fields carry unary rules gets one signature row for edits
+    that keep them and one for edits that break them."""
+    return len(S.class_fields[k]) > 1 and any(c.unary and c.scope[0] in S.class_fields[k] for c in S.constraints)
+
+
 def signature_rows():
-    """Row labels of the empirical signature table, in class order; a multi-field class
-    gets one row for edits that keep its unary rule and one for edits that break it."""
+    """Row labels of the empirical signature table, in class order."""
     rows = []
     for k in S.classes:
         label = DT.class_labels.get(k, k)
-        if len(S.class_fields[k]) > 1:
+        if split_by_unary(k):
             rows += [(k, False, f"{label} ({DT.unary_labels[0]})"), (k, True, f"{label} ({DT.unary_labels[1]})")]
         else:
             rows.append((k, None, label))
@@ -228,9 +265,8 @@ def signature_table(d):
     labels = {(k, u): lab for k, u, lab in signature_rows()}
     for i in np.nonzero(single)[0]:
         k = S.field_class[S.field_names[d["primary"][i]]]
-        multi = len(S.class_fields[k]) > 1
-        key = labels[(k, bool(hit[i]) if multi else None)]
-        rows.setdefault(key, []).append(family_columns(d["w_true"][i], multi))
+        key = labels[(k, bool(hit[i]) if split_by_unary(k) else None)]
+        rows.setdefault(key, []).append(family_columns(d["w_true"][i], len(S.class_fields[k]) > 1))
     return {k: np.mean(v, 0) for k, v in rows.items()}, {k: len(v) for k, v in rows.items()}
 
 
@@ -252,12 +288,13 @@ def tex_family(fam):
 
 
 def fmt_pct(x):
-    return f"{100 * x:.1f}"
+    return "--" if np.isnan(x) else f"{100 * x:.1f}"
 
 
-def write_tables(res, rob, sig, sig_n, ocr_acc, rho_emp, cand_size, held=None):
+def write_tables(res, rob, sig, sig_n, ocr_acc, rho_emp, cand_size, held=None, chance_amb=float("nan")):
     os.makedirs(TAB, exist_ok=True)
-    best = {k: max(res[m][k] for m in METHODS) for k in res["CVP"]}
+    best = {k: np.nanmax([res[m][k] for m in METHODS]) if not all(np.isnan(res[m][k]) for m in METHODS)
+            else float("nan") for k in res["CVP"]}
 
     def cell(m, k):
         v = fmt_pct(res[m][k])
@@ -289,7 +326,8 @@ def write_tables(res, rob, sig, sig_n, ocr_acc, rho_emp, cand_size, held=None):
         for m in METHODS:
             fh.write(f"{m} & {fmt_pct(res[m]['attr_amb_T1'])} & {fmt_pct(res[m]['attr_amb_T2'])} & "
                      f"{fmt_pct(res[m]['attr_amb'])}\\\\\n")
-        fh.write("\\midrule\nChance ($1/|K|$) & 20.0 & 20.0 & 20.0\\\\\n\\bottomrule\n\\end{tabular}\n")
+        c = fmt_pct(chance_amb)
+        fh.write(f"\\midrule\nChance ($1/|C(V)|$) & {c} & {c} & {c}\\\\\n\\bottomrule\n\\end{{tabular}}\n")
 
     with open(os.path.join(TAB, "signatures.tex"), "w") as fh:
         fh.write("\\begin{tabular}{lr" + "c" * len(S.families) + "}\n\\toprule\nField edited & $n$ & "
@@ -335,18 +373,21 @@ def write_tables(res, rob, sig, sig_n, ocr_acc, rho_emp, cand_size, held=None):
 
 
 def write_numbers(summary):
-    """LaTeX macros for every number quoted in the report text (report/numbers.tex)."""
+    """LaTeX macros for every number quoted in the report text (report/numbers/<type>.tex);
+    macros of a type other than the transcript carry its name as a prefix."""
     words = dict(zip("0123456789", ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]))
 
+    prefix = "" if DT.name == "transcript" else DT.name.capitalize()
+
     def name(s):
-        return "".join(words.get(c, c) for c in s if c.isalnum())
+        return prefix + "".join(words.get(c, c) for c in s if c.isalnum())
 
     keys = {"ELA": "Ela", "Visual-only": "Vis", "Constraint-only": "Con", "Concat fusion": "Cat",
             "CVP (rule)": "Rule", "CVP": "Cvp"}
     out = []
     for m, k in keys.items():
         for metric, v in summary["results"][m].items():
-            val = f"{v:.3f}" if metric.startswith("AUC") or metric == "F1" else f"{100 * v:.1f}"
+            val = "--" if np.isnan(v) else f"{v:.3f}" if metric.startswith("AUC") or metric == "F1" else f"{100 * v:.1f}"
             out.append(f"\\newcommand{{\\{name(k + metric.replace('_', ''))}}}{{{val}}}")
         for c, r in summary["robustness"].items():
             tag = {"Clean": "Clean"}.get(c, "Jpeg" if "JPEG" in c else "Resize")
@@ -356,10 +397,10 @@ def write_numbers(summary):
     for c, v in summary["ocr_acc"].items():
         tag = {"Clean": "Clean"}.get(c, "Jpeg" if "JPEG" in c else "Resize")
         out.append(f"\\newcommand{{\\{name('Ocr' + tag)}}}{{{100 * v:.1f}}}")
-    out.append(f"\\newcommand{{\\GphiAcc}}{{{100 * summary['g_phi_acc']:.1f}}}")
-    out.append(f"\\newcommand{{\\CandSize}}{{{summary['cand_size']:.2f}}}")
-    out.append(f"\\newcommand{{\\RhoEmp}}{{{summary['rho_empirical']:.2f}}}")
-    out.append(f"\\newcommand{{\\NAmb}}{{{summary['n_ambiguous']}}}")
+    out.append(f"\\newcommand{{\\{name('GphiAcc')}}}{{{100 * summary['g_phi_acc']:.1f}}}")
+    out.append(f"\\newcommand{{\\{name('CandSize')}}}{{{summary['cand_size']:.2f}}}")
+    out.append(f"\\newcommand{{\\{name('RhoEmp')}}}{{{summary['rho_empirical']:.2f}}}")
+    out.append(f"\\newcommand{{\\{name('NAmb')}}}{{{summary['n_ambiguous']}}}")
     for c, n in summary["n_test"].items():
         out.append(f"\\newcommand{{\\{name('NTest' + c.capitalize())}}}{{{n}}}")
     for tag, pre in [("blind", "Zs"), ("oracle", "Orc")]:
@@ -372,15 +413,23 @@ def write_numbers(summary):
             out.append(f"\\newcommand{{\\{name(pre + k + 'AttrTtwo')}}}{{{100 * h[m]['attr_T2']:.1f}}}")
             out.append(f"\\newcommand{{\\{name(pre + k + 'AmbTtwo')}}}{{{100 * h[m]['attr_amb_T2']:.1f}}}")
             out.append(f"\\newcommand{{\\{name(pre + k + 'All')}}}{{{100 * h[m]['attr_all']:.1f}}}")
-    with open(os.path.join(paths.REPORT, "numbers.tex"), "w") as fh:
+    os.makedirs(os.path.join(paths.REPORT, "numbers"), exist_ok=True)
+    with open(os.path.join(paths.REPORT, "numbers", f"{DT.name}.tex"), "w") as fh:
         fh.write("% Generated by scripts/evaluate.py -- do not edit by hand.\n" + "\n".join(out) + "\n")
 
 
 def main():
+    global SHARED, HEAT
     import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--doctype", default="transcript", choices=doctypes.names())
-    set_doctype(ap.parse_args().doctype)
+    ap.add_argument("--prior", default="shared" if SHARED else "class", choices=["class", "shared"],
+                    help="field prior of the attribution head (see pipeline.field_prior)")
+    ap.add_argument("--heat", default=HEAT, choices=pipeline.HEAT,
+                    help="how the heatmap enters the attribution head (see pipeline.attribution_features)")
+    a = ap.parse_args()
+    set_doctype(a.doctype)
+    SHARED, HEAT = a.prior == "shared", a.heat
     tr, va, te = without_blended(load("train")), without_blended(load("val")), load("test")
     heads = Heads().fit(tr, va)
     th = best_thresholds(heads, va)
@@ -425,21 +474,23 @@ def main():
     held = regimes
 
     sig, sig_n = signature_table(te)
-    write_tables(res, rob, sig, sig_n, ocr_acc, rho_emp, cand_size, held)
+    chance_amb = chance(te)
+    write_tables(res, rob, sig, sig_n, ocr_acc, rho_emp, cand_size, held, chance_amb)
     summary = dict(results=res, robustness=rob, ocr_acc=ocr_acc, g_phi_acc=g_acc,
                    ocr_clean_by_field={f: float(te["ocr_ok"][:, i].mean()) for i, f in enumerate(S.field_names)},
                    cand_size=cand_size, rho_empirical=rho_emp, rho_theory=rho_th, expected_K=e_th,
                    attr_w=heads.attr_w.tolist(), det_threshold=th["CVP"], thresholds=th, heldout=held,
                    signatures={k: v.tolist() for k, v in sig.items()}, signature_n=sig_n,
                    n_test={c: int((te["category"] == i).sum()) for i, c in enumerate(CATS)},
-                   n_ambiguous=int(ambiguous(te).sum()), n_regimes=int(n_reg))
+                   n_ambiguous=int(ambiguous(te).sum()), chance_ambiguous=chance_amb, n_regimes=int(n_reg),
+                   prior="shared" if SHARED else "class", heat=HEAT)
     os.makedirs(paths.results_dir(DT.name), exist_ok=True)
     with open(os.path.join(paths.results_dir(DT.name), "results.json"), "w") as fh:
         json.dump(summary, fh, indent=1)
     write_numbers(summary)
     with open(pipeline.heads_path(DT.name), "wb") as fh:
         pickle.dump(dict(g_phi=heads.g, g_scaler=heads.scaler, det=heads.det, attr_w=heads.attr_w,
-                         det_threshold=th["CVP"]), fh)
+                         det_threshold=th["CVP"], shared_prior=SHARED, heat=HEAT), fh)
     for m in METHODS:
         r = res[m]
         print(f"{m:16s} AUC {r['AUC']:.3f} F1 {r['F1']:.3f} | attr all {r['attr_all']:.3f} unamb {r['attr_unamb']:.3f} "

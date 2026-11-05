@@ -1,0 +1,15 @@
+\begin{tabular}{lccccccccc}
+\toprule
+ & \multicolumn{3}{c}{Clean} & \multicolumn{3}{c}{JPEG $q{=}60$} & \multicolumn{3}{c}{Resize $0.6\times$}\\
+Method & AUC & All & Amb. & AUC & All & Amb. & AUC & All & Amb.\\
+\midrule
+ELA & 0.549 & 25.7 & 19.7 & 0.613 & 40.3 & 30.5 & 0.525 & 30.2 & 19.7\\
+Visual-only & 0.901 & 83.0 & 81.7 & 0.894 & 81.9 & 80.2 & 0.540 & 30.7 & 32.5\\
+Constraint-only & 0.784 & 48.6 & 50.5 & 0.784 & 48.6 & 50.5 & 0.792 & 49.5 & 50.3\\
+Concat fusion & 0.935 & 71.2 & 90.4 & 0.936 & 69.7 & 89.8 & 0.774 & 61.1 & 77.2\\
+CVP (rule) & 0.956 & 79.2 & 65.5 & 0.961 & 80.7 & 70.6 & 0.839 & 58.0 & 69.5\\
+CVP & 0.956 & 86.8 & 85.3 & 0.961 & 85.9 & 84.8 & 0.839 & 45.2 & 56.3\\
+\midrule
+OCR field acc. & \multicolumn{3}{c}{99.8} & \multicolumn{3}{c}{99.8} & \multicolumn{3}{c}{99.7}\\
+\bottomrule
+\end{tabular}

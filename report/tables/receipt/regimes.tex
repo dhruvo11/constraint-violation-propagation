@@ -1,0 +1,16 @@
+\begin{tabular}{llcccc}
+\toprule
+Visual branch trained on & Method & AUC$_{T2}$ & Attr.\ T2 & Ambig.\ T2 & Attr.\ all\\
+\midrule
+\multirow{2}{*}{Crude only (zero-shot)} & Visual-only & 0.458 & 0.6 & 0.0 & 49.9\\
+ & CVP & 0.996 & 92.3 & 60.5 & 80.2\\
+\midrule
+\multirow{2}{*}{Crude + older generator (main)} & Visual-only & 0.933 & 65.4 & 76.7 & 84.4\\
+ & CVP & 1.000 & 95.5 & 76.7 & 91.9\\
+\midrule
+\multirow{2}{*}{Evaluated generator (oracle)} & Visual-only & 0.964 & 87.2 & 88.4 & 94.6\\
+ & CVP & 1.000 & 98.7 & 90.7 & 99.3\\
+\midrule
+(no visual branch) & Constraint-only & 0.983 & 91.7 & 44.2 & 62.8\\
+\bottomrule
+\end{tabular}

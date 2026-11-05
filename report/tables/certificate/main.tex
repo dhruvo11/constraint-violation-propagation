@@ -1,0 +1,14 @@
+\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{2}{c}{Detection} & \multicolumn{3}{c}{Attribution (top-1, \%)} & Loc.\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-7}
+Method & AUC & F1 & All & Unamb. & Ambig. & IoU$_{.5}$\\
+\midrule
+ELA & 0.524 & 0.822 & 23.0 & 36.8 & 19.3 & 27.1\\
+Visual-only & 0.961 & 0.902 & 89.7 & 87.8 & 89.4 & 70.2\\
+Constraint-only & 0.736 & 0.735 & 43.6 & 94.2 & 41.3 & 45.7\\
+Concat fusion & 0.944 & 0.925 & 79.3 & 90.3 & 73.0 & 64.5\\
+CVP (rule) & 0.956 & 0.950 & 82.9 & 95.8 & 67.4 & 64.0\\
+CVP & 0.956 & 0.950 & \textbf{92.4} & \textbf{98.7} & \textbf{91.9} & \textbf{76.2}\\
+\bottomrule
+\end{tabular}

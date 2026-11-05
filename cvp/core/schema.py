@@ -28,9 +28,11 @@ class Constraint:
     `check(values)` returns (violated, residual) and is only called when every field in
     the scope was read; otherwise the constraint reports `on_missing`. `sensitive` lists
     the fields any change of which necessarily violates the predicate (every term of a
-    sum, say); `exchangeable` lists groups of fields the predicate sees only through their
-    sum, which is what makes them indistinguishable (Proposition 1). `family` groups
-    per-field copies of one rule (c4 for every mark) for reporting.
+    sum, say); `exchangeable` lists groups of fields the predicate sees only through a
+    symmetric combination (their sum, or the product qty x rate), so that any edit of one
+    is matched by an edit of the other with the same (w, r): this is what makes them
+    indistinguishable (Proposition 1). `family` groups per-field copies of one rule (c4
+    for every mark) for reporting.
     """
     name: str
     kind: str
@@ -153,3 +155,22 @@ class Schema:
             return list(fields)
         hit = [f for f in fields if self.unary_violated(f, w)]
         return hit or list(fields)
+
+    def consistent_fields(self, w):
+        """Every field a single-field edit could have produced this violation pattern from:
+        the candidates of each class whose signature interval contains it. Proposition 1's
+        classes are one source of ambiguity; the other is two classes whose intervals
+        overlap (a printed date and its machine-readable copy both violate only their
+        equality, say). Patterns no single edit explains fall back to the best overlap."""
+        V = self.violated(w)
+        if not V:
+            return list(self.field_names)
+        fits = [k for k in self.classes if self.necessary[k] <= V <= self.possible[k]] or [self.signature_class(w)]
+        out = []
+        for k in fits:
+            out += [f for f in self.candidate_fields(k, w) if f not in out]
+        return out
+
+    def constrained(self, field):
+        """Whether any constraint reads `field` (a field no rule reads can only be checked visually)."""
+        return bool(self.possible[self.field_class[field]])

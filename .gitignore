@@ -9,8 +9,8 @@ __pycache__/
 data/
 features/
 logs/
-models/*.pt
-models/*.pkl
+models/**/*.pt
+models/**/*.pkl
 results/**/*.png
 *.zip
 

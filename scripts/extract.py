@@ -108,14 +108,15 @@ def run(dt, split, cond, reader, m, dev, tag="", limit=0, embed_only=False):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--doctype", default="transcript", choices=doctypes.names())
-    ap.add_argument("--jobs", default="train:clean:embed,val:clean,test:clean,test:jpeg60:750,test:resize60:750",
+    ap.add_argument("--jobs", default="train:clean:embed,val:clean,val_g1:clean,test:clean,test:jpeg60:750,test:resize60:750",
                     help="split:condition[:limit][:embed], comma-separated")
     ap.add_argument("--visual", default=visual.MODEL_PATH)
+    ap.add_argument("--ocr", default=ocr.MODEL_PATH)
     ap.add_argument("--tag", default="")
     a = ap.parse_args()
     dt = doctypes.get(a.doctype)
     dev = "mps" if torch.backends.mps.is_available() else "cpu"
-    reader = ocr.Reader(device="cpu")
+    reader = ocr.Reader(a.ocr, device="cpu")
     m = visual.ResUNet(pretrained=False)
     m.load_state_dict(torch.load(a.visual, map_location="cpu"))
     m = m.eval().to(dev)

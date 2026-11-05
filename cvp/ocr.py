@@ -14,10 +14,13 @@ import torch
 import torch.nn as nn
 from PIL import Image
 
-ALPHABET = string.digits + string.ascii_uppercase + "./+"
+ALPHABET = string.digits + string.ascii_uppercase + "./+,-:<% "
 CHAR_INDEX = {c: i + 1 for i, c in enumerate(ALPHABET)}  # 0 = CTC blank
 CROP_H, CROP_W = 32, 160
+WIDE_W = 640  # long lines: machine-readable zones, amounts in words
 THRESH = 150
+MAX_GAP = 8       # px: a broken-up rule is still one rule
+MAX_OFFSET = 40   # px: pages are placed within a few pixels of the template
 MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "models", "ocr_crnn.pt")
 
 
@@ -34,37 +37,53 @@ class CRNN(nn.Module):
         self.rnn = nn.LSTM(192, 128, bidirectional=True, batch_first=True)
         self.fc = nn.Linear(256, n_classes)
 
-    def forward(self, x):  # x: B,1,32,160 -> B,T=40,C
+    def forward(self, x):  # x: B,1,32,W -> B,T=W/4,C (W = 160 for slots, 640 for long lines)
         f = self.cnn(x).squeeze(2).transpose(1, 2)
         return self.fc(self.rnn(f)[0])
 
 
-def register(gray, header_rule):
+def register(gray, header_rule, min_run=300):
     """Estimate the global page offset from the header rule."""
     x0, y0 = header_rule
     top = max(0, y0 - 16)
     band = gray[top:y0 + 16] < THRESH
-    rows = np.nonzero(band.sum(1) > 300)[0]
+    rows = np.nonzero(band.sum(1) > min_run)[0]
     if len(rows) == 0:
         return 0, 0
     r = rows[0]
     cols = np.nonzero(band[r])[0]
-    return int(cols[0] - x0), int(r + top - y0)
+    # Left end of the longest dark run, so a page border or text in the same row cannot shift
+    # it; gaps of a few pixels (a rule broken up by compression or rescaling) do not split a run.
+    breaks = np.nonzero(np.diff(cols) > MAX_GAP)[0]
+    starts, ends = np.r_[0, breaks + 1], np.r_[breaks, len(cols) - 1]
+    i = int(np.argmax(cols[ends] - cols[starts]))
+    ox, oy = int(cols[starts[i]] - x0), int(r + top - y0)
+    if abs(ox) > MAX_OFFSET or abs(oy) > MAX_OFFSET:  # not the header rule: assume no offset
+        return 0, 0
+    return ox, oy
 
 
 def slot_rect(doctype, f, ox, oy, shape):
-    ax, ay, width = doctype.slots[f]
-    return (max(0, ax + ox - 10), max(0, ay + oy - 8),
-            min(shape[1], ax + ox + width), min(shape[0], ay + oy + 30))
+    ax, ay, width, *ud = doctype.slots[f]
+    up, down = ud if ud else (8, 30)
+    return (max(0, ax + ox - 10), max(0, ay + oy - up),
+            min(shape[1], ax + ox + width), min(shape[0], ay + oy + down))
+
+
+def crop_width(doctype, f):
+    return WIDE_W if f in doctype.wide else CROP_W
 
 
 def crop_slot(gray, doctype, f, ox, oy):
     x0, y0, x1, y1 = slot_rect(doctype, f, ox, oy, gray.shape)
     c = gray[y0:y1, x0:x1]
+    cw = crop_width(doctype, f)
+    if c.size == 0:  # the slot fell off the page: an empty (unreadable) crop
+        return np.full((CROP_H, cw), float(np.median(gray)) / 255.0, np.float32), (x0, y0, max(x0 + 1, x1), max(y0 + 1, y1))
     scale = CROP_H / c.shape[0]
-    w = min(CROP_W, max(1, int(round(c.shape[1] * scale))))
+    w = min(cw, max(1, int(round(c.shape[1] * scale))))
     im = np.asarray(Image.fromarray(c.astype(np.uint8)).resize((w, CROP_H), Image.BILINEAR), np.float32)
-    out = np.full((CROP_H, CROP_W), float(np.median(c)), np.float32)
+    out = np.full((CROP_H, cw), float(np.median(c)), np.float32)
     out[:, :w] = im
     return out / 255.0, (x0, y0, x1, y1)
 
@@ -119,11 +138,15 @@ class Reader:
     def read(self, img, doctype):
         """OCR + FieldAssign. Returns dict(values, text, conf, boxes, offset)."""
         gray = gray_of(img)
-        ox, oy = register(gray, doctype.header_rule)
+        ox, oy = register(gray, doctype.header_rule, doctype.rule_min)
         fields = doctype.schema.fields
         crops, rects = zip(*[crop_slot(gray, doctype, f.name, ox, oy) for f in fields])
-        x = torch.from_numpy(np.stack(crops))[:, None].to(self.device)
-        logits = self.model(x).float().cpu()
+        logits = [None] * len(fields)
+        for width in sorted({c.shape[1] for c in crops}):  # one batch per crop width
+            idx = [i for i, c in enumerate(crops) if c.shape[1] == width]
+            x = torch.from_numpy(np.stack([crops[i] for i in idx]))[:, None].to(self.device)
+            for i, lg in zip(idx, self.model(x).float().cpu()):
+                logits[i] = lg
         values, texts, conf, boxes = {}, {}, {}, {}
         for i, f in enumerate(fields):
             texts[f.name], conf[f.name] = decode(logits[i], f.charset)

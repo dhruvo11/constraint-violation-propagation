@@ -20,15 +20,20 @@ def main():
     ap.add_argument("--train", default="train")
     ap.add_argument("--val", default="val")
     ap.add_argument("--tag", default="", help="feature tag of the validation split, e.g. _blind")
+    ap.add_argument("--prior", default="class", choices=["class", "shared"],
+                    help="field prior of the attribution head (see pipeline.field_prior)")
+    ap.add_argument("--heat", default=E.HEAT, choices=pipeline.HEAT,
+                    help="how the heatmap enters the attribution head (see pipeline.attribution_features)")
     a = ap.parse_args()
     E.set_doctype(a.doctype)
+    E.SHARED, E.HEAT = a.prior == "shared", a.heat
     tr = E.without_blended(E.load(a.train, tag=a.tag if a.train != "train" else ""))
     va = E.without_blended(E.load(a.val, tag=a.tag))
     heads = E.Heads().fit(tr, va)
     th = E.best_thresholds(heads, va)
     with open(pipeline.heads_path(a.doctype), "wb") as fh:
         pickle.dump(dict(g_phi=heads.g, g_scaler=heads.scaler, det=heads.det, attr_w=heads.attr_w,
-                         det_threshold=th["CVP"]), fh)
+                         det_threshold=th["CVP"], shared_prior=E.SHARED, heat=E.HEAT), fh)
     print("saved", pipeline.heads_path(a.doctype), "theta", heads.attr_w.round(3), "threshold", round(th["CVP"], 3))
 
 

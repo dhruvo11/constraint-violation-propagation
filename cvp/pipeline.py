@@ -26,6 +26,15 @@ def pool(H, boxes, schema, pad=3):
     return out
 
 
+def class_posterior(model, X, n_classes):
+    """g_phi's class posterior as a full row per class name. A class no training document
+    was labelled with (a field no rule reads is never the target of a single-field edit)
+    gets probability 0 instead of shifting every later column."""
+    P = np.zeros((len(X), n_classes))
+    P[:, model.classes_] = model.predict_proba(X)
+    return P
+
+
 def constraint_features(o, schema):
     """[w; r; e; q]: violations, residuals, per-field parse failures and OCR confidences."""
     w, r = schema.evaluate(o["values"])
@@ -34,21 +43,52 @@ def constraint_features(o, schema):
     return np.concatenate([w, r, fail, conf]), w, r
 
 
-def field_prior(p_cls, w, schema):
+def field_prior(p_cls, w, schema, shared=False):
     """Constraint-branch posterior over fields: each class's mass spread over its
-    candidate fields; the coherent class spreads uniformly over all fields."""
+    candidate fields; the coherent class spreads uniformly over all fields.
+
+    With shared=True, the classes whose signature fits the observed violations
+    (necessary <= V <= possible) pool their mass and spread it evenly over all their
+    candidates. The violations alone cannot tell those fields apart (a shared signature,
+    e.g. cash and change), so the constraint branch does not prefer one of them and the
+    visual branch decides."""
     F = schema.field_names
     pi = np.full(len(F), p_cls[schema.class_index["coherent"]] / len(F))
+    V = schema.violated(w) if shared else set()
+    fits = [k for k in schema.classes if schema.necessary[k] <= V <= schema.possible[k]] if V else []
+    if fits:
+        C = schema.consistent_fields(w)
+        mass = sum(p_cls[schema.class_index[k]] for k in fits)
+        for f in C:
+            pi[schema.field_index[f]] += mass / len(C)
     for k in schema.classes:
+        if k in fits:
+            continue
         cand = schema.candidate_fields(k, w)
         for f in cand:
             pi[schema.field_index[f]] += p_cls[schema.class_index[k]] / len(cand)
     return pi / pi.sum()
 
 
-def attribution_features(p_cls, w, pooled, schema):
-    pi = field_prior(p_cls, w, schema)
-    return np.concatenate([np.log(pi + 1e-6)[:, None], pooled], 1)  # n_fields x 4
+HEAT = ("prob", "log", "logmax")
+
+
+def attribution_features(p_cls, w, pooled, schema, shared=False, heat="prob"):
+    """Per-field evidence for the attribution head, n_fields x (1 + k): the log field prior,
+    then the pooled heatmap statistics -- max, mean and 90th percentile as probabilities
+    ("prob"), the same in log space ("log"), or only the log of the max ("logmax"). In log
+    space the score is a weighted product of experts, prior^a * heat^b, so a saturated
+    heatmap (1e-7 against 2e-7) still ranks the fields instead of vanishing beside the prior."""
+    pi = field_prior(p_cls, w, schema, shared)
+    if heat == "prob":
+        h = pooled
+    elif heat == "log":
+        h = np.log(np.clip(pooled, 1e-12, None))
+    elif heat == "logmax":
+        h = np.log(np.clip(pooled[:, :1], 1e-12, None))
+    else:
+        raise ValueError(f"heat must be one of {HEAT}")
+    return np.concatenate([np.log(pi + 1e-6)[:, None], h], 1)
 
 
 def visual_detection_features(pooled):
@@ -69,6 +109,16 @@ def cvp_rule(p_cls, w, pooled, schema):
     return max(cand, key=lambda f: pooled[schema.field_index[f], 0])
 
 
+_SHARED = {}
+
+
+def shared_models(device):
+    """The OCR and the visual branch serve every document type: load them once."""
+    if device not in _SHARED:
+        _SHARED[device] = (ocr.Reader(device="cpu"), visual.load(device))
+    return _SHARED[device]
+
+
 class CVP:
     """End-to-end system: image -> decision, class, attributed field, and the evidence."""
 
@@ -76,10 +126,9 @@ class CVP:
         self.doctype = doctypes.get(doctype) if isinstance(doctype, str) else doctype
         self.schema = self.doctype.schema
         self.device = device or ("mps" if torch.backends.mps.is_available() else "cpu")
-        self.reader = ocr.Reader(device="cpu")
-        self.visual = visual.load(self.device)
         with open(heads_path(self.doctype.name), "rb") as fh:
             self.heads = pickle.load(fh)
+        self.reader, self.visual = shared_models(self.device)
 
     def __call__(self, arr):
         s = self.schema
@@ -88,13 +137,16 @@ class CVP:
         H, _ = visual.heatmap(self.visual, [arr], self.device)
         H = H[0]
         pooled = pool(H, o["boxes"], s)
-        p_cls = self.heads["g_phi"].predict_proba(self.heads["g_scaler"].transform(feats[None]))[0]
+        p_cls = class_posterior(self.heads["g_phi"], self.heads["g_scaler"].transform(feats[None]),
+                                len(s.class_names))[0]
         p_vis = float(self.heads["det"].predict_proba(visual_detection_features(pooled)[None])[0, 1])
         p_tamper = float(noisy_or(1 - p_cls[0], p_vis))
-        scores = attribution_features(p_cls, w, pooled, s) @ self.heads["attr_w"]
+        shared = self.heads.get("shared_prior", False)  # how the heads were fitted
+        heat = self.heads.get("heat", "prob")
+        scores = attribution_features(p_cls, w, pooled, s, shared, heat) @ self.heads["attr_w"]
         k = s.class_names[int(np.argmax(p_cls))]
         return dict(ocr=o, w=w, r=r, p_cls=p_cls, cls=k, candidates=s.candidate_fields(k, w),
-                    signature_class=s.signature_class(w), heatmap=H, pooled=pooled,
+                    signature_class=s.signature_class(w), consistent=s.consistent_fields(w), heatmap=H, pooled=pooled,
                     p_tamper=p_tamper, tampered=p_tamper >= self.heads["det_threshold"],
                     field=s.field_names[int(np.argmax(scores))], field_scores=scores,
-                    field_prior=field_prior(p_cls, w, s))
+                    field_prior=field_prior(p_cls, w, s, shared))

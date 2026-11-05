@@ -1,0 +1,13 @@
+\begin{tabular}{lcccc|cccc}
+\toprule
+ & \multicolumn{4}{c|}{Detection AUC} & \multicolumn{4}{c}{Attribution (\%)}\\
+Method & T1 & T2 & T3 & T4 & T1 & T2 & T3 & T4\\
+\midrule
+ELA & 0.592 & 0.483 & 0.666 & 0.505 & 55.5 & 0.2 & 77.6 & 0.8\\
+Visual-only & 0.998 & 0.933 & 1.000 & 0.935 & 99.8 & 65.4 & 100.0 & 74.9\\
+Constraint-only & 0.982 & 0.983 & 0.542 & 0.501 & 93.0 & 91.7 & 24.1 & 18.3\\
+Concat fusion & 1.000 & 0.984 & 0.998 & 0.814 & 89.8 & 73.1 & 44.2 & 36.6\\
+CVP (rule) & 1.000 & 1.000 & 0.995 & 0.854 & 93.8 & 92.9 & 99.0 & 74.1\\
+CVP & 1.000 & 1.000 & 0.995 & 0.854 & 97.2 & 95.5 & 99.5 & 73.7\\
+\bottomrule
+\end{tabular}

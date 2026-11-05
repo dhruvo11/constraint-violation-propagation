@@ -1,15 +1,20 @@
 #!/bin/bash
-# Rebuild everything from scratch: OCR, corpus, the three visual-branch regimes, features,
-# evaluation and figures. Each heavy step runs alone (the target laptop has 8 GB of RAM);
-# logs go to logs/. Expect a few hours in total on an Apple-silicon laptop.
-#   ./scripts/reproduce.sh            all steps
-#   ./scripts/reproduce.sh evaluate   only the steps from evaluation on
+# Rebuild everything from scratch: the shared OCR, a corpus per document type, the three
+# visual-branch regimes (trained on every type at once), features, evaluation and figures.
+# Each heavy step runs alone (the target laptop has 8 GB of RAM); logs go to logs/.
+# Expect several hours on an Apple-silicon laptop.
+#   ./scripts/reproduce.sh              all steps
+#   ./scripts/reproduce.sh evaluate     only the steps from evaluation on
+#   TYPES="invoice receipt" ./scripts/reproduce.sh data     some types only
 set -e
 cd "$(dirname "$0")/.."
 PY=.venv/bin/python
 mkdir -p logs
 FROM=${1:-ocr}
-STEPS=(ocr data visual extract evaluate figures)
+ALL=$($PY -c "from cvp import doctypes; print(' '.join(doctypes.names()))")
+TYPES=${TYPES:-$ALL}
+COMMA=$(echo $TYPES | tr ' ' ',')
+STEPS=${VISUAL_STEPS:-3000}
 started=0
 
 step() {
@@ -21,16 +26,23 @@ step() {
   tail -n 2 "logs/$name.log"
 }
 
-step ocr      $PY scripts/train_ocr.py --docs 4000 --steps 1200
-step data     $PY scripts/make_dataset.py
-step visual   bash -c "
-  $PY scripts/train_visual.py --steps 1100 --exclude T2,T4 --extra train_g1 &&
-  $PY scripts/train_visual.py --steps 1100 --exclude T2,T4 --out models/visual_resunet_blind.pt &&
-  $PY scripts/train_visual.py --steps 1100 --out models/visual_resunet_oracle.pt"
-step extract  bash -c "
-  $PY scripts/extract.py &&
-  $PY scripts/extract.py --visual models/visual_resunet_blind.pt --tag _blind --jobs val:clean,test:clean &&
-  $PY scripts/extract.py --visual models/visual_resunet_oracle.pt --tag _oracle --jobs val:clean,test:clean"
-step evaluate $PY scripts/evaluate.py
-step figures  $PY scripts/make_figures.py
+per_type() {  # run a command once per document type, with {} replaced by the type
+  for t in $TYPES; do "${@//\{\}/$t}" || return 1; done
+}
+
+step ocr       $PY scripts/train_ocr.py
+step data      $PY scripts/make_dataset.py --doctypes $COMMA
+step visual    $PY scripts/train_visual.py --steps $STEPS --exclude T2,T4 --extra train_g1
+step extract   per_type $PY scripts/extract.py --doctype {}
+step select    $PY scripts/select_head.py   # attribution-head design, chosen on val_g1 (never on test)
+step evaluate  per_type $PY scripts/evaluate.py --doctype {}
+step visual_regimes bash -c "
+  $PY scripts/train_visual.py --steps $STEPS --exclude T2,T4 --out models/visual_resunet_blind.pt &&
+  $PY scripts/train_visual.py --steps $STEPS --out models/visual_resunet_oracle.pt"
+step extract_regimes per_type bash -c "
+  $PY scripts/extract.py --doctype {} --visual models/visual_resunet_blind.pt --tag _blind --jobs val:clean,test:clean &&
+  $PY scripts/extract.py --doctype {} --visual models/visual_resunet_oracle.pt --tag _oracle --jobs val:clean,test:clean"
+step evaluate_regimes per_type $PY scripts/evaluate.py --doctype {}
+step ablation  $PY scripts/ablate_head.py   # every head design on the test set, after the choice
+step figures   bash -c "$PY scripts/make_figures.py && $PY scripts/summarize.py"
 echo "[$(date +%H:%M)] done"
