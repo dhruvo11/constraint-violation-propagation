@@ -93,3 +93,36 @@ def test_rules_that_read_missing_values_do_not_apply():
     del gt["gt_parse"]["total"]["cashprice"], gt["gt_parse"]["total"]["menuqty_cnt"]
     res = receipt_rules.check(cord.parse(gt))
     assert res["change"] is None and res["tender"] is None and res["count"] is None and res["total"] is True
+
+
+def test_a_receipts_own_schema_follows_the_rules_and_proposition_1():
+    """Each receipt gets its own constraint graph. Without unit prices, item prices are read
+    only through their sum: one class, so an edit of either leaves the same signature."""
+    from cvp.real import receipt_schema as RS
+    r = cord.parse(record())
+    S = RS.schema(r)
+    assert set(S.constraint_names) == {"line1", "sum", "total", "change", "tender", "count"}
+    w, _ = S.evaluate(RS.values(r))
+    assert not S.violated(w)  # the genuine receipt
+    gt = record()
+    del gt["gt_parse"]["menu"][0]["unitprice"]
+    r = cord.parse(gt)
+    S = RS.schema(r)
+    assert S.field_class["price1"] == S.field_class["price2"]
+    v = RS.values(r)
+    v["price2"] += 5000
+    w, _ = S.evaluate(v)
+    assert S.violated(w) == {"sum"}
+    assert set(S.candidate_fields(S.signature_class(w), w)) == {"price1", "price2"}
+
+
+def test_schema_and_validity_rules_agree_on_every_edit():
+    from cvp.real import receipt_schema as RS
+    for edit in ({"total.total_price": "48,750"}, {"total.changeprice": "13,250"}, {"total.menuqty_cnt": "4"},
+                 {"sub_total.subtotal_price": "52,500"}, {"total.cashprice": "40,000"}):
+        r = cord.parse(record(**edit))
+        res = receipt_rules.check(r)
+        broken = {k for k, v in res.items() if v is False or (isinstance(v, list) and not all(v))}
+        S = RS.schema(cord.parse(record()))  # the genuine receipt's structure, evaluated on the edited reading
+        w, _ = S.evaluate(RS.values(r))
+        assert {c.rstrip("0123456789") for c in S.violated(w)} == broken
