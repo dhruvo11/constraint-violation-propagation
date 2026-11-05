@@ -2,13 +2,13 @@
 \toprule
 Rule & Checks & Applies & Holds\\
 \midrule
-line & count x unit price = price, for each item that prints a unit price & 63 & 100.0\%\\
-sum & item prices (with add-ons, less item discounts) add up to the subtotal & 62 & 98.4\%\\
-total & subtotal + tax + service - discount = total (or the prices already include the tax) & 63 & 96.8\%\\
-change & cash (+ card) - total = change & 50 & 96.0\%\\
-tender & cash (+ card) covers the total & 61 & 98.4\%\\
-count & item counts add up to the printed number of items & 26 & 100.0\%\\
+line & count x unit price = price, for each item that prints a unit price & 727 & 99.7\%\\
+sum & item prices (with add-ons, less item discounts) add up to the subtotal, or, when no subtotal is printed, with tax and service to the total & 968 & 97.4\%\\
+total & subtotal + tax + service - discount = total (or the prices already include the tax) & 642 & 97.4\%\\
+change & cash (+ card) - total = change & 530 & 96.6\%\\
+tender & cash (+ card) covers the total & 616 & 98.4\%\\
+count & item counts add up to the printed number of items & 250 & 96.8\%\\
 \midrule
-\multicolumn{2}{l}{Genuine receipts flagged (any rule fails)} & 97 & 5.2\%\\
+\multicolumn{2}{l}{Genuine receipts flagged (any rule fails)} & 992 & 6.7\%\\
 \bottomrule
 \end{tabular}

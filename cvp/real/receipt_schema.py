@@ -63,10 +63,23 @@ def schema(r):
     if prices and all(p in has for p in prices) and "subtotal" in has:  # every item prints its price
         def sum_check(v):
             base = sum(v[p] for p in prices)
-            ok = any(close(x, v["subtotal"]) for x in (base, base + add, base - dsc, base + add - dsc))
-            return not ok, min((_rel(x, v["subtotal"]) for x in (base, base + add, base - dsc, base + add - dsc)), key=abs)
+            xs = (base, base + add, base - dsc, base + add - dsc)
+            return not any(close(x, v["subtotal"]) for x in xs), min((_rel(x, v["subtotal"]) for x in xs), key=abs)
         cons.append(Constraint("sum", "arithmetic", prices + ("subtotal",), sum_check, RULES["sum"],
                                sensitive=prices + ("subtotal",), exchangeable=(prices,) if len(prices) > 1 else ()))
+    elif prices and all(p in has for p in prices) and "total" in has:  # no subtotal: items add up to the total
+        extra = tuple(f for f in ("tax", "service") if f in has)
+        scope = prices + extra + (("discount",) if "discount" in has else ()) + ("total",)
+
+        def sum_total_check(v):
+            base = sum(v[p] for p in prices)
+            tax, svc, d = v.get("tax") or 0.0, v.get("service") or 0.0, abs(v.get("discount") or 0.0)
+            xs = [x + tax + svc - d for x in (base, base + add, base - dsc, base + add - dsc)]
+            xs += [x + svc - d for x in (base, base + add, base - dsc, base + add - dsc)]
+            return not any(close(x, v["total"]) for x in xs), min((_rel(x, v["total"]) for x in xs), key=abs)
+        terms = prices + extra
+        cons.append(Constraint("sum", "arithmetic", scope, sum_total_check, RULES["sum"], sensitive=scope,
+                               exchangeable=(terms,) if len(terms) > 1 else ()))
     if {"subtotal", "total"} <= has:
         terms = tuple(f for f in ("subtotal", "tax", "service") if f in has)
         scope = terms + (("discount",) if "discount" in has else ()) + ("total",)

@@ -126,3 +126,17 @@ def test_schema_and_validity_rules_agree_on_every_edit():
         S = RS.schema(cord.parse(record()))  # the genuine receipt's structure, evaluated on the edited reading
         w, _ = S.evaluate(RS.values(r))
         assert {c.rstrip("0123456789") for c in S.violated(w)} == broken
+
+
+def test_without_a_subtotal_the_items_add_up_to_the_total():
+    """Many receipts print no subtotal (e.g. 17,500 + 46,000 + 27,500 = TOTAL 91,000)."""
+    from cvp.real import receipt_schema as RS
+    gt = {"gt_parse": {"menu": [{"nm": "A", "price": "17500"}, {"nm": "B", "price": "46000"}, {"nm": "C", "price": "27500"}],
+                       "total": {"total_price": "91000", "cashprice": "91000"}}, "meta": {}, "valid_line": []}
+    r = cord.parse(gt)
+    assert receipt_rules.check(r)["sum"] is True
+    S = RS.schema(r)
+    v = RS.values(r)
+    v["price2"] = 48000
+    w, _ = S.evaluate(v)
+    assert S.violated(w) == {"sum"} and len(S.candidate_fields(S.signature_class(w), w)) == 3  # one class of prices

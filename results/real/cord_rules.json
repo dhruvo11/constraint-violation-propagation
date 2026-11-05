@@ -1,59 +1,137 @@
 {
  "dataset": "CORD v2",
  "splits": [
+  "train",
+  "validation",
   "test"
  ],
- "receipts": 100,
- "receipts_checked": 97,
- "genuine_flagged": 5,
- "false_alarm_rate": 0.05154639175257732,
+ "receipts": 1000,
+ "receipts_checked": 992,
+ "genuine_flagged": 66,
+ "false_alarm_rate": 0.06653225806451613,
  "tolerance": 0.005,
  "rules": {
   "line": {
    "description": "count x unit price = price, for each item that prints a unit price",
-   "applies": 63,
-   "holds": 63,
-   "failed": []
+   "applies": 727,
+   "holds": 725,
+   "failed": [
+    "train_0099",
+    "train_0278"
+   ]
   },
   "sum": {
-   "description": "item prices (with add-ons, less item discounts) add up to the subtotal",
-   "applies": 62,
-   "holds": 61,
+   "description": "item prices (with add-ons, less item discounts) add up to the subtotal, or, when no subtotal is printed, with tax and service to the total",
+   "applies": 968,
+   "holds": 943,
    "failed": [
+    "train_0037",
+    "train_0050",
+    "train_0099",
+    "train_0149",
+    "train_0153",
+    "train_0175",
+    "train_0235",
+    "train_0278",
+    "train_0279",
+    "train_0324",
+    "train_0503",
+    "train_0527",
+    "train_0558",
+    "train_0592",
+    "train_0623",
+    "train_0632",
+    "train_0640",
+    "train_0645",
+    "train_0692",
+    "train_0719",
+    "train_0736",
+    "train_0791",
+    "validation_0002",
+    "validation_0005",
     "test_0048"
    ]
   },
   "total": {
    "description": "subtotal + tax + service - discount = total (or the prices already include the tax)",
-   "applies": 63,
-   "holds": 61,
+   "applies": 642,
+   "holds": 625,
    "failed": [
+    "train_0290",
+    "train_0297",
+    "train_0361",
+    "train_0421",
+    "train_0495",
+    "train_0527",
+    "train_0558",
+    "train_0614",
+    "train_0623",
+    "train_0640",
+    "train_0719",
+    "train_0744",
+    "train_0777",
+    "train_0778",
+    "validation_0094",
     "test_0000",
     "test_0099"
    ]
   },
   "change": {
    "description": "cash (+ card) - total = change",
-   "applies": 50,
-   "holds": 48,
+   "applies": 530,
+   "holds": 512,
    "failed": [
+    "train_0002",
+    "train_0081",
+    "train_0198",
+    "train_0363",
+    "train_0433",
+    "train_0464",
+    "train_0542",
+    "train_0584",
+    "train_0607",
+    "train_0668",
+    "train_0710",
+    "train_0735",
+    "train_0767",
+    "validation_0013",
+    "validation_0033",
+    "validation_0061",
     "test_0014",
     "test_0071"
    ]
   },
   "tender": {
    "description": "cash (+ card) covers the total",
-   "applies": 61,
-   "holds": 60,
+   "applies": 616,
+   "holds": 606,
    "failed": [
+    "train_0081",
+    "train_0327",
+    "train_0331",
+    "train_0364",
+    "train_0584",
+    "train_0607",
+    "train_0710",
+    "train_0734",
+    "validation_0033",
     "test_0014"
    ]
   },
   "count": {
    "description": "item counts add up to the printed number of items",
-   "applies": 26,
-   "holds": 26,
-   "failed": []
+   "applies": 250,
+   "holds": 242,
+   "failed": [
+    "train_0084",
+    "train_0179",
+    "train_0271",
+    "train_0350",
+    "train_0356",
+    "train_0556",
+    "train_0607",
+    "validation_0053"
+   ]
   }
  }
 }

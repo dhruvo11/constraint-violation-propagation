@@ -11,7 +11,8 @@ rupiah, say) and at least one currency unit.
 TOL = 0.005
 RULES = {
     "line": "count x unit price = price, for each item that prints a unit price",
-    "sum": "item prices (with add-ons, less item discounts) add up to the subtotal",
+    "sum": "item prices (with add-ons, less item discounts) add up to the subtotal, or, when no subtotal "
+           "is printed, with tax and service to the total",
     "total": "subtotal + tax + service - discount = total (or the prices already include the tax)",
     "change": "cash (+ card) - total = change",
     "tender": "cash (+ card) covers the total",
@@ -35,11 +36,17 @@ def check(r):
     out["line"] = lines or None
 
     prices = [it.price for it in r.items]
-    if r.subtotal is not None and prices and _known(*prices):
+    sums = None
+    if prices and _known(*prices):
         base = sum(prices)
         add = sum(sum(it.addons) for it in r.items)
         dsc = sum(abs(it.discount) for it in r.items if it.discount)
-        out["sum"] = any(close(v, r.subtotal) for v in (base, base + add, base - dsc, base + add - dsc))
+        sums = (base, base + add, base - dsc, base + add - dsc)
+    if sums and r.subtotal is not None:
+        out["sum"] = any(close(v, r.subtotal) for v in sums)
+    elif sums and r.total is not None:  # no subtotal printed: the items add up to the total
+        tax, svc, d = r.tax or 0.0, r.service or 0.0, abs(r.discount or 0.0)
+        out["sum"] = any(close(v + tax + svc - d, r.total) or close(v + svc - d, r.total) for v in sums)
     else:
         out["sum"] = None
 
