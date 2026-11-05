@@ -62,15 +62,15 @@
    "rate": 0.9954545454545455
   },
   "item unit price": {
-   "correct": 60,
+   "correct": 62,
    "of": 67,
-   "rate": 0.8955223880597015
+   "rate": 0.9253731343283582
   }
  },
- "receipts_checked": 97,
+ "receipts_checked": 98,
  "flagged_true_values": 6,
  "flagged_as_read": 9,
  "flagged_both": 6,
- "false_alarm_true_values": 0.061855670103092786,
- "false_alarm_as_read": 0.09278350515463918
+ "false_alarm_true_values": 0.061224489795918366,
+ "false_alarm_as_read": 0.09183673469387756
 }
