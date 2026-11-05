@@ -88,6 +88,20 @@ def value_words(line):
     return [w for w in line["words"] if not w.get("is_key")]
 
 
+def number_text(texts):
+    """The printed number among a line's value words: the last word with a digit (amounts are
+    printed rightmost: "Rp. | 111,000", or a value repeated in two columns), except digit
+    groups split by a space ("2 | 600"), which join."""
+    nums = [t for t in texts if any(ch.isdigit() for ch in t)]
+    if not nums:
+        return " ".join(texts)
+    tail = 0
+    while tail + 1 < len(nums) and len([c for c in nums[-1 - tail] if c.isdigit()]) == 3 \
+            and nums[-1 - tail] != nums[-2 - tail] and nums[-1 - tail].isdigit():
+        tail += 1
+    return "".join(nums[len(nums) - 1 - tail:])
+
+
 def from_lines(lines, read=None, rid="", size=None):
     """A Receipt rebuilt from labelled words. `read(word)` gives each value word's text
     (default: the dataset's transcription), so the same code builds the receipt as an OCR
@@ -96,8 +110,9 @@ def from_lines(lines, read=None, rid="", size=None):
     read = read or (lambda w: w["text"])
     groups, fields = {}, {}
     for line in lines:
-        text = " ".join(read(w) for w in value_words(line)).strip()
+        texts = [read(w) for w in value_words(line)]
         cat = line["category"]
+        text = " ".join(texts).strip() if cat in ("menu.nm", "menu.sub.nm") else number_text(texts)
         if cat.startswith("menu."):
             groups.setdefault(line["group_id"], []).append((cat, text))
         elif cat in AMOUNTS:

@@ -140,3 +140,42 @@ def test_without_a_subtotal_the_items_add_up_to_the_total():
     v["price2"] = 48000
     w, _ = S.evaluate(v)
     assert S.violated(w) == {"sum"} and len(S.candidate_fields(S.signature_class(w), w)) == 3  # one class of prices
+
+
+@pytest.mark.parametrize("words,text", [(["Rp.", "111,000"], "111,000"), (["46.636", "46.636"], "46.636"),
+                                        (["-2", "600"], "-2600"), (["1", "x"], "1"), (["17500"], "17500")])
+def test_the_number_among_a_lines_value_words(words, text):
+    assert cord.number_text(words) == text
+
+
+@pytest.mark.parametrize("value,like,out", [(36000, "46000", "36000"), (12500, "11,000", "12,500"),
+                                            (65000, "60.000", "65.000"), (12500, "@11000", "@12500"),
+                                            (121000, "Rp. 111,000", "Rp. 121,000"), (52341.2, "48982.68", "52341.20"),
+                                            (3, "1X", "3X"), (1234567, "1.234.567", "1.234.567"), (21000, "-2 600", "-21 000")])
+def test_forged_values_are_printed_in_the_receipts_own_style(value, like, out):
+    from cvp.real import forge
+    assert forge.printed(value, like) == out
+
+
+def test_forged_amounts_change_for_real_and_keep_their_digits():
+    import numpy as np
+    from cvp.real import forge
+    rng = np.random.default_rng(0)
+    for old in (17500.0, 91000.0, 4664.0, 230000.0, 700.0):
+        for _ in range(50):
+            new = forge.other_value(old, rng)
+            assert abs(new - old) > max(1.0, 0.02 * old) and len(str(int(new))) == len(str(int(old)))
+            assert new % forge.granularity(old) == 0
+
+
+def test_coherent_edits_keep_every_rule():
+    import numpy as np
+    from cvp.real import forge, receipt_schema as RS
+    r = cord.parse(record())
+    S = RS.schema(r)
+    for seed in range(20):
+        ch = forge.coherent(r, np.random.default_rng(seed))
+        assert ch and any(f.startswith("price") for f in ch)
+        v = dict(RS.values(r), **ch)
+        w, _ = S.evaluate(v)
+        assert not S.violated(w), (seed, ch)
