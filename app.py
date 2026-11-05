@@ -11,6 +11,7 @@ from PIL import Image, ImageDraw
 
 from cvp import doctypes, paths, pipeline
 from cvp.core import render, tamper
+from cvp.real import demo as real_demo
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 TYPES = {doctypes.get(n).title: n for n in doctypes.names()}
@@ -238,6 +239,31 @@ with gr.Blocks(title="CVP - Constraint Violation Propagation") as demo:
         rep2 = gr.Markdown()
         post2 = gr.Label(label="p(K)")
         gr.Button("Analyse", variant="primary").click(analyse, [dtype2, up], [out2, rep2, post2])
+    with gr.Tab("Real receipt"):
+        gr.Markdown("A real photographed receipt from the CORD v2 test set (Indonesian shops; CC BY 4.0). Forge "
+                    "it, or leave it genuine: CVP reads its values with a real OCR (docTR), checks the receipt's "
+                    "own arithmetic, and runs the visual branch on the photo.")
+        why = real_demo.unavailable()
+        if why:
+            gr.Markdown(f"**Not available on this machine:** {why}")
+        else:
+            with gr.Row():
+                with gr.Column(scale=1):
+                    rk = gr.Number(value=7, label=f"Receipt (0-{real_demo.count() - 1})", precision=0)
+                    rcat = gr.Dropdown(list(real_demo.CAT_LABELS.values()), value=real_demo.CAT_LABELS["T2"],
+                                       label="Forgery type")
+                    rfld = gr.Dropdown(real_demo.field_choices(7), value=real_demo.RANDOM,
+                                       label="Field to edit (T1/T2)", allow_custom_value=True)
+                    rbtn = gr.Button("Forge and analyse", variant="primary")
+                    gr.Markdown("The first analysis loads the OCR and the visual branch (about 15 s).")
+                with gr.Column(scale=2):
+                    with gr.Row():
+                        rraw = gr.Image(label="Photo as received", type="pil")
+                        rout = gr.Image(label="CVP evidence (heat; orange: fields the broken rules fit; red: "
+                                              "attributed; green: truth)", type="pil")
+                    rrep = gr.Markdown()
+            rk.change(lambda k: gr.update(choices=real_demo.field_choices(k), value=real_demo.RANDOM), [rk], [rfld])
+            rbtn.click(real_demo.analyse, [rk, rcat, rfld], [rraw, rout, rrep])
     with gr.Tab("Results"):
         dtype3 = gr.Dropdown(list(TYPES), value=first, label="Document type")
         res_md = gr.Markdown(results_md(first))
