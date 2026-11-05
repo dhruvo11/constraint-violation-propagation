@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How CVP Works</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column of evidence, like a case file; the app's own evidence colours
+   (orange = what the rules nominate, red = heat and blame, green = ground truth) carry meaning throughout. */
+:root {
+  --paper: #f5f6f8;
+  --panel: #ffffff;
+  --ink: #1b2130;
+  --muted: #586174;
+  --rule: #dce0e7;
+  --rules: #b85f00;       /* constraint branch: orange boxes in the app */
+  --rules-soft: #fbead6;
+  --heat: #c0262d;        /* visual branch: heat and the attributed field */
+  --heat-soft: #f9dfe0;
+  --truth: #1d7f47;       /* ground truth: green boxes */
+  --truth-soft: #dcf1e4;
+  --code-bg: #eef0f4;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #13161c; --panel: #1b1f27; --ink: #e5e8ef; --muted: #9aa3b4; --rule: #2b313c;
+    --rules: #f0a347; --rules-soft: #3a2a14; --heat: #ff6b6f; --heat-soft: #3b1c1e;
+    --truth: #52c98a; --truth-soft: #163223; --code-bg: #20252e; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #13161c; --panel: #1b1f27; --ink: #e5e8ef; --muted: #9aa3b4; --rule: #2b313c;
+  --rules: #f0a347; --rules-soft: #3a2a14; --heat: #ff6b6f; --heat-soft: #3b1c1e;
+  --truth: #52c98a; --truth-soft: #163223; --code-bg: #20252e; color-scheme: dark;
+}
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-block: 40px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(2.1rem, 4.6vw, 3.2rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: clamp(1.45rem, 2.6vw, 1.9rem); font-weight: 700; }
+h3 { font-size: 1.1rem; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+section { display: grid; gap: 20px; min-width: 0; }
+.eyebrow { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 1.18rem; color: var(--ink); max-width: 62ch; }
+.muted { color: var(--muted); }
+code, .mono { font-family: var(--mono); font-size: 0.88em; }
+:not(pre) > code { background: var(--code-bg); padding: 0.08em 0.35em; border-radius: 4px; }
+.tag { font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.tag.rules { background: var(--rules-soft); color: var(--rules); }
+.tag.heat { background: var(--heat-soft); color: var(--heat); }
+.tag.truth { background: var(--truth-soft); color: var(--truth); }
+
+/* header */
+header { display: grid; gap: 18px; }
+.pitch { border-left: 3px solid var(--heat); padding: 4px 0 4px 16px; font-size: 1.05rem; max-width: 66ch; }
+.facts { display: flex; flex-wrap: wrap; gap: 10px 28px; font-family: var(--mono); font-size: 0.85rem; color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 600; }
+
+/* pipeline diagram */
+.flow { display: grid; gap: 14px; }
+.stage { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; min-width: 0; }
+.stage .file { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+.stage h3 { font-size: 1.02rem; }
+.stage p { font-size: 0.95rem; }
+.arrow { text-align: center; font-family: var(--mono); color: var(--muted); font-size: 0.85rem; line-height: 1; }
+.lanes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.lane { display: grid; gap: 10px; border-radius: 12px; padding: 12px; min-width: 0; }
+.lane.rules { background: var(--rules-soft); }
+.lane.heat { background: var(--heat-soft); }
+.lane-title { font-family: var(--display); font-weight: 700; font-size: 1rem; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.lane.rules .lane-title { color: var(--rules); }
+.lane.heat .lane-title { color: var(--heat); }
+.lane .stage { border-color: transparent; }
+.stage.fuse { border: 1.5px solid var(--ink); }
+@media (max-width: 720px) { .lanes { grid-template-columns: 1fr; } }
+
+/* worked example */
+.example { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 760px) { .example { grid-template-columns: 1fr; } }
+.sheet { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 16px 18px; font-family: var(--mono); font-size: 0.88rem; }
+.sheet .hd { font-family: var(--body); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.sheet table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.sheet td { padding: 4px 6px; }
+.sheet td:last-child { text-align: right; }
+.sheet tr.cand td:last-child { outline: 2px solid var(--rules); outline-offset: -2px; border-radius: 3px; }
+.sheet tr.blamed td:last-child { outline: 3px solid var(--heat); background: var(--heat-soft); }
+.sheet tr.total td { border-top: 1px solid var(--rule); font-weight: 600; }
+.steps { display: grid; gap: 12px; counter-reset: step; }
+.step { display: grid; grid-template-columns: 30px 1fr; gap: 12px; align-items: start; }
+.step::before { counter-increment: step; content: counter(step); font-family: var(--mono); font-weight: 600; font-size: 0.85rem;
+  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--paper); }
+.step p { font-size: 0.98rem; }
+
+/* tables */
+.tablebox { overflow-x: auto; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); }
+table.grid { width: 100%; border-collapse: collapse; font-size: 0.94rem; min-width: 620px; }
+table.grid th, table.grid td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.grid th { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--paper); }
+table.grid tr:last-child td { border-bottom: none; }
+table.grid td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.grid td.path { font-family: var(--mono); font-size: 0.84rem; white-space: nowrap; }
+table.grid td b { font-weight: 600; }
+
+/* code */
+pre.code { margin: 0; background: var(--code-bg); border-radius: 10px; padding: 16px 18px; overflow-x: auto;
+  font-family: var(--mono); font-size: 0.83rem; line-height: 1.55; color: var(--ink); }
+.code .c { color: var(--muted); }
+.code .k { color: var(--heat); }
+.code .s { color: var(--truth); }
+
+/* results */
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card .big { font-family: var(--display); font-weight: 700; font-size: 2rem; line-height: 1; }
+.card .big small { font-family: var(--body); font-weight: 400; font-size: 0.95rem; color: var(--muted); }
+.bar { display: grid; grid-template-columns: 96px 1fr 52px; gap: 10px; align-items: center; font-size: 0.86rem; }
+.bar .track { height: 10px; background: var(--code-bg); border-radius: 5px; overflow: hidden; }
+.bar .fill { height: 100%; border-radius: 5px; }
+.bar .fill.cvp { background: var(--ink); }
+.bar .fill.vis { background: var(--heat); }
+.bar .fill.rul { background: var(--rules); }
+.bar .v { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+
+/* questions */
+.qa { display: grid; gap: 10px; }
+details { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 0 18px; }
+summary { cursor: pointer; padding: 14px 0; font-weight: 600; list-style: none; display: flex; gap: 10px; align-items: baseline; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "+"; font-family: var(--mono); color: var(--muted); width: 14px; flex: none; }
+details[open] summary::before { content: "\2212"; }
+details > div { padding: 0 0 16px 24px; display: grid; gap: 8px; }
+details p { font-size: 0.97rem; }
+summary:focus-visible, a:focus-visible { outline: 2px solid var(--heat); outline-offset: 3px; border-radius: 4px; }
+.limits { display: grid; gap: 10px; }
+.limit { display: grid; grid-template-columns: 8px 1fr; gap: 14px; }
+.limit::before { content: ""; background: var(--heat); border-radius: 4px; }
+pre.cmd { margin: 0; background: var(--code-bg); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font-family: var(--mono); font-size: 0.84rem; }
+footer { color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--rule); padding-top: 18px; }
+@media (prefers-reduced-motion: no-preference) { details > div { animation: open 160ms ease-out; } @keyframes open { from { opacity: 0.4; } to { opacity: 1; } } }
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Constraint Violation Propagation &middot; Harshith Rudresh &amp; Dhruv S P</div>
+    <h1>How CVP works</h1>
+    <p class="lede">CVP attributes document forgery: it says whether a document was edited and <em>which field</em> was changed, even when an AI-style edit leaves almost no trace in the pixels.</p>
+    <p class="pitch">Generative inpainting removes the pixel traces that forensic detectors look for, but it does not know the document's arithmetic. CVP uses the rules a forged value breaks to shrink the list of suspect fields, then uses even weak visual evidence to pick the edited field within it.</p>
+    <div class="facts">
+      <span><b>6</b> document types</span><span><b>1,000</b> real receipts tested</span><span><b>987</b> real human forgeries</span>
+      <span><b>~7,100</b> lines of Python</span><span><b>346</b> automated tests</span><span>free, runs offline on a laptop</span>
+    </div>
+  </header>
+
+  <section aria-labelledby="pipe">
+    <div class="eyebrow">The pipeline</div>
+    <h2 id="pipe">From a document image to a verdict</h2>
+    <p class="muted">Each box names the file that does it. Two branches work side by side and meet at the end.</p>
+    <div class="flow">
+      <div class="stage">
+        <span class="file">input</span>
+        <h3>A document image</h3>
+        <p>A transcript, invoice, receipt, certificate, passport or ID card, synthetic or a real photo.</p>
+      </div>
+      <div class="arrow">&darr;</div>
+      <div class="stage">
+        <span class="file">cvp/ocr.py &middot; cvp/real/read.py</span>
+        <h3>Read every field</h3>
+        <p>Find the page's position, then read each field's value. Our own CRNN reader (trained on synthetic crops) for the templates; docTR, a free open-source OCR, for real photos.</p>
+      </div>
+      <div class="arrow">&darr; both branches get the same image</div>
+      <div class="lanes">
+        <div class="lane rules">
+          <div class="lane-title">Constraint branch <span class="tag rules">orange in the app</span></div>
+          <div class="stage">
+            <span class="file">cvp/doctypes/*.py &middot; cvp/core/schema.py</span>
+            <h3>Check the document's rules</h3>
+            <p>Marks add up to the total, quantity &times; rate = amount, the passport's check digits match. The result is a list of broken rules.</p>
+          </div>
+          <div class="stage">
+            <span class="file">cvp/core/schema.py</span>
+            <h3>Which fields could explain it?</h3>
+            <p>From the pattern of broken rules, the theory derives the fields that could have been edited. Fields the rules cannot tell apart form one class (Proposition 1).</p>
+          </div>
+        </div>
+        <div class="lane heat">
+          <div class="lane-title">Visual branch <span class="tag heat">red in the app</span></div>
+          <div class="stage">
+            <span class="file">cvp/visual.py</span>
+            <h3>Look for edit traces</h3>
+            <p>A ResNet-18 U-Net looks at the colours plus error-level analysis (how differently each patch recompresses) and paints a tamper heatmap.</p>
+          </div>
+          <div class="stage">
+            <span class="file">cvp/pipeline.py</span>
+            <h3>Heat per field</h3>
+            <p>The heatmap is pooled over every field's box: how suspicious each field looks on its own.</p>
+          </div>
+        </div>
+      </div>
+      <div class="arrow">&darr; they meet</div>
+      <div class="stage fuse">
+        <span class="file">cvp/pipeline.py &middot; class CVP</span>
+        <h3>Decide and attribute</h3>
+        <p><b>Attribution:</b> among the fields the rules nominate, pick the one with the most heat; when no rule breaks, every field is a suspect. <b>Detection:</b> flag the document when a rule breaks <em>or</em> the heat is high (a noisy-OR).</p>
+      </div>
+      <div class="arrow">&darr;</div>
+      <div class="stage">
+        <span class="file">app.py</span>
+        <h3>Verdict, blamed field, evidence</h3>
+        <p>TAMPERED or GENUINE, the field it blames (red box), the suspects (orange), and, in the demo, the truth (green).</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="ex">
+    <div class="eyebrow">A worked example</div>
+    <h2 id="ex">One blended edit on a transcript</h2>
+    <div class="example">
+      <div class="sheet" aria-label="Transcript marks after the edit">
+        <div class="hd">Statement of marks (seed 2)</div>
+        <table>
+          <tr class="cand"><td>Machine Learning</td><td>69</td></tr>
+          <tr class="cand"><td>Database Systems</td><td>59</td></tr>
+          <tr class="cand blamed"><td>Data Structures</td><td>77</td></tr>
+          <tr class="cand"><td>Computer Networks</td><td>32</td></tr>
+          <tr class="cand"><td>Linear Algebra</td><td>91</td></tr>
+          <tr class="total"><td>Total</td><td>311</td></tr>
+        </table>
+      </div>
+      <div class="steps">
+        <div class="step"><p>The forger changed mark 3 from <code>60</code> to <code>77</code> with an inpainting-like edit that looks clean.</p></div>
+        <div class="step"><p>The marks now add up to <code>328</code>, but the printed total is <code>311</code>: rule <code>c1</code> (sum of marks = Total) breaks. Nothing else does.</p></div>
+        <div class="step"><p>Any of the five marks could have caused exactly this: each enters <code>c1</code> the same way. They form one class, so the rules narrow 10 fields to <span class="tag rules">5 suspects</span>.</p></div>
+        <div class="step"><p>The heatmap is faint, but among those five it is highest on mark 3, so CVP blames <span class="tag heat">mark 3</span>. That's <span class="tag truth">correct</span>.</p></div>
+        <div class="step"><p>Neither branch could do it alone: the rules cannot say which mark, and the heat is too weak to stand out across the whole page.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="theory">
+    <div class="eyebrow">The theory in code</div>
+    <h2 id="theory">Proposition 1: fields the rules cannot tell apart</h2>
+    <p>Two fields are equivalent when every rule that reads one also reads the other and treats them the same way (as terms of a sum, or the factors of quantity &times; rate). An edit of either then breaks exactly the same rules, so no amount of rule-checking can separate them. This is the function, from <code>cvp/core/schema.py</code>:</p>
+<pre class="code"><span class="k">def</span> equivalent(a, b):
+    shared = <span class="k">False</span>
+    <span class="k">for</span> c <span class="k">in</span> non_unary:                        <span class="c"># every rule with 2+ fields</span>
+        ina, inb = a <span class="k">in</span> c.scope, b <span class="k">in</span> c.scope
+        <span class="k">if</span> ina != inb:                        <span class="c"># one rule reads a but not b:</span>
+            <span class="k">return False</span>                       <span class="c">#   the rules can tell them apart</span>
+        <span class="k">if</span> ina:
+            <span class="k">if not</span> any(a <span class="k">in</span> g <span class="k">and</span> b <span class="k">in</span> g <span class="k">for</span> g <span class="k">in</span> c.exchangeable):
+                <span class="k">return False</span>                   <span class="c"># read, but in different roles</span>
+            shared = <span class="k">True</span>
+    <span class="k">return</span> shared</pre>
+    <p>Each class then gets a signature: the rules any edit of it must break, and the ones it may break. <code>signature_class(w)</code> looks up the class whose signature matches the broken rules <code>w</code>, and <code>consistent_fields(w)</code> lists every field that could explain them. A document type only declares its fields and rules; all of this is derived automatically.</p>
+  </section>
+
+  <section aria-labelledby="forg">
+    <div class="eyebrow">Forgery taxonomy</div>
+    <h2 id="forg">Four kinds of forgery, and who catches them</h2>
+    <div class="tablebox">
+      <table class="grid">
+        <thead><tr><th>Kind</th><th>What the forger does</th><th>Rules</th><th>Pixels</th><th>Who catches it</th></tr></thead>
+        <tbody>
+          <tr><td><b>T1</b> crude</td><td>Pastes a new value in another font, on a flat patch</td><td>break</td><td>obvious</td><td>both branches</td></tr>
+          <tr><td><b>T2</b> blended</td><td>Inpaints the old digits away and redraws matching ones (AI-style)</td><td>break</td><td>faint</td><td>the rules; CVP picks the field</td></tr>
+          <tr><td><b>T3</b> coherent crude</td><td>Changes a value and repairs every value that depends on it</td><td>hold</td><td>obvious</td><td>the visual branch</td></tr>
+          <tr><td><b>T4</b> coherent blended</td><td>Repairs every dependent value and blends the edits</td><td>hold</td><td>faint</td><td>only sometimes: the open problem</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted"><code>cvp/core/tamper.py</code> makes these for the synthetic documents; <code>cvp/real/forge.py</code> makes them on real receipt photos.</p>
+  </section>
+
+  <section aria-labelledby="code">
+    <div class="eyebrow">Code map</div>
+    <h2 id="code">What to open, in this order</h2>
+    <div class="tablebox">
+      <table class="grid">
+        <thead><tr><th>File</th><th>What it does</th><th>Show</th></tr></thead>
+        <tbody>
+          <tr><td class="path">cvp/core/schema.py</td><td>The theory: fields, rules, Proposition 1 classes, signatures, candidate fields</td><td class="num">_equivalence_classes (l.77), signature_class (l.138), consistent_fields (l.159)</td></tr>
+          <tr><td class="path">cvp/doctypes/transcript.py</td><td>One document type: its fields, its 10 rules, its page template and its forger</td><td class="num">CONSTRAINTS (l.113): c1 "sum of marks = Total"</td></tr>
+          <tr><td class="path">cvp/core/tamper.py</td><td>The four forgery kinds on synthetic pages</td><td class="num">crude_edit (l.37), blended_edit (l.62), apply (l.86)</td></tr>
+          <tr><td class="path">cvp/ocr.py</td><td>Finds the page's position, reads each field with a CRNN + CTC network</td><td class="num">register (l.45), CRNN (l.27), Reader (l.130)</td></tr>
+          <tr><td class="path">cvp/visual.py</td><td>Error-level analysis and the ResNet-18 U-Net that paints the heatmap</td><td class="num">ela (l.17), ResUNet (l.41), heatmap (l.83)</td></tr>
+          <tr><td class="path">cvp/pipeline.py</td><td>The whole system on one image: read, check, heat, attribute, decide</td><td class="num">CVP.__call__ (l.133), noisy_or (l.99)</td></tr>
+          <tr><td class="path">scripts/evaluate.py</td><td>Trains the small decision heads, runs every baseline, writes the results</td><td class="num">Heads.fit, metrics</td></tr>
+          <tr><td class="path">cvp/real/</td><td>Real receipts: reading real photos, each receipt's own rules, forging real photos</td><td class="num">receipt_schema.py, read.py, forge.py</td></tr>
+          <tr><td class="path">app.py</td><td>The web app you are demoing (Gradio, runs locally)</td><td class="num">forge(), the tabs at the bottom</td></tr>
+          <tr><td class="path">tests/</td><td>346 automated checks: the theory, every rule, rendering, forgeries, scoring, models</td><td class="num">.venv/bin/python -m pytest</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="data">
+    <div class="eyebrow">Data and training</div>
+    <h2 id="data">Where the data and the models come from</h2>
+    <div class="cols">
+      <div class="card"><h3>Synthetic documents</h3><p>Each document type generates its own pages, valid by construction, with every field's position and value known. That gives exact ground truth for every forgery, and no personal data. Per type: 2,000 training, 500 validation and 1,500 test documents.</p></div>
+      <div class="card"><h3>Real documents</h3><p><b>CORD v2:</b> 1,000 real receipt photos from Indonesian shops (CC BY 4.0). <b>Find it again!</b> (ICDAR 2023): 988 scanned receipts, 163 forged by people with image editors.</p></div>
+      <div class="card"><h3>Models we trained</h3><p>The CRNN reader, the ResNet-18 U-Net (synthetic, then fine-tuned on real photos), and two small heads: a class model (MLP) and a detector (logistic regression).</p></div>
+      <div class="card"><h3>Fair evaluation</h3><p>Separate train, validation and test splits. The test's blended forgeries come from a generator no model saw. Design choices were made on validation data, never on the test set, and every alternative is reported.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="res">
+    <div class="eyebrow">Results</div>
+    <h2 id="res">What it achieves</h2>
+    <div class="cols">
+      <div class="card">
+        <h3>Synthetic documents, attribution</h3>
+        <p class="muted">Share of forged documents where the blamed field is the edited one; CVP against the visual branch alone.</p>
+        <div class="bar"><span>Transcript</span><span class="track"><span class="fill cvp" style="width:89.1%;display:block"></span></span><span class="v">89.1</span></div>
+        <div class="bar"><span>Invoice</span><span class="track"><span class="fill cvp" style="width:90.6%;display:block"></span></span><span class="v">90.6</span></div>
+        <div class="bar"><span>Receipt</span><span class="track"><span class="fill cvp" style="width:91.9%;display:block"></span></span><span class="v">91.9</span></div>
+        <div class="bar"><span>Certificate</span><span class="track"><span class="fill cvp" style="width:92.4%;display:block"></span></span><span class="v">92.4</span></div>
+        <div class="bar"><span>Passport</span><span class="track"><span class="fill cvp" style="width:88.0%;display:block"></span></span><span class="v">88.0</span></div>
+        <div class="bar"><span>Student ID</span><span class="track"><span class="fill cvp" style="width:87.6%;display:block"></span></span><span class="v">87.6</span></div>
+        <p class="muted">Visual branch alone: 81.0&ndash;89.7. Blended single-field edits: CVP flags 97.6&ndash;100%, the visual branch 13&ndash;67%.</p>
+      </div>
+      <div class="card">
+        <h3>Real receipt photos (CORD test)</h3>
+        <p class="muted">474 genuine and forged photos; visual branch fine-tuned on real photos with crude edits only.</p>
+        <div class="bar"><span>CVP</span><span class="track"><span class="fill cvp" style="width:75.6%;display:block"></span></span><span class="v">75.6</span></div>
+        <div class="bar"><span>Visual only</span><span class="track"><span class="fill vis" style="width:65.4%;display:block"></span></span><span class="v">65.4</span></div>
+        <div class="bar"><span>Rules only</span><span class="track"><span class="fill rul" style="width:58.2%;display:block"></span></span><span class="v">58.2</span></div>
+        <p class="muted">Attribution, %. On blended edits: CVP 56.5, visual branch 14.3. Detection AUC: CVP 0.838, visual 0.751, rules 0.729.</p>
+      </div>
+      <div class="card">
+        <h3>Real-world facts</h3>
+        <div class="big">97&ndash;100% <small>of genuine real receipts satisfy each rule</small></div>
+        <div class="big">49% <small>of real receipts contain fields the rules cannot tell apart</small></div>
+        <div class="big">32% vs 17% <small>real forged vs genuine receipts breaking a rule</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="qa">
+    <div class="eyebrow">Likely questions</div>
+    <h2 id="qa">If you're asked</h2>
+    <div class="qa">
+      <details><summary>What problem does this solve?</summary><div><p>Image-editing and AI tools can change a number on a marksheet or a receipt and leave almost no trace in the pixels, so detectors that look only at pixels miss it. Documents, though, follow rules: totals, check digits, dates. CVP uses those rules as a second, independent source of evidence.</p></div></details>
+      <details><summary>What is new compared with existing forgery detectors?</summary><div><p>Most detectors only say "edited or not" from pixels. CVP says which field was edited, and it combines two kinds of evidence. Proposition 1 makes precise which fields the rules can never tell apart, so the visual branch is needed only to choose within that small set, and even weak visual evidence is enough there.</p></div></details>
+      <details><summary>Why use synthetic documents?</summary><div><p>They give exact ground truth (which field changed, which pixels), all four forgery kinds, and no personal data. Phase 2 then checks the method on real data: 1,000 real receipt photos and 988 receipts forged by real people.</p></div></details>
+      <details><summary>How does it pick the field when several fit the broken rules?</summary><div><p>The rules nominate a class of suspects, such as "one of the five marks". The heatmap scores each suspect's box, and the hottest suspect is blamed. When no rule breaks, every field is a suspect and the heatmap decides alone.</p></div></details>
+      <details><summary>Which models and tools does it use?</summary><div><p>Python with PyTorch. We trained a CRNN reader for the templates and a ResNet-18 U-Net for the heatmap. docTR, a free open-source OCR, reads real photos. scikit-learn fits the small decision heads, and Gradio serves the web app. Everything is free and runs locally.</p></div></details>
+      <details><summary>How do you know the results are fair?</summary><div><p>Training, validation and test documents are separate. The blended forgeries in the test set come from a generator the models never saw. The design of the decision head was chosen on validation data from an older generator, never on the test set, and every alternative is reported as an ablation.</p></div></details>
+      <details><summary>Can it handle a new kind of document?</summary><div><p>Yes. A new type is one module that declares its fields and rules, a page template and a forger. The classes, signatures and suspect sets are derived automatically. Real receipts go further: each one gets its own rule graph built from the values it prints.</p></div></details>
+      <details><summary>How fast is it?</summary><div><p>About a second per synthetic document and about two seconds per real photo on this laptop. Training everything from scratch takes a few hours.</p></div></details>
+    </div>
+  </section>
+
+  <section aria-labelledby="lim">
+    <div class="eyebrow">Limits</div>
+    <h2 id="lim">What it cannot do yet</h2>
+    <div class="limits">
+      <div class="limit"><p><b>Complete forgeries (T4).</b> When every dependent value is repaired and the edits are blended, no rule breaks and little heat remains: caught only some of the time.</p></div>
+      <div class="limit"><p><b>OCR noise on real photos.</b> Misread digits break rules on genuine receipts: about 11% of genuine real receipts are flagged.</p></div>
+      <div class="limit"><p><b>Copy-paste forgeries.</b> Real forgers often copied digits from the same receipt, which our visual branch cannot see; that needs a copy-move detector.</p></div>
+      <div class="limit"><p><b>Unconstrained fields.</b> A name that no rule reads rests on the visual branch alone.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="run">
+    <div class="eyebrow">Running it</div>
+    <h2 id="run">Commands</h2>
+    <div class="cols">
+      <div class="card"><h3>Start the app</h3><pre class="cmd">./"Start CVP.command"</pre><p class="muted">Or double-click it in Finder. It opens http://127.0.0.1:7860.</p></div>
+      <div class="card"><h3>Run the tests</h3><pre class="cmd">.venv/bin/python -m pytest</pre><p class="muted">346 checks, a few minutes.</p></div>
+      <div class="card"><h3>Rebuild every result</h3><pre class="cmd">./scripts/reproduce.sh</pre><p class="muted">Then <code>./scripts/reproduce_real.sh</code> for the real data.</p></div>
+    </div>
+  </section>
+
+  <footer>CVP: Constraint Violation Propagation. Project folder: ~/Desktop/CVP-project. Detailed numbers: results/summary.md and results/real/summary.md. Demo script: DEMO.md.</footer>
+</div>
+
+</body>
+</html>

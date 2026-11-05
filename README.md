@@ -17,6 +17,10 @@ Research project by Harshith Rudresh (1RUA24CSE0157) and Dhruv S P (1RUA24CSE013
 Then double-click **Start CVP.command** (or run `.venv/bin/python app.py`). The app opens
 in your browser once it is ready; keep the Terminal window open while you use it.
 
+To explain how it works, open `docs/how-it-works.html` in a browser: the pipeline, a worked
+example, the theory in code, a map of which file does what, results and likely questions.
+The demo script is in `DEMO.md`.
+
 ## Layout
 
 ```
