@@ -1,0 +1,42 @@
+{
+ "visual_resunet.pt": {
+  "AUC_heat": 0.5265417642466823,
+  "pointing": 0.08571428571428572,
+  "pointing_chance": 0.006059592836344632,
+  "threshold": 1.0,
+  "flagged_genuine": 0.12568306010928962,
+  "flagged_forged": 0.17142857142857143,
+  "rules_only": {
+   "genuine": 0.12568306010928962,
+   "forged": 0.17142857142857143
+  }
+ },
+ "visual_cord_crude.pt": {
+  "AUC_heat": 0.5076502732240438,
+  "pointing": 0.02857142857142857,
+  "pointing_chance": 0.006059592836344632,
+  "threshold": 2.0,
+  "flagged_genuine": 0.12568306010928962,
+  "flagged_forged": 0.17142857142857143,
+  "rules_only": {
+   "genuine": 0.12568306010928962,
+   "forged": 0.17142857142857143
+  }
+ },
+ "visual_cord_all.pt": {
+  "AUC_heat": 0.5035909445745511,
+  "pointing": 0.08571428571428572,
+  "pointing_chance": 0.006059592836344632,
+  "threshold": 1.9999998807907104,
+  "flagged_genuine": 0.12568306010928962,
+  "flagged_forged": 0.17142857142857143,
+  "rules_only": {
+   "genuine": 0.12568306010928962,
+   "forged": 0.17142857142857143
+  }
+ },
+ "test_scans": {
+  "genuine": 183,
+  "forged": 35
+ }
+}

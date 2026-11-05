@@ -41,3 +41,11 @@ Chance on the ambiguity split: 38.1%. The last regime has seen the blended rende
 | ocr (forged) | 162 | 121 | 32.2% |
 | transcription (genuine) | 825 | 551 | 29.0% |
 | transcription (forged) | 162 | 107 | 33.6% |
+
+Visual branch on the real forgeries (test scans): heat AUC, how often the hottest pixel is in an edited region (chance in brackets), and CVP's flags at a validation threshold.
+
+| Visual branch | Heat AUC | Pointing | CVP flags genuine / forged |
+|---|---|---|---|
+| visual_resunet.pt | 0.527 | 8.6% (0.6%) | 12.6% / 17.1% |
+| visual_cord_crude.pt | 0.508 | 2.9% (0.6%) | 12.6% / 17.1% |
+| visual_cord_all.pt | 0.504 | 8.6% (0.6%) | 12.6% / 17.1% |

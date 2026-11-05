@@ -76,6 +76,15 @@ def main():
             for kind in ("genuine", "forged"):
                 c = fi[source][kind]
                 md.append(f"| {source} ({kind}) | {c.get('receipts', 0)} | {c.get('checkable', 0)} | {pct(c['flag_rate'])}% |")
+    fv = load("findit_visual.json")
+    if fv:
+        md += ["", "Visual branch on the real forgeries (test scans): heat AUC, how often the hottest pixel is in an "
+               "edited region (chance in brackets), and CVP's flags at a validation threshold.", "",
+               "| Visual branch | Heat AUC | Pointing | CVP flags genuine / forged |", "|---|---|---|---|"]
+        for m, r in fv.items():
+            if isinstance(r, dict) and "AUC_heat" in r:
+                md.append(f"| {m} | {r['AUC_heat']:.3f} | {pct(r['pointing'])}% ({pct(r['pointing_chance'])}%) | "
+                          f"{pct(r['flagged_genuine'])}% / {pct(r['flagged_forged'])}% |")
     os.makedirs(R, exist_ok=True)
     with open(os.path.join(R, "summary.md"), "w") as fh:
         fh.write("\n".join(md) + "\n")
