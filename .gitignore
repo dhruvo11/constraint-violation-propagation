@@ -21,3 +21,6 @@ report/*.out
 report/*.bbl
 report/*.blg
 report/*.pdf
+
+# Private documents (your own certificates): never committed
+private/

@@ -15,7 +15,10 @@ if [ ! -x .venv/bin/python ]; then
   uv venv --python 3.12 .venv
 fi
 echo "Installing dependencies (PyTorch is large; the first install can take a while) ..."
-uv pip install --python .venv/bin/python -r requirements.txt
+uv pip install --python .venv/bin/python -r requirements.txt -c requirements-lock.txt  # exact tested versions
+echo "Installing what reads real documents (docTR OCR and dataset readers; see requirements-real.txt) ..."
+uv pip install --python .venv/bin/python -c requirements-lock.txt -r requirements-real.txt
+uv pip install --python .venv/bin/python --no-deps "python-doctr==1.1.0"
 
 echo "Running the tests ..."
 .venv/bin/python -m pytest

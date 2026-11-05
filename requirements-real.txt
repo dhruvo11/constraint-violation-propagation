@@ -1,0 +1,20 @@
+# Reading real documents (Phase 2): docTR OCR (Apache 2.0) and readers for the public datasets. Installed by setup.sh in two steps,
+# because python-doctr 1.1.0 declares huggingface-hub<2 while Gradio needs huggingface-hub 2.x.
+# docTR only uses the hub to share models online, which CVP does not do, so:
+#   1. these runtime dependencies, constrained by requirements-lock.txt (nothing already
+#      installed may change version), then
+#   2. python-doctr itself with --no-deps.
+# Its pretrained detection and recognition weights (about 124 MB) download to ~/.cache/doctr
+# on first use.
+onnx>=1.12,<3
+h5py>=3.1,<4
+opencv-python>=4.5,<6
+pypdfium2>=4.11,<6
+pyclipper>=1.2,<2
+shapely>=1.6,<3
+langdetect>=1.0.9,<2
+rapidfuzz>=3,<4
+anyascii>=0.3.2
+validators>=0.18.0
+tqdm>=4.30.0
+pyarrow>=15  # reads the public datasets' Parquet files
