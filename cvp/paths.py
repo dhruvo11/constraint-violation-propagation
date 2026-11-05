@@ -17,3 +17,11 @@ def feature_dir(doctype):
 
 def results_dir(doctype):
     return os.path.join(BASE, "results", doctype)
+
+
+def real_dir(dataset):
+    """A downloaded public dataset (never under version control)."""
+    return os.path.join(BASE, "data", "real", dataset)
+
+
+PRIVATE = os.path.join(BASE, "private")  # the user's own documents (never under version control)
