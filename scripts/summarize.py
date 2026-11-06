@@ -54,7 +54,7 @@ def main():
 
     tex = ["\\begin{tabular}{lcccc" + "cc" * len(METHODS) + "}", "\\toprule",
            " & & & & & " + " & ".join(f"\\multicolumn{{2}}{{c}}{{{m}}}" for m in METHODS) + "\\\\",
-           "Type & $|F|/|C|$ & $\\rho$ & OCR & Amb. & " + " & ".join(["Attr. & Amb."] * len(METHODS)) + "\\\\",
+           "Type & $|F|/|C|$ & $\\rho$ & OCR & $n_{\\mathrm{amb}}$ & " + " & ".join(["Attr. & Amb."] * len(METHODS)) + "\\\\",
            "\\midrule"]
     for r in rows:
         best = max(r["res"][m]["attr_all"] for m in METHODS)

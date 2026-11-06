@@ -58,6 +58,7 @@ scripts/
   evaluate.py             fit g_phi and heads, run all baselines, write results and tables
   fit_heads.py            fit only the heads the app needs
   make_figures.py         figures per type and across types (PDF for the report, PNG for the app)
+  make_paper_figures.py   the paper's other figures: flags, regimes, robustness, real data
   summarize.py            one table across every document type (results/summary.md)
   select_head.py          choose the attribution head's design on g1 validation data
   ablate_head.py          every head design on the test set, after the choice
@@ -67,7 +68,8 @@ scripts/
   reproduce_real.sh       rebuild every real-data result from the downloaded datasets
 tests/                    pytest suite (theory, rules, rendering, forgeries, scoring, models)
 app.py                    the app
-report/                   IEEE LaTeX paper (draft; on hold)
+report/                   the paper (IEEE Computer Society journal format); report/build.sh
+                          builds main.pdf and a zip to upload to Overleaf
 ```
 
 The bulky generated artefacts are not under version control and are rebuilt by

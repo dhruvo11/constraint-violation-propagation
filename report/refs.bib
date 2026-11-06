@@ -1,3 +1,8 @@
+% The 2024-2026 entries and the datasets were checked against their arXiv records, publisher
+% pages or the authors' sites in November 2026; the others are standard references.
+% Check any addition the same way before citing it.
+
+%--------------------------------------------------------------- visual document forensics
 @inproceedings{qu2023doctamper,
   author    = {Chenfan Qu and Chongyu Liu and Yuliang Liu and Xinhong Chen and Dezhi Peng and Fengjun Guo and Lianwen Jin},
   title     = {Towards Robust Tampered Text Detection in Document Image: New Dataset and New Solution},
@@ -41,9 +46,28 @@
   author    = {Chenfan Qu and Yiwu Zhong and Fengjun Guo and Lianwen Jin},
   title     = {Revisiting Tampered Scene Text Detection in the Era of Generative {AI}},
   booktitle = {Proc. AAAI Conf. Artificial Intelligence},
+  volume    = {39},
+  number    = {1},
+  pages     = {694--702},
   year      = {2025}
 }
 
+@inproceedings{guillaro2023trufor,
+  author    = {Fabrizio Guillaro and Davide Cozzolino and Avneesh Sud and Nicholas Dufour and Luisa Verdoliva},
+  title     = {{TruFor}: Leveraging All-Round Clues for Trustworthy Image Forgery Detection and Localization},
+  booktitle = {Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {20606--20615},
+  year      = {2023}
+}
+
+@misc{krawetz2007ela,
+  author       = {Neal Krawetz},
+  title        = {A Picture's Worth: Digital Image Analysis and Forensics},
+  howpublished = {Black Hat Briefings, Las Vegas, NV, USA},
+  year         = {2007}
+}
+
+%--------------------------------------------------------------- generative forgery benchmarks
 @misc{wu2026aiforge,
   author       = {Jiaqi Wu and Yuchen Zhou and Muduo Xu and Zisheng Liang and Simiao Ren and Jiayu Xue and Meige Yang and Siying Chen and Jingheng Huan},
   title        = {{AIForge-Doc}: A Benchmark for Detecting {AI}-Forged Tampering in Financial and Form Documents},
@@ -58,6 +82,15 @@
   year         = {2026}
 }
 
+@inproceedings{rombach2022ldm,
+  author    = {Robin Rombach and Andreas Blattmann and Dominik Lorenz and Patrick Esser and Bj{\"o}rn Ommer},
+  title     = {High-Resolution Image Synthesis with Latent Diffusion Models},
+  booktitle = {Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {10684--10695},
+  year      = {2022}
+}
+
+%--------------------------------------------------------------- multimodal and text-aware detection
 @inproceedings{shao2023hammer,
   author    = {Rui Shao and Tianxing Wu and Ziwei Liu},
   title     = {Detecting and Grounding Multi-Modal Media Manipulation},
@@ -77,14 +110,19 @@
   author  = {Peisen Wang and Bo Wang and Kaijiang Li and Bing Zhou and Chunyi Guo},
   title   = {Trustworthy Layout Analysis Network: Fine-Grained Multi-Scale Tampering Detection for Complex Layout Personnel Documentation Images},
   journal = {Knowledge-Based Systems},
+  volume  = {323},
   pages   = {113525},
-  year    = {2025}
+  year    = {2025},
+  doi     = {10.1016/j.knosys.2025.113525}
 }
 
 @article{devi2026forenxai,
   author  = {S. Nandhini Devi and N. Sabiyath Fatima},
   title   = {{ForenXAI}: An Intelligent Deep Learning Framework for Forensic Document Verification and Forgery Detection for Police Evidence},
-  journal = {Journal of Internet Services and Information Security (JISIS)},
+  journal = {Journal of Internet Services and Information Security},
+  volume  = {16},
+  number  = {1},
+  pages   = {181--207},
   year    = {2026}
 }
 
@@ -102,11 +140,12 @@
   year         = {2026}
 }
 
-@misc{saha2025invoice,
+@misc{saha2026invoice,
   author       = {Mridumay Saha and Payal Khanal and Gaurav Sarma},
   title        = {Multimodal Structural Anomaly Detection in Invoices Using Text--Logic Fusion},
-  howpublished = {ResearchGate preprint},
-  year         = {2025}
+  howpublished = {Research Square preprint},
+  doi          = {10.21203/rs.3.rs-10100967/v1},
+  year         = {2026}
 }
 
 @misc{kumar2026flid,
@@ -128,7 +167,32 @@
   author    = {Yifan Liu and Yaokun Liu and Zelin Li and Ruichen Yao and Yang Zhang and Dong Wang},
   title     = {Modality Interactive Mixture-of-Experts for Fake News Detection},
   booktitle = {Proc. ACM Web Conference (WWW)},
+  pages     = {5139--5150},
   year      = {2025}
+}
+
+%--------------------------------------------------------------- documents, datasets, reading
+@inproceedings{park2019cord,
+  author    = {Seunghyun Park and Seung Shin and Bado Lee and Junyeop Lee and Jaeheung Surh and Minjoon Seo and Hwalsuk Lee},
+  title     = {{CORD}: A Consolidated Receipt Dataset for Post-{OCR} Parsing},
+  booktitle = {Workshop on Document Intelligence at NeurIPS},
+  year      = {2019}
+}
+
+@inproceedings{huang2019sroie,
+  author    = {Zheng Huang and Kai Chen and Jianhua He and Xiang Bai and Dimosthenis Karatzas and Shijian Lu and C. V. Jawahar},
+  title     = {{ICDAR2019} Competition on Scanned Receipt {OCR} and Information Extraction},
+  booktitle = {Proc. Int. Conf. Document Analysis and Recognition (ICDAR)},
+  pages     = {1516--1520},
+  year      = {2019}
+}
+
+@inproceedings{tornes2023findit,
+  author    = {Beatriz Mart{\'i}nez Torn{\'e}s and Th{\'e}o Taburet and Emanuela Boros and Kais Rouis and Petra Gomez-Kr{\"a}mer and Nicolas Sidere and Antoine Doucet and Vincent Poulain d'Andecy},
+  title     = {Receipt Dataset for Document Forgery Detection},
+  booktitle = {Proc. Int. Conf. Document Analysis and Recognition (ICDAR)},
+  address   = {San Jos{\'e}, CA, USA},
+  year      = {2023}
 }
 
 @inproceedings{zhong2019publaynet,
@@ -139,43 +203,19 @@
   year      = {2019}
 }
 
-@inproceedings{he2016resnet,
-  author    = {Kaiming He and Xiangyu Zhang and Shaoqing Ren and Jian Sun},
-  title     = {Deep Residual Learning for Image Recognition},
-  booktitle = {Proc. IEEE Conf. Computer Vision and Pattern Recognition (CVPR)},
-  pages     = {770--778},
-  year      = {2016}
+@inproceedings{xu2020layoutlm,
+  author    = {Yiheng Xu and Minghao Li and Lei Cui and Shaohan Huang and Furu Wei and Ming Zhou},
+  title     = {{LayoutLM}: Pre-training of Text and Layout for Document Image Understanding},
+  booktitle = {Proc. ACM SIGKDD Int. Conf. Knowledge Discovery and Data Mining (KDD)},
+  pages     = {1192--1200},
+  year      = {2020}
 }
 
-@inproceedings{ronneberger2015unet,
-  author    = {Olaf Ronneberger and Philipp Fischer and Thomas Brox},
-  title     = {{U-Net}: Convolutional Networks for Biomedical Image Segmentation},
-  booktitle = {Proc. Medical Image Computing and Computer-Assisted Intervention (MICCAI)},
-  pages     = {234--241},
-  year      = {2015}
-}
-
-@misc{krawetz2007ela,
-  author       = {Neal Krawetz},
-  title        = {A Picture's Worth: Digital Image Analysis and Forensics},
-  howpublished = {Black Hat Briefings, Las Vegas},
-  year         = {2007}
-}
-
-@inproceedings{milletari2016vnet,
-  author    = {Fausto Milletari and Nassir Navab and Seyed-Ahmad Ahmadi},
-  title     = {{V-Net}: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation},
-  booktitle = {Proc. Int. Conf. 3D Vision (3DV)},
-  pages     = {565--571},
-  year      = {2016}
-}
-
-@inproceedings{guillaro2023trufor,
-  author    = {Fabrizio Guillaro and Davide Cozzolino and Avneesh Sud and Nicholas Dufour and Luisa Verdoliva},
-  title     = {{TruFor}: Leveraging All-Round Clues for Trustworthy Image Forgery Detection and Localization},
-  booktitle = {Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR)},
-  pages     = {20606--20615},
-  year      = {2023}
+@misc{doctr2021,
+  author       = {{Mindee}},
+  title        = {{docTR}: Document Text Recognition},
+  howpublished = {\url{https://github.com/mindee/doctr}},
+  year         = {2021}
 }
 
 @article{shi2017crnn,
@@ -196,20 +236,38 @@
   year      = {2006}
 }
 
-@inproceedings{rombach2022ldm,
-  author    = {Robin Rombach and Andreas Blattmann and Dominik Lorenz and Patrick Esser and Bj{\"o}rn Ommer},
-  title     = {High-Resolution Image Synthesis with Latent Diffusion Models},
-  booktitle = {Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR)},
-  pages     = {10684--10695},
-  year      = {2022}
+@manual{icao9303,
+  author       = {{International Civil Aviation Organization}},
+  title        = {Machine Readable Travel Documents, {Doc} 9303},
+  edition      = {8th},
+  organization = {ICAO},
+  address      = {Montr{\'e}al, Canada},
+  year         = {2021}
 }
 
-@inproceedings{paszke2019pytorch,
-  author    = {Adam Paszke and Sam Gross and Francisco Massa and others},
-  title     = {{PyTorch}: An Imperative Style, High-Performance Deep Learning Library},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  pages     = {8024--8035},
-  year      = {2019}
+%--------------------------------------------------------------- networks, training, statistics
+@inproceedings{he2016resnet,
+  author    = {Kaiming He and Xiangyu Zhang and Shaoqing Ren and Jian Sun},
+  title     = {Deep Residual Learning for Image Recognition},
+  booktitle = {Proc. IEEE Conf. Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {770--778},
+  year      = {2016}
+}
+
+@inproceedings{ronneberger2015unet,
+  author    = {Olaf Ronneberger and Philipp Fischer and Thomas Brox},
+  title     = {{U-Net}: Convolutional Networks for Biomedical Image Segmentation},
+  booktitle = {Proc. Medical Image Computing and Computer-Assisted Intervention (MICCAI)},
+  pages     = {234--241},
+  year      = {2015}
+}
+
+@inproceedings{milletari2016vnet,
+  author    = {Fausto Milletari and Nassir Navab and Seyed-Ahmad Ahmadi},
+  title     = {{V-Net}: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation},
+  booktitle = {Proc. Int. Conf. 3D Vision (3DV)},
+  pages     = {565--571},
+  year      = {2016}
 }
 
 @inproceedings{deng2009imagenet,
@@ -218,4 +276,65 @@
   booktitle = {Proc. IEEE Conf. Computer Vision and Pattern Recognition (CVPR)},
   pages     = {248--255},
   year      = {2009}
+}
+
+@inproceedings{paszke2019pytorch,
+  author    = {Adam Paszke and Sam Gross and Francisco Massa and Adam Lerer and James Bradbury and Gregory Chanan and others},
+  title     = {{PyTorch}: An Imperative Style, High-Performance Deep Learning Library},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  pages     = {8024--8035},
+  year      = {2019}
+}
+
+@inproceedings{loshchilov2019adamw,
+  author    = {Ilya Loshchilov and Frank Hutter},
+  title     = {Decoupled Weight Decay Regularization},
+  booktitle = {Proc. Int. Conf. Learning Representations (ICLR)},
+  year      = {2019}
+}
+
+@inproceedings{smith2019superconvergence,
+  author    = {Leslie N. Smith and Nicholay Topin},
+  title     = {Super-Convergence: Very Fast Training of Neural Networks Using Large Learning Rates},
+  booktitle = {Proc. SPIE Artificial Intelligence and Machine Learning for Multi-Domain Operations Applications},
+  volume    = {11006},
+  year      = {2019}
+}
+
+@book{pearl1988,
+  author    = {Judea Pearl},
+  title     = {Probabilistic Reasoning in Intelligent Systems: Networks of Plausible Inference},
+  publisher = {Morgan Kaufmann},
+  address   = {San Mateo, CA, USA},
+  year      = {1988}
+}
+
+@article{youden1950,
+  author  = {W. J. Youden},
+  title   = {Index for Rating Diagnostic Tests},
+  journal = {Cancer},
+  volume  = {3},
+  number  = {1},
+  pages   = {32--35},
+  year    = {1950}
+}
+
+@article{wilson1927,
+  author  = {Edwin B. Wilson},
+  title   = {Probable Inference, the Law of Succession, and Statistical Inference},
+  journal = {Journal of the American Statistical Association},
+  volume  = {22},
+  number  = {158},
+  pages   = {209--212},
+  year    = {1927}
+}
+
+@article{zhang2018excitation,
+  author  = {Jianming Zhang and Sarah Adel Bargal and Zhe Lin and Jonathan Brandt and Xiaohui Shen and Stan Sclaroff},
+  title   = {Top-Down Neural Attention by Excitation Backprop},
+  journal = {International Journal of Computer Vision},
+  volume  = {126},
+  number  = {10},
+  pages   = {1084--1102},
+  year    = {2018}
 }
