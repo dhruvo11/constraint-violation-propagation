@@ -6,7 +6,11 @@ arithmetic and logic. CVP reads the document, checks its constraints, uses the p
 violated constraints to narrow down which field could have been edited, and uses a visual
 tamper heatmap to pick the edited field within that set.
 
-Research project by Harshith Rudresh (1RUA24CSE0157) and Dhruv S P (1RUA24CSE0133).
+Research project by Harshith Rudresh (1RUA24CSE0157) and Dhruv S P (1RUA24CSE0133),
+School of Computer Science and Engineering, RV University, Bengaluru.
+
+The research paper is `report/main.tex` (build with `report/build.sh`); the final project report is
+built by `scripts/build_report.py` from `report/final_report/content/`.
 
 ## Quick start
 

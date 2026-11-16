@@ -1,8 +1,12 @@
 # APPENDIX
 
-## APPENDIX A: REPOSITORY STRUCTURE
+## APPENDIX A: REPOSITORY STRUCTURE AND GITHUB LINK
 
-The project is kept in a local Git repository with one branch per phase of the work. The main folders are shown below.
+The complete source code, results, figures and this report's content are available on GitHub:
+
+**https://github.com/dhruvo11/constraint-violation-propagation**
+
+The repository has one branch per phase of the work; the default branch, phase2/real-docs, holds the final version. The main folders are shown below.
 
 ### REPOSITORY DIRECTORY TREE
 
