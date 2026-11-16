@@ -1,0 +1,47 @@
+# CHAPTER 1: INTRODUCTION
+
+## 1.1 BACKGROUND AND MOTIVATION
+
+Documents such as mark sheets, certificates, invoices, receipts and identity cards are used every day as proof of something. A mark sheet supports an admission, a receipt supports a reimbursement claim, an invoice supports a tax credit and an identity card supports a bank account. In most offices these documents are still checked by eye, and when checking is automated, the usual approach is forensic: if a document was edited, the editing should have left marks in the image. Pasting a digit leaves sharp edges, a different font renders slightly differently, and saving the edited region again leaves JPEG artefacts that do not match the rest of the page. A large body of research detects exactly these cues from JPEG coefficients, noise patterns and learned filters.
+
+Generative inpainting has changed this picture. Image editors that use diffusion models can now repaint a small region of a photo so that it blends perfectly with its surroundings. When such a model is asked to write "95" where "45" was printed, it does not paste anything. It redraws the region with the same font, paper texture, noise and compression as the rest of the page, so there is very little left for a pixel-based detector to find. A 2026 benchmark that repainted the numbers on 4,061 receipts and forms with two commercial AI editors found that TruFor, a well-known forensic detector, reached only 0.751 AUC, the DocTamper detector 0.563, and a zero-shot GPT-4o judge 0.509, which is close to guessing. These tools are cheap and easy to use, so this kind of forgery is no longer limited to skilled people.
+
+There is, however, something a generator does not know. When it repaints a subject mark on a transcript, it does not know that the mark adds up to a total printed further down, that the total fixes the percentage, and that the percentage fixes the grade. When it repaints the change on a receipt, it does not know that cash minus total should equal the change. A landscape photograph has no arithmetic to break, but a structured document does, and those relations stay broken however realistic the new pixels look. This project started from that simple observation and asked how far it can be taken: can the rules inside a document be used not only to say that a document was tampered with, but also to point at the field that was changed?
+
+## 1.2 PROBLEM STATEMENT
+
+Visual forensic detectors are losing their signal against generative edits, while the rules inside structured documents, which a local edit cannot satisfy, are not used by any trained forgery detector. At the same time, rules alone cannot always say which field was edited. The problem addressed in this project is to detect forged structured documents and to identify the edited field by combining explicit rule checking with visual evidence, in a way that still works when the visual evidence is weak. In particular:
+
+- **Visual detectors miss realistic edits:** detectors trained on one kind of editing generalise poorly to edits made by a newer or unseen generator, and on inpainted documents they are close to chance.
+- **Rules detect but do not always attribute:** a broken rule shows that something is wrong, but several fields can break the same rule in the same way, so the rules alone may not identify the edited field.
+- **No system combines the two:** existing work either looks only at pixels, learns from text without checking explicit rules, or uses prompted language models that do not locate the edit.
+- **Real documents are noisy:** real receipts follow shop-specific conventions and real OCR makes mistakes, both of which can produce false alarms that a practical system has to handle.
+
+## 1.3 OBJECTIVES OF THE PROJECT
+
+The main objective of this project is to design, build and evaluate a forgery detection system for structured documents that uses the document's own rules to narrow down the edited field and visual evidence to choose it. The specific objectives were:
+
+1. **Objective 1:** Describe structured documents formally as sets of fields and rules, define the violation signature of an edit, and prove what rule checking can and cannot achieve on its own.
+2. **Objective 2:** Build six synthetic document types (academic transcript, GST tax invoice, shop receipt, course certificate, specimen passport and student ID card), each with its own rules, a realistic renderer and a forger that produces four kinds of forgery with exact ground truth.
+3. **Objective 3:** Implement the two evidence branches: an OCR reader that reads every field and a visual network that produces a tamper heatmap, shared across all six document types.
+4. **Objective 4:** Design the fusion head that combines the two branches, and evaluate it under a strict protocol in which the generator used at test time was never seen in training, against five baselines and four hypotheses fixed in advance.
+5. **Objective 5:** Test the idea on real documents: whether real receipts follow the rules, how the system performs on real receipt photos forged with known ground truth, and whether real forgeries made by people break the rules.
+6. **Objective 6:** Deliver a working interactive application, an automated test suite and scripts that rebuild every result from scratch, and write up the work as an IEEE-format research paper.
+
+## 1.4 SCOPE AND BOUNDARIES
+
+**In scope:** structured documents whose fields are related by arithmetic or logical rules (sums, percentages, tax calculations, check digits, dates and formats); single-field edits rendered crudely or with blending; coherent edits that also repair dependent fields; attribution of the edited field; real receipts from public datasets; and an application that explains its decision by showing the broken rules, the candidate fields and the heatmap.
+
+**Out of scope:** CVP is a research prototype and not a certified forensic tool. It makes no legal claim about a document's authenticity. All synthetic templates are fictional (an "Institute of Advanced Technology", a "Skillnest Academy" and Utopia, the specimen country of ICAO Doc 9303), no real person's documents were used, and no real identity documents were generated. Forgeries that repair every dependent field and leave no visual trace are beyond the reach of the method, and we report them separately rather than hiding them. No paid services or commercial APIs were used anywhere in the project.
+
+## 1.5 REPORT ORGANIZATION
+
+The rest of this report is organised as follows:
+
+- Chapter 2 reviews how document forgery is detected today, why generative editing breaks current detectors, and the related work, and identifies the research gaps.
+- Chapter 3 describes the methodology: the system architecture, documents as constraint graphs, the mathematical results, the fusion of the two branches and the datasets and evaluation protocol.
+- Chapter 4 gives the implementation details of every part of the system, including the application.
+- Chapter 5 presents the results on synthetic and real documents, the test suite and a comparison with published methods.
+- Chapter 6 draws the main inferences and checks the objectives against the results.
+- Chapter 7 is our impression report: what we learned and the engineering problems we had to solve.
+- Chapter 8 concludes the report and outlines future work, followed by the references and appendices.

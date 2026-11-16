@@ -1,0 +1,9 @@
+We are grateful to our project guide, [Guide Name], [Designation], School of Computer Science and Engineering, RV University, for guiding us through this project. The discussions on how to frame the constraint system, the questions on our results and the patient feedback on our drafts shaped this work at every stage.
+
+We thank Prof. Dr. Ram Kumar Kakani, Vice Chancellor, RV University, and Prof. Dr. G. Shobha, Dean, School of Computer Science and Engineering, RV University, for the environment and the facilities that made this work possible.
+
+We also thank Dr. Rashmi S, Program Director, B.Tech (Honours), School of Computer Science and Engineering, RV University, and all the faculty and staff of the School for their support and encouragement during our course of study.
+
+We are thankful to the authors of the CORD and Find it again! datasets for making their data publicly available, and to the developers of the open-source tools this project is built on.
+
+Finally, we thank our families and friends for their constant support and patience while we worked on this project.

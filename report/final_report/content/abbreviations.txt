@@ -1,0 +1,36 @@
+AUC | Area Under the ROC Curve; a detection score from 0.5 (chance) to 1.0 (perfect)
+CVP | Constraint Violation Propagation, the method proposed in this project
+OCR | Optical Character Recognition
+CRNN | Convolutional Recurrent Neural Network, the text recogniser used to read fields
+CTC | Connectionist Temporal Classification, the training loss of the CRNN
+ELA | Error Level Analysis: the difference between an image and a JPEG re-encoding of it
+CNN | Convolutional Neural Network
+LSTM | Long Short-Term Memory, a recurrent neural network layer
+MLP | Multi-Layer Perceptron
+ResNet-18 | An 18-layer residual network, the encoder of the visual branch
+U-Net | An encoder-decoder network with skip connections, used for the heatmap
+JPEG | Joint Photographic Experts Group image compression
+MCU | Minimum Coded Unit, the 16 x 16 pixel block of a JPEG image
+IoU | Intersection over Union of two boxes or regions
+ROC | Receiver Operating Characteristic curve
+GST | Goods and Services Tax (India)
+GSTIN | GST Identification Number
+CGST / SGST / IGST | Central, State and Integrated GST
+ICAO | International Civil Aviation Organization
+MRZ | Machine-Readable Zone of a passport
+USN | University Seat Number
+CORD | Consolidated Receipt Dataset (real receipt photos)
+SROIE | Scanned Receipt OCR and Information Extraction dataset
+LLM / MLLM | Large Language Model / Multimodal Large Language Model
+T1, T2, T3, T4 | Forgery types: crude, blended, coherent crude, coherent blended (complete)
+G1, G2 | The older blended generator seen in training and the newer one used for testing
+F, C | The set of fields and the set of rules (constraints) of a document
+w, r | The violation vector and the residual vector of a document
+σ(f) | The violation signature of field f: the rules an edit of f breaks
+K | A constraint-equivalence class of fields
+C(V) | The consistent set: fields from which a single edit could produce the violations V
+ρ | The reduction factor: the share of the attribution search space removed by the rules
+H | The tamper heatmap produced by the visual branch
+π(f) | The field prior given by the constraint branch
+θ | The weights of the attribution head (kept non-negative)
+g_φ, h_θ | The class-posterior network and the visual network

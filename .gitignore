@@ -26,3 +26,7 @@ report/*.pdf
 private/
 # Per-word reading logs of the real datasets (large, regenerable)
 results/real/*_reads_*.json
+
+# Final report build output and the extracted template parts (rebuilt by scripts/build_report.py)
+report/final_report/CVP_Final_Report.docx
+report/final_report/template_parts/

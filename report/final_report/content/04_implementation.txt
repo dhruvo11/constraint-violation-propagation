@@ -1,0 +1,118 @@
+# CHAPTER 4: IMPLEMENTATION DETAILS
+
+## 4.1 RUNTIME ENVIRONMENT & SOFTWARE STACK
+
+The whole project was developed and run on a single laptop: an Apple MacBook with an M1 chip and 8 GB of shared memory, running macOS. Every model was trained on this machine using PyTorch's Apple-silicon GPU backend (MPS). Working within 8 GB shaped several design choices, such as the compact ResNet-18 backbone, training on small patches and running the heavy jobs one at a time. Table 4.1 lists the main software.
+
+!table Table 4.1: Software Stack and the Role of Each Component
+!widths 24,26,50
+!opts firstbold
+Component | Technology / version | Role in the project
+Language | Python 3.12 (uv, locked dependencies) | All code: rendering, forgers, models, evaluation, application
+Deep learning | PyTorch 2.14, torchvision 0.29 | CRNN reader and ResNet-18 U-Net heatmap network, trained on MPS
+Classical ML | scikit-learn 1.9, NumPy 2.5, SciPy 1.18 | Class-posterior MLP, logistic regression, AUC and other metrics
+Imaging | Pillow 12.3, OpenCV | Document templates, acquisition model, the four forgery renderers
+Real-document OCR | docTR 1.1.0 | Reading values on real receipt photos and scans
+Application | Gradio 6.31 | Interactive web app for analysing and forging documents
+Plots | Matplotlib 3.11 | Every graph in this report and in the paper
+Testing | pytest 9.2 | 346 automated tests
+Paper | LaTeX (IEEEtran), Tectonic | IEEE Computer Society journal-format paper
+Versioning | Git | One branch per project phase, tagged demo versions
+!end
+
+## 4.2 PROJECT STRUCTURE AND MODULES
+
+The code is organised as a Python package, `cvp`, with a generic core, one module per document type, the two neural branches, the pipeline, and a sub-package for real documents. Scripts in `scripts/` run each stage of the experiments, and `app.py` is the application. Table 4.2 gives the main modules; the full directory tree is in Appendix A.
+
+!table Table 4.2: Main Modules of the CVP Code Base
+!widths 32,68
+!opts firstbold
+Module | What it does
+cvp/core/schema.py | Fields, rules, equivalence classes (Proposition 1), signatures, consistent sets and the reduction factor
+cvp/core/render.py | Fonts, the acquisition model (blur, noise, JPEG) and the Document record
+cvp/core/tamper.py | The forgery taxonomy T1–T4 and the crude and blended renderers (generators G1 and G2)
+cvp/core/rules.py | Shared rule helpers: check digits (ICAO 9303, GSTIN), money in paise, amounts in words, dates
+cvp/doctypes/*.py | One module per document type: fields, rules, template, forger
+cvp/ocr.py | Page registration and the CRNN/CTC slot reader
+cvp/visual.py | ELA and the ResNet-18 U-Net heatmap network
+cvp/pipeline.py | Constraint features, field prior, attribution and detection heads, the end-to-end CVP system
+cvp/real/*.py | Real receipts: CORD loader, receipt rules, per-receipt schema, reader, forger, Find it again! reader
+scripts/*.py | Dataset creation, training, feature extraction, evaluation, figures and real-data experiments
+app.py | The Gradio application with four tabs
+tests/*.py | The pytest suite (theory, rules, rendering, forgeries, scoring, models, real data)
+!end
+
+## 4.3 DOCUMENT TEMPLATES AND RENDERING
+
+Each document type is a Python class that declares its fields and rules, draws a template and knows how to forge itself. The templates are drawn with Pillow from scratch, with fonts, lines, logos made of simple shapes, watermarks and tables (Figure 4.1). All issuers are fictional: the transcript and ID card come from an "Institute of Advanced Technology", the certificate from a "Skillnest Academy", and the passport follows the layout of Utopia, the specimen country used by ICAO Doc 9303.
+
+!figure report/final_report/figures/doctypes.png | 5.6 | Figure 4.1: One Genuine Document of Each of the Six Synthetic Types
+
+Values are generated so that every document is consistent: marks are drawn from a normal distribution around 66 and clipped to the valid range, invoices get random line items, tax regimes and place of supply, receipts get random baskets and payments, passports get valid check digits, and so on. The page offset varies by up to 8 pixels and each field by up to 2 pixels, the paper tint and ink tone vary per document, and the transcript and invoice carry a faint watermark. An acquisition model then adds Gaussian blur, sensor noise and a first JPEG compression (quality 82 to 95). Every document, genuine or forged, is finally saved once more as JPEG (quality 75 to 92), so that a second compression on its own gives nothing away.
+
+## 4.4 FORGERY GENERATION
+
+The forger of each type implements three methods: choosing a violating value for a field (for T1 and T2), making a coherent edit that also updates every dependent field (for T3 and T4), and drawing random values. The renderers in `cvp/core/tamper.py` then draw the edit:
+
+- **Crude rendering (T1, T3):** the field is filled with the median background colour and the new value is typed in a different font (bold, serif, monospace or another size). This destroys the local noise, texture and watermark.
+- **Blended rendering, generator G2 (T2, T4):** the page is rendered again with the new value in the document's own font and layout, passed through the acquisition model with weaker noise (scaled by 0.5 to 0.85) and extra blur (0.3 to 0.7), and alpha-blended into the original with a feathered mask. This imitates the smooth, slightly over-cleaned look of diffusion inpainting.
+- **Older blended generator G1 (training only):** stronger smoothing (noise scaled by 0.15 to 0.45, extra blur 0.9 to 1.5) and a hard-edged mask.
+
+The forger records which fields were edited, their old and new values and the edited pixel regions, which gives exact ground truth for every test.
+
+## 4.5 OCR: TEMPLATE REGISTRATION AND CRNN READER
+
+Because each document type has a known layout, the reader first registers the page by finding a horizontal header rule, which fixes the global offset, and then crops each field from its slot. Each crop is resized and read by a CRNN: convolutional blocks, a bidirectional LSTM and a CTC output over a 39-symbol alphabet. Long lines, such as the passport's machine-readable zone and amounts written in words, are read from crops four times wider. Decoding is restricted to the characters a slot can contain, and the field box is the tight box around the ink in the slot.
+
+A single recogniser serves all six types. It was trained for 4,000 steps on 126,000 normal and 21,000 wide crops cut from synthetic documents whose values were drawn beyond the valid range on purpose. This matters: an OCR that has only seen valid documents learns what values are likely and may quietly "correct" a forged value into a plausible one, which would hide the very violation we want to detect. The crops also pass through every forgery renderer, and a third of them are degraded by JPEG compression or resampling. Table 4.3 shows how accurately the reader reads complete fields on the test documents.
+
+!table Table 4.3: OCR Field Accuracy (%) on Test Documents
+!widths 34,22,22,22
+!opts center
+Document type | Clean | JPEG quality 60 | Resized to 0.6×
+Academic transcript | 99.9 | 99.9 | 99.4
+GST tax invoice | 99.7 | 99.7 | 99.1
+Shop receipt | 99.5 | 99.5 | 98.8
+Certificate of completion | 99.1 | 98.9 | 97.2
+Passport (Utopia specimen) | 99.8 | 99.8 | 99.7
+Student ID card | 99.9 | 99.9 | 99.7
+!end
+
+## 4.6 VISUAL BRANCH: RESNET-18 U-NET WITH ELA
+
+The visual branch is a U-Net with a ResNet-18 encoder initialised from ImageNet and a full-resolution skip connection, so the heatmap has the same size as the input page. Error Level Analysis is computed as the difference between the image and a quality-90 re-encoding of it and added as a fourth input channel; its first-layer filters are initialised as the mean of the RGB filters. We chose a small backbone on purpose, since our training documents are rendered and a larger encoder would more easily overfit to rendering details.
+
+Training uses 256 × 256 patches cut on the 16-pixel JPEG block grid, so that ELA computed on a patch is exactly the same as ELA computed on the whole page. The loss is binary cross-entropy plus Dice against the edit masks. The network is trained for 3,000 steps with batch size 8, the AdamW optimiser (weight decay 0.0001) and a one-cycle learning-rate schedule with a peak of 0.001, which takes under 80 minutes on the laptop. One network is trained for all six types together on genuine, T1, T3 and G1-blended documents. Two more versions were trained for the experiments in Section 5.5: one on crude edits only (zero-shot) and one that also saw G2 (oracle). At test time the network runs on the whole page at once.
+
+## 4.7 CONSTRAINT EVALUATION, CLASS POSTERIOR AND HEADS
+
+The rules of each type are written as small Python objects with a scope, a check function and a residual. `cvp/core/schema.py` derives everything else automatically from these declarations: the equivalence classes of Proposition 1, the necessary and possible signatures of each class, the consistent set for an observed pattern and the reduction factor. Adding a new document type therefore only requires declaring its fields and rules; the theory is applied to it without further code.
+
+The class-posterior network g_φ is a scikit-learn MLP with two hidden layers of 64 units, trained on the training-split features (violations, residuals, parse failures and OCR confidences). Its accuracy at predicting the edited class ranges from 87.1% (certificate) to 99.9% (transcript). The attribution head has four non-negative weights, fitted with L-BFGS on validation features, and the visual detection score is a logistic regression on four pooled heat statistics. All thresholds are chosen on validation data, never on the test set. Six head designs were compared on the separate G1 validation set before any test result was seen, as described in Chapter 5.
+
+## 4.8 REAL RECEIPT PIPELINE
+
+Real receipts needed their own pipeline because every shop prints different fields and follows its own conventions:
+
+- **Reading:** CORD gives a box for every labelled word, and we use these boxes like a template. docTR's CRNN recogniser reads each value inside its box, padded by three pixels. For Find it again!, which has no positions, docTR's text detector finds the words, the words are grouped into printed rows, and each keyword (TOTAL, CASH, CHANGE, ROUNDING and so on) is paired with the rightmost amount on its row.
+- **Rules:** six receipt rules (line, sum, total, change, tender and count) allow for prices that already include tax, service charges, add-on items, item discounts and split payments. Each receipt gets its own constraint graph over the fields it actually prints, and the same theory applies to it unchanged.
+- **Forging with ground truth:** the forger repaints values directly on the photographs. T1 paints over a value in the paper colour and retypes it; T2 removes the digits by inpainting and draws new ones in the receipt's own ink colour, size and softness; T3 and T4 change an item price and update every dependent value. New values keep the digit count and number style of the old ones, and every output is saved again as JPEG quality 90.
+- **Visual branch:** each photo is resized so that its longer side is at most 1,600 pixels. The synthetic model is used as it is (zero-shot) or fine-tuned for 3,000 steps on 3,859 training images made from the 800 training receipts, either with crude edits only or with every category.
+- **Decision:** because each receipt has its own schema, CVP uses the deterministic signature lookup: the broken rules give the consistent set and the heatmap picks a field within it. The detection threshold maximises Youden's J on the 489 validation images.
+
+## 4.9 INTERACTIVE APPLICATION
+
+The application (`app.py`) is built with Gradio and runs locally in a browser. It has four tabs:
+
+- **Forge & analyse:** choose a document type, a random seed, a forgery type and a field; the app generates the document, forges it and runs CVP. It shows the document as received, the evidence image (heatmap in red, candidate fields in orange, the blamed field in red, the true edit in green) and a plain-English report with the verdict, the broken rules and a table of every rule and field (Figure 4.2).
+- **Analyse an image:** upload any image of one of the six document types; the app reads it, checks the rules and shows the same evidence. Nine ready-made sample documents are included for demonstrations.
+- **Real receipt:** pick one of the 100 CORD test receipts, choose a forgery type and a field, and see CVP's evidence on the real photograph.
+- **Results:** the graphs and tables of every experiment, per document type.
+
+!figure report/final_report/figures/app_forge.png | 5.6 | Figure 4.2: The CVP Application: Forging a Document and Analysing It
+
+## 4.10 TESTING AND REPRODUCIBILITY
+
+The project includes 346 automated tests written with pytest. They check the theory (equivalence classes, signatures, consistent sets and the reduction factor, including a property test of Proposition 1), every rule of every document type, rendering and forgery generation, the scoring code, the trained models and the real-data pipeline. Results are covered in Section 5.1.
+
+Every result can be rebuilt from scratch. `scripts/reproduce.sh` generates the synthetic data, trains the OCR and visual networks, extracts features, fits the heads, evaluates every method and draws every table and figure, which takes a few hours on the laptop. `scripts/reproduce_real.sh` does the same for the real-data experiments from the public datasets. A setup script creates the Python environment, and a double-click launcher starts the application. The large generated files (datasets, features and model weights) are not stored in Git, while the small outputs (results, tables, figures and the paper) are.

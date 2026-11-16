@@ -1,0 +1,68 @@
+# APPENDIX
+
+## APPENDIX A: REPOSITORY STRUCTURE
+
+The project is kept in a local Git repository with one branch per phase of the work. The main folders are shown below.
+
+### REPOSITORY DIRECTORY TREE
+
+!code 7.5
+CVP-project/
+├── app.py                      the Gradio application (four tabs)
+├── setup.sh                    one-time setup: Python environment, dependencies, tests
+├── Start CVP.command           double-click launcher for the application
+├── requirements-lock.txt       exact versions of all 87 Python packages
+├── cvp/                        the library
+│   ├── core/
+│   │   ├── schema.py           fields, rules, equivalence classes, signatures, consistent set, rho
+│   │   ├── render.py           fonts, acquisition model (blur, noise, JPEG), Document record
+│   │   ├── tamper.py           forgery types T1-T4, crude and blended renderers (G1, G2)
+│   │   └── rules.py            check digits (ICAO 9303, GSTIN), money, amounts in words, dates
+│   ├── doctypes/               one module per document type
+│   │   ├── transcript.py       10 fields, 10 rules
+│   │   ├── invoice.py          24 fields, 19 rules
+│   │   ├── receipt.py          27 fields, 18 rules
+│   │   ├── certificate.py      10 fields, 10 rules
+│   │   ├── passport.py         10 fields, 18 rules (ICAO 9303 MRZ)
+│   │   └── idcard.py           7 fields, 8 rules
+│   ├── ocr.py                  page registration + CRNN/CTC field reader
+│   ├── visual.py               ELA + ResNet-18 U-Net heatmap network
+│   ├── pipeline.py             constraint features, field prior, heads, the CVP system
+│   └── real/                   real documents (CORD, Find it again!)
+│       ├── cord.py, receipt_rules.py, receipt_schema.py
+│       ├── read.py, rows.py, forge.py, view.py
+│       └── system.py, demo.py, findit.py
+├── scripts/                    every experiment, from data to figures
+│   ├── make_dataset.py, train_ocr.py, train_visual.py, extract.py
+│   ├── evaluate.py, select_head.py, ablate_head.py, summarize.py
+│   ├── make_figures.py, make_paper_figures.py, build_report.py
+│   ├── real_*.py               rule validity, OCR, forgeries, evaluation, Find it again!
+│   ├── reproduce.sh            rebuild every synthetic result
+│   └── reproduce_real.sh       rebuild every real-data result
+├── tests/                      346 pytest tests
+├── samples/                    nine ready-to-upload documents for the application
+├── results/                    metrics of every experiment (JSON, summaries)
+├── docs/how-it-works.html      an illustrated explainer of the method
+└── report/
+    ├── main.tex, refs.bib      the IEEE research paper
+    ├── figures/, tables/       generated figures and tables
+    └── final_report/           this report: content, template parts, builder output
+!end
+
+## APPENDIX B: HOW TO RUN THE PROJECT
+
+The commands below are run from the project folder in a terminal. The first command needs an internet connection to install the Python packages; everything else runs offline on the laptop.
+
+!table Table B.1: Main Commands of the Project
+!widths 38,62
+!opts firstbold
+Command | What it does
+./setup.sh | Creates the Python environment, installs the locked dependencies and runs the tests
+.venv/bin/python app.py | Starts the application at http://127.0.0.1:7860 (or double-click Start CVP.command)
+.venv/bin/python -m pytest | Runs all 346 automated tests
+./scripts/reproduce.sh | Rebuilds every synthetic-data result from scratch (a few hours)
+./scripts/reproduce.sh evaluate | Re-runs only the evaluation and figures from cached features
+./scripts/reproduce_real.sh | Rebuilds every real-data result from the downloaded CORD and Find it again! data
+report/build.sh | Builds the IEEE paper (PDF) and the zip for Overleaf
+.venv/bin/python scripts/build_report.py | Builds this report as a Word document
+!end

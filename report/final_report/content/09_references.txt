@@ -1,0 +1,45 @@
+# REFERENCES
+
+!refs
+Chen, Z., Chen, S., Yao, T., Sun, K., Ding, S., Lin, X., Cao, L., & Ji, R. (2024). Enhancing tampered text detection through frequency feature fusion and decomposition. In *Proceedings of the European Conference on Computer Vision (ECCV)*.
+Deng, J., Dong, W., Socher, R., Li, L.-J., Li, K., & Fei-Fei, L. (2009). ImageNet: A large-scale hierarchical image database. In *Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)* (pp. 248–255).
+Devi, S. N., & Fatima, N. S. (2026). ForenXAI: An intelligent deep learning framework for forensic document verification and forgery detection for police evidence. *Journal of Internet Services and Information Security, 16*(1), 181–207.
+Dhouib, M., Zhu, Y., Vanier, S., & Shabou, A. (2026). Efficient document tampering localization with multi-level discrepancy features and unified DCT-quantization embedding. In *Proceedings of the European Conference on Computer Vision (ECCV)*. arXiv:2606.22285.
+Graves, A., Fernández, S., Gomez, F., & Schmidhuber, J. (2006). Connectionist temporal classification: Labelling unsegmented sequence data with recurrent neural networks. In *Proceedings of the International Conference on Machine Learning (ICML)* (pp. 369–376).
+Guillaro, F., Cozzolino, D., Sud, A., Dufour, N., & Verdoliva, L. (2023). TruFor: Leveraging all-round clues for trustworthy image forgery detection and localization. In *Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)* (pp. 20606–20615).
+He, K., Zhang, X., Ren, S., & Sun, J. (2016). Deep residual learning for image recognition. In *Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)* (pp. 770–778).
+Huang, Z., Chen, K., He, J., Bai, X., Karatzas, D., Lu, S., & Jawahar, C. V. (2019). ICDAR2019 competition on scanned receipt OCR and information extraction. In *Proceedings of the International Conference on Document Analysis and Recognition (ICDAR)* (pp. 1516–1520).
+International Civil Aviation Organization. (2021). *Machine readable travel documents* (Doc 9303, 8th ed.). ICAO.
+Krawetz, N. (2007). *A picture's worth: Digital image analysis and forensics*. Black Hat Briefings, Las Vegas, NV, USA.
+Kumar, A., Tapwal, R., Maple, C., & Hooper, M. (2026). Field-localized forgery detection for digital identity documents. arXiv:2605.09089.
+Liang, Z., Zewde, K., Singh, R. P., Patil, D., Chen, Z., Xue, J., Yao, Y., Chen, Y., Liu, Q., & Ren, S. (2025). Can multi-modal (reasoning) LLMs detect document manipulation? arXiv:2508.11021.
+Liu, Y., Liu, Y., Li, Z., Yao, R., Zhang, Y., & Wang, D. (2025). Modality interactive mixture-of-experts for fake news detection. In *Proceedings of the ACM Web Conference (WWW)* (pp. 5139–5150).
+Loshchilov, I., & Hutter, F. (2019). Decoupled weight decay regularization. In *Proceedings of the International Conference on Learning Representations (ICLR)*.
+Luo, G., Darrell, T., & Rohrbach, A. (2021). NewsCLIPpings: Automatic generation of out-of-context multimodal media. In *Proceedings of the Conference on Empirical Methods in Natural Language Processing (EMNLP)* (pp. 6801–6817).
+Martínez Tornés, B., Taburet, T., Boros, E., Rouis, K., Gomez-Krämer, P., Sidere, N., Doucet, A., & Poulain d'Andecy, V. (2023). Receipt dataset for document forgery detection. In *Proceedings of the International Conference on Document Analysis and Recognition (ICDAR)*, San José, CA, USA.
+Milletari, F., Navab, N., & Ahmadi, S.-A. (2016). V-Net: Fully convolutional neural networks for volumetric medical image segmentation. In *Proceedings of the International Conference on 3D Vision (3DV)* (pp. 565–571).
+Mindee. (2021). *docTR: Document text recognition* [Computer software]. https://github.com/mindee/doctr
+Park, S., Shin, S., Lee, B., Lee, J., Surh, J., Seo, M., & Lee, H. (2019). CORD: A consolidated receipt dataset for post-OCR parsing. In *Workshop on Document Intelligence at NeurIPS*.
+Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., et al. (2019). PyTorch: An imperative style, high-performance deep learning library. In *Advances in Neural Information Processing Systems (NeurIPS)* (pp. 8024–8035).
+Pearl, J. (1988). *Probabilistic reasoning in intelligent systems: Networks of plausible inference*. Morgan Kaufmann.
+Qu, C., Liu, C., Liu, Y., Chen, X., Peng, D., Guo, F., & Jin, L. (2023). Towards robust tampered text detection in document image: New dataset and new solution. In *Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)* (pp. 5937–5946).
+Qu, C., Liu, J., Chen, H., Yu, B., Liu, J., Wang, W., & Jin, L. (2024). TextSleuth: Towards explainable tampered text detection. arXiv:2412.14816.
+Qu, C., Zhong, Y., Guo, F., & Jin, L. (2025). Revisiting tampered scene text detection in the era of generative AI. *Proceedings of the AAAI Conference on Artificial Intelligence, 39*(1), 694–702.
+Rombach, R., Blattmann, A., Lorenz, D., Esser, P., & Ommer, B. (2022). High-resolution image synthesis with latent diffusion models. In *Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)* (pp. 10684–10695).
+Ronneberger, O., Fischer, P., & Brox, T. (2015). U-Net: Convolutional networks for biomedical image segmentation. In *Proceedings of Medical Image Computing and Computer-Assisted Intervention (MICCAI)* (pp. 234–241).
+Saha, M., Khanal, P., & Sarma, G. (2026). *Multimodal structural anomaly detection in invoices using text–logic fusion* [Preprint]. Research Square. https://doi.org/10.21203/rs.3.rs-10100967/v1
+Shao, R., Wu, T., & Liu, Z. (2023). Detecting and grounding multi-modal media manipulation. In *Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)* (pp. 6904–6913).
+Shi, B., Bai, X., & Yao, C. (2017). An end-to-end trainable neural network for image-based sequence recognition and its application to scene text recognition. *IEEE Transactions on Pattern Analysis and Machine Intelligence, 39*(11), 2298–2304.
+Smith, L. N., & Topin, N. (2019). Super-convergence: Very fast training of neural networks using large learning rates. *Proceedings of SPIE, 11006*.
+Wang, P., Wang, B., Li, K., Zhou, B., & Guo, C. (2025). Trustworthy layout analysis network: Fine-grained multi-scale tampering detection for complex layout personnel documentation images. *Knowledge-Based Systems, 323*, 113525. https://doi.org/10.1016/j.knosys.2025.113525
+Wang, Y., Xie, H., Xing, M., Wang, J., Zhu, S., & Zhang, Y. (2022). Detecting tampered scene text in the wild. In *Proceedings of the European Conference on Computer Vision (ECCV)* (pp. 215–232).
+Wilson, E. B. (1927). Probable inference, the law of succession, and statistical inference. *Journal of the American Statistical Association, 22*(158), 209–212.
+Wong, K., Zhou, J., Wu, H., Si, Y.-W., & Zhou, J. (2025). ADCD-Net: Robust document image forgery localization via adaptive DCT feature and hierarchical content disentanglement. In *Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)*.
+Wu, J., Zhou, Y., Xu, M., Liang, Z., Ren, S., Xue, J., Yang, M., Chen, S., & Huan, J. (2026). AIForge-Doc: A benchmark for detecting AI-forged tampering in financial and form documents. arXiv:2602.20569.
+Xu, Y., Li, M., Cui, L., Huang, S., Wei, F., & Zhou, M. (2020). LayoutLM: Pre-training of text and layout for document image understanding. In *Proceedings of the ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD)* (pp. 1192–1200).
+Youden, W. J. (1950). Index for rating diagnostic tests. *Cancer, 3*(1), 32–35.
+Zhang, J., Bargal, S. A., Lin, Z., Brandt, J., Shen, X., & Sclaroff, S. (2018). Top-down neural attention by excitation backprop. *International Journal of Computer Vision, 126*(10), 1084–1102.
+Zhang, Y., Ren, S., Raj, A., Wei, E., Ng, D., Shen, A., Xue, J., Zhang, Y., & Marotta, E. (2026). GPT4o-Receipt: A dataset and human study for AI-generated document forensics. arXiv:2603.11442.
+Zhao, Z., Xia, W., Wei, E., Zhang, Y., Mo, J., Zhang, T., Dai, Y., Chen, Z., Tao, Y., & Ren, S. (2026). DOCFORGE-BENCH: A comprehensive 0-shot benchmark for document forgery detection and analysis. arXiv:2603.01433.
+Zhong, X., Tang, J., & Jimeno Yepes, A. (2019). PubLayNet: Largest dataset ever for document layout analysis. In *Proceedings of the International Conference on Document Analysis and Recognition (ICDAR)* (pp. 1015–1022).
+!end

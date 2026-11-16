@@ -1,0 +1,188 @@
+# CHAPTER 5: RESULTS AND DISCUSSION
+
+## 5.1 AUTOMATED TEST SUITE & CODE QUALITY
+
+Before looking at accuracy, we checked that the code does what it is supposed to do. The test suite was run in full on the final version of the code (Table 5.1). All 346 tests ran: 345 passed and 1 was skipped by design, a randomly generated case of the Proposition 1 property test whose perturbation would push a mark outside the valid range, where the proposition does not apply. No test failed. The whole suite takes about 103 seconds, most of it spent loading and running the trained models.
+
+!table Table 5.1: Automated Test Suite Results
+!widths 24,40,9,9,9,9
+!opts center
+Test file | What it checks | Tests | Passed | Skipped | Time (s)
+test_schema.py | Equivalence classes, signatures, consistent sets, ρ, Proposition 1 | 146 | 145 | 1 | 0.1
+test_doctypes.py | Fields, rules, templates and forgers of all six types | 84 | 84 | 0 | 20.1
+test_real.py | Real receipts: parsing, rules, reader, forger | 63 | 63 | 0 | 2.5
+test_rules.py | Check digits, money, amounts in words, dates | 22 | 22 | 0 | 0.1
+test_models.py | OCR and visual networks, heads, end-to-end system | 19 | 19 | 0 | 75.5
+test_render_tamper.py | Rendering and the four forgery renderers | 9 | 9 | 0 | 0.7
+test_evaluate.py | Scoring, including exact-tie handling | 3 | 3 | 0 | 0.1
+**Total** | | **346** | **345** | **1** | **102.6**
+!end
+
+## 5.2 MAIN RESULTS ON THE SIX DOCUMENT TYPES
+
+Table 5.2 and Figure 5.1 summarise the main setting, in which the visual branch was trained on crude edits and the older generator G1 and tested on edits from the unseen generator G2. CVP attributes better than every baseline on every type, naming the edited field for 87.6% to 92.4% of tampered documents. The visual branch alone reaches 81.0% to 89.7%, concatenation fusion 55.5% to 80.7%, the rules alone 43.6% to 62.8% and ELA 23.0% to 32.0%. Its own rule-based variant, CVP (rule), is the only method that beats it on any type (Section 5.6). CVP's detection AUC (0.942 to 0.966) is the best on five types; on the certificate the visual branch is very slightly higher (0.961 against 0.956). At the validation threshold CVP reaches an F1 score of 0.915 to 0.955, against 0.701 to 0.902 for the visual branch.
+
+!table Table 5.2: Main Setting: Detection AUC and Attribution (%) on All Six Types
+!widths 18,9,9,9,9,9,9,9,9,10
+!opts center
+Type | AUC visual | AUC CVP | Attr. visual | Attr. rules | Attr. concat | Attr. CVP | Amb. visual | Amb. CVP | Amb. chance
+Transcript | 0.941 | **0.953** | 87.3 | 48.7 | 55.5 | **89.1** | 84.4 | **87.7** | 20.0
+GST invoice | 0.957 | **0.959** | 88.0 | 57.0 | 62.4 | **90.6** | 87.9 | **91.3** | 50.0
+Shop receipt | 0.965 | **0.966** | 84.4 | 62.8 | 64.4 | **91.9** | **86.4** | 76.6 | 50.0
+Certificate | **0.961** | 0.956 | 89.7 | 43.6 | 79.3 | **92.4** | 89.4 | **91.9** | 44.6
+Passport | 0.890 | **0.949** | 83.7 | 48.1 | 70.9 | **88.0** | 83.3 | **87.6** | 50.0
+Student ID | 0.923 | **0.942** | 81.0 | 46.4 | 80.7 | **87.6** | 81.8 | **93.2** | 50.0
+!end
+
+!figure report/final_report/figures/cross_type.png | 5.7 | Figure 5.1: Main Setting Across the Six Types: Detection AUC, Attribution and the Ambiguity Split
+
+## 5.3 BLENDED EDITS AND WHAT EACH BRANCH CATCHES
+
+Table 5.3 and Figure 5.2 show the problem that motivated the project. From crude to blended edits the detection AUC of the visual branch drops on every type, and at its validation threshold it flags only 13.4% to 67.1% of blended edits, against 85.8% to 100% of crude ones. The rules do not notice any difference between the two: their AUC on blended edits is within 0.002 of their AUC on crude edits, and they flag every blended edit, because the signature depends only on the values. CVP keeps this property and flags 97.6% to 100% of blended edits while flagging only 1.2% to 5.8% of genuine documents.
+
+!table Table 5.3: Detection AUC on Crude (T1) and Blended (T2) Edits
+!widths 22,13,13,13,13,13,13
+!opts center
+Type | Visual T1 | Visual T2 | Rules T1 | Rules T2 | CVP T1 | CVP T2
+Transcript | 0.996 | 0.887 | 1.000 | 1.000 | 1.000 | 0.999
+GST invoice | 0.998 | 0.908 | 0.994 | 0.994 | 0.999 | 0.998
+Shop receipt | 0.998 | 0.933 | 0.982 | 0.983 | 1.000 | 1.000
+Certificate | 0.999 | 0.920 | 0.920 | 0.918 | 0.996 | 0.995
+Passport | 0.972 | 0.788 | 0.998 | 0.998 | 0.999 | 0.995
+Student ID | 0.998 | 0.850 | 1.000 | 1.000 | 1.000 | 1.000
+!end
+
+!figure report/final_report/figures/cross_flags.png | 5.7 | Figure 5.2: Share of Genuine Documents, Blended Edits (T2) and Complete Forgeries (T4) Flagged by Each Method
+
+The combination has a cost on the other side. Complete forgeries (T4) break no rule, so CVP can only catch them through the visual branch. It flags 38.2% to 65.5% of them, and its AUC on T4 (0.755 to 0.854) is lower than that of the visual branch alone (0.788 to 0.935), because the noisy-OR mixes the visual evidence with the constraint branch's score, which cannot tell a coherent edit from a genuine document. The learned constraint branch also absorbs OCR noise well: on the receipt, the bare rules flag 10.6% of genuine documents because of misread digits, while CVP flags only 1.2%.
+
+## 5.4 THE AMBIGUITY SPLIT AND THE HYPOTHESES
+
+On the ambiguity split, where the broken rules fit more than one field, the rules alone are at chance or below it on every type (20.0% on the transcript at a chance level of 20.0%, and 41.3% to 50.6% on the others at 44.6% to 50.0%), while they are right 94.2% to 100% of the time on unambiguous edits. CVP beats both single-modality baselines on this split for five of the six types, reaching 87.6% to 93.2%. The exception is the shop receipt (76.6% against 86.4% for the visual branch): editing the cash or the change breaks the same single rule, and the learned class probability leans towards one of the two fields and can override the heatmap. A variant with a shared prior, which spreads the probability evenly over the two fields, gets 90.9% of these edits right, but it was slightly worse on average on the validation data and so was not chosen. Table 5.4 summarises the four hypotheses.
+
+!table Table 5.4: The Four Hypotheses and Their Outcome
+!widths 8,34,20,38
+Hyp. | Statement | Outcome | Evidence
+H1 | The visual branch degrades from crude to blended edits; the rules do not | Supported on all six types | Visual AUC 0.972–0.999 falls to 0.788–0.933; rule AUC changes by at most 0.002
+H2 | The rules alone are at chance on the ambiguity split | Supported on all six types | 20.0–50.6% against chance levels of 20.0–50.0%; 94.2–100% on unambiguous edits
+H3 | CVP beats both single modalities on the ambiguity split, by a larger margin than overall | Partly supported | Best on 5 of 6 types; margin larger than overall on 3 types, equal on 1, smaller on 1
+H4 | Candidate pooling beats concatenation fusion, mainly in attribution | Supported on all six types | 6.9–33.6 points better attribution; detection AUC within 0.021
+!end
+
+Concatenation fusion has access to the same evidence as CVP, yet its attribution is much worse. A network that sees a global summary of both branches learns that a document is forged far more easily than where it was forged; pooling the heatmap inside the fields suggested by the rules is what turns visual evidence into an attribution.
+
+## 5.5 HOW MUCH VISUAL EVIDENCE IS NEEDED, AND ROBUSTNESS
+
+Figure 5.3 changes what the visual branch saw during training. Trained on crude edits only (zero-shot), it gets almost no blended edits right (0.0% to 6.6%), yet CVP still attributes 62.1% to 92.3% of them, close to the rules alone (60.7% to 91.7%): wherever the broken rules point to a single field, the rules do the work. CVP is better than the rules alone on four types but worse on the transcript and the invoice, where the learned head trusts a heatmap that knows nothing about blended edits. With the older generator G1 (the main setting), the visual branch reaches 63.0% to 77.9% and CVP 83.0% to 95.5%, above both single modalities on every type. With the test generator itself (oracle), both exceed 97% on five types and the gap closes. CVP helps most when the visual evidence is weak but not completely missing.
+
+!figure report/final_report/figures/cross_regimes.png | 5.7 | Figure 5.3: Attribution of Blended Edits With the Visual Branch Trained Zero-Shot, on the Older Generator, and on the Test Generator
+
+Figure 5.4 repeats the evaluation after recompression and resampling. JPEG compression at quality 60 costs CVP only 0.9 to 3.4 points of attribution. Downscaling to 0.6 times the size hurts much more: the OCR still reads 97.2% to 99.7% of fields, but the visual branch drops to 30.7% to 51.2%. CVP stays above the visual branch on five types but falls below the rules alone on the invoice and the passport, because a head fitted on clean pages keeps trusting a heatmap that resampling has made unreliable.
+
+!figure report/final_report/figures/cross_robustness.png | 5.7 | Figure 5.4: Attribution on Clean Pages, After JPEG Recompression at Quality 60 and After Downscaling to 0.6×
+
+Figure 5.5 shows the mechanism on one transcript. The same subject mark is edited once crudely and once with blending. In both cases the rules report {c1}, which fits all five marks (orange boxes). The heatmap is strong for the crude edit and faint for the blended one, but in both cases it is highest inside the edited mark, which is all the attribution head needs.
+
+!figure report/final_report/figures/examples.png | 5.6 | Figure 5.5: A Transcript Whose Third Mark Was Changed to 100, Crudely (Top) and With Blending (Bottom), With CVP's Evidence
+
+## 5.6 CHOOSING THE ATTRIBUTION HEAD
+
+Six designs of the attribution head and CVP (rule) were compared on a separate validation set of blended edits from the older generator, with the rule for choosing fixed beforehand: the best mean attribution over the six types (Table 5.5). The per-class prior with heat used as probabilities won with 97.0%, against 91.1% for CVP (rule), and it is the CVP reported throughout. On the test set, the designs trade blended single-field edits against complete forgeries: the chosen design is best on blended edits (88.9% on average), the log-space designs are best on complete forgeries (up to 74.6%), and no design wins everywhere. CVP (rule) is better than the chosen head on the transcript (92.0% against 89.1%) and the ID card (88.9% against 87.6%) but much worse on the ambiguity split (76.0% against 88.1% on average), because choosing a single class throws away the true field whenever two classes fit the broken rules.
+
+!table Table 5.5: Choosing the Attribution Head on Validation Data (Attribution, %)
+!widths 22,10,10,10,10,10,10,10
+!opts center
+Head design (prior / heat) | Transcript | Invoice | Receipt | Certificate | Passport | ID card | Mean
+class / prob (chosen) | **99.6** | **86.8** | **96.6** | **100.0** | **98.8** | **100.0** | **97.0**
+class / log | 99.4 | 86.4 | 88.6 | 100.0 | 98.8 | 100.0 | 95.5
+class / logmax | 99.6 | 85.3 | 88.6 | 99.6 | 98.8 | 99.2 | 95.2
+shared / prob | 99.6 | 86.8 | 94.8 | 100.0 | 97.2 | 100.0 | 96.4
+shared / log | 99.4 | 86.4 | 87.0 | 100.0 | 98.4 | 100.0 | 95.2
+shared / logmax | 99.6 | 85.3 | 87.0 | 99.6 | 98.4 | 99.4 | 94.9
+CVP (rule) | 99.2 | 84.0 | 89.0 | 88.4 | 88.8 | 97.2 | 91.1
+!end
+
+## 5.7 REAL RECEIPTS (CORD)
+
+The first question for real documents was whether real receipts follow the rules strictly enough for this approach to be useful. On the 992 CORD receipts to which at least one rule applies, each rule holds on 96.6% to 99.7% of genuine receipts (Table 5.6, Figure 5.6), and 6.7% of genuine receipts break some rule even when every printed word is read correctly. Taking the values only at the fields CVP reads gives 7.2%, and when docTR reads those fields the figure rises to 10.9%. The extra 3.7 points are OCR errors. These false alarms are the floor for what the rules alone can achieve on real receipts.
+
+!table Table 5.6: Receipt Rules and How Often They Hold on 1,000 Genuine CORD Receipts
+!widths 12,60,14,14
+Rule | What it checks | Applies to | Holds on
+line | count × unit price = price, for each item that prints a unit price | 727 | 99.7%
+sum | item prices (with add-ons, less item discounts) add up to the subtotal, or to the total with tax and service | 968 | 97.4%
+total | subtotal + tax + service − discount = total (or prices already include tax) | 642 | 97.4%
+change | cash (+ card) − total = change | 530 | 96.6%
+tender | cash (+ card) covers the total | 616 | 98.4%
+count | item counts add up to the printed number of items | 250 | 96.8%
+**Any rule** | genuine receipts that break at least one rule | **992** | **6.7% break**
+!end
+
+!figure report/final_report/figures/cord_rules.png | 5.7 | Figure 5.6: Rule Validity on Genuine CORD Receipts (Left) and the False Alarms of the Rules Alone (Right)
+
+The forged test set contains 474 photographs (98 genuine, and 98, 98, 90 and 90 forged with T1, T2, T3 and T4) made from the 100 test receipts. The forgeries behave as intended: 98.6% of the 990 edited values read back exactly, single-field forgeries break a rule 96.9% (T1) and 98.0% (T2) of the time, and coherent forgeries keep every rule 88.9% of the time, the same rate as genuine receipts. Table 5.7 and Figure 5.7 give the results with the three versions of the visual branch.
+
+!table Table 5.7: CVP on 474 Real CORD Receipt Photographs (Attribution in %; Chance on the Ambiguity Split 38.1%)
+!widths 26,18,10,10,12,12,12
+!opts center
+Visual branch | Method | AUC | AUC T2 | Attr. all | Attr. T2 | Ambiguity split
+Zero-shot (synthetic only) | Visual only | 0.546 | 0.500 | 60.0 | 11.0 | 40.0
+ | Rules only | 0.729 | 0.939 | 58.2 | 55.0 | 37.2
+ | **CVP** | **0.746** | 0.928 | **73.1** | 54.1 | **56.2**
+Fine-tuned, crude edits | Visual only | 0.751 | 0.498 | 65.4 | 14.3 | 54.4
+ | Rules only | 0.729 | 0.939 | 58.2 | 55.0 | 37.2
+ | **CVP** | **0.838** | **0.941** | **75.6** | **56.5** | **64.9**
+Fine-tuned, all categories (upper bound) | Visual only | 0.892 | 0.746 | 92.3 | 75.0 | 85.4
+ | Rules only | 0.729 | 0.939 | 58.2 | 55.0 | 37.2
+ | **CVP** | **0.913** | **0.968** | **93.0** | **84.2** | **88.5**
+!end
+
+!figure report/final_report/figures/cord_regimes.png | 5.7 | Figure 5.7: CVP on Real Receipt Photographs With Three Versions of the Visual Branch
+
+With the zero-shot visual branch, which is at chance on blended edits (AUC 0.500), CVP still raises detection from 0.546 to 0.746 and attribution from 60.0% to 73.1%, and on the ambiguity split it reaches 56.2% where both single modalities are at chance. Fine-tuning the visual branch on crude edits improves CVP to 0.838 AUC and 75.6% attribution. Even the upper-bound visual branch, which has seen the forger and attributes 92.3% on its own, is improved by CVP (93.0%; 84.2% against 75.0% on blended edits). This is the order the theory predicts: the weaker the visual evidence, the more CVP adds, and it adds something in every setting.
+
+Two limitations are visible in Figure 5.8. Real receipts cause false alarms: at the validation threshold CVP flags 11.2% to 17.3% of genuine receipts, mostly because OCR errors break a rule. And coherent forgeries are caught only as far as the visual branch sees them: 8.9% of T4 forgeries zero-shot, 13.3% after fine-tuning on crude edits and 68.9% for the upper bound.
+
+!figure report/final_report/figures/cord_flags.png | 4.6 | Figure 5.8: Share of Real Receipts Flagged by CVP, by Forgery Type, for the Three Visual Branches
+
+Figure 5.9 shows one receipt. The change was edited from 72,000 to 92,000. Only "cash − total = change" breaks, which fits both the cash and the change (orange boxes). The heatmap is 0.95 on the change and 0.01 on the cash, so CVP blames the change (red box), which is correct (green box).
+
+!figure report/final_report/figures/cord_example.png | 4.8 | Figure 5.9: A Real CORD Receipt With an Edited Change Amount and CVP's Evidence
+
+## 5.8 REAL FORGERIES MADE BY PEOPLE (FIND IT AGAIN!)
+
+The Find it again! forgeries were made by people with ordinary image editors. We read every scan with docTR and checked four receipt rules: the total, the change, cash covering the total, and Malaysian rounding (an adjustment of at most 0.02). Of the 987 scans available, 646 genuine and 121 forged scans had at least one rule we could check. Some rule fails on 32.2% of the forged scans against 17.2% of the genuine ones, a difference that is statistically significant (two-proportion z ≈ 3.8). The change rule alone fails on 31.4% of forged scans against 10.5% of genuine ones (Figure 5.10). Real forgers, in other words, break receipt arithmetic far more often than genuine receipts do.
+
+!figure report/final_report/figures/findit_rules.png | 4.8 | Figure 5.10: Share of Genuine and Forged Find it again! Scans on Which Each Receipt Rule Fails
+
+The visual branch, on the other hand, did not transfer to these forgeries (Table 5.8). Its heat separates forged from genuine test scans at chance level (AUC 0.504 to 0.527), and its hottest pixel falls inside an edited region for only 2.9% to 8.6% of forged scans. On real human forgeries, all of CVP's evidence currently comes from the rules.
+
+!table Table 5.8: Find it again!: Rule Failures and the Visual Branch on Real Human Forgeries
+!widths 34,22,22,22
+!opts center
+Reading / visual branch | Checkable scans (genuine / forged) | Genuine flagged | Forged flagged
+docTR, read by rows | 646 / 121 | 17.2% | 32.2%
+Dataset transcription | 551 / 107 | 29.0% | 33.6%
+Visual branch | Heat AUC | Pointing game | CVP flags (genuine / forged)
+Synthetic only | 0.527 | 8.6% | 12.6% / 17.1%
+Fine-tuned on CORD, crude | 0.508 | 2.9% | 12.6% / 17.1%
+Fine-tuned on CORD, all | 0.504 | 8.6% | 12.6% / 17.1%
+!end
+
+## 5.9 COMPARATIVE ANALYSIS WITH EXISTING METHODS
+
+Table 5.9 places our results next to the published numbers for well-known detectors on AI-inpainted receipts and forms. The numbers come from different test sets, so this is not a head-to-head comparison; it shows the range in which current detectors operate on realistic edits and where CVP sits on our real receipts. A direct comparison on AIForge-Doc is planned as future work.
+
+!table Table 5.9: Published Detectors on AI-Edited Documents and CVP on Our Forged Real Receipts (Different Test Sets)
+!widths 32,40,14,14
+Method | Test data | Detection AUC | Source
+TruFor | AIForge-Doc: receipts and forms edited by commercial AI tools | 0.751 | Wu et al. (2026)
+DocTamper detector (DTD) | AIForge-Doc | 0.563 | Wu et al. (2026)
+GPT-4o, zero-shot judge | AIForge-Doc | 0.509 | Wu et al. (2026)
+Visual branch only (ours, zero-shot) | CORD photos forged by us, all categories | 0.546 | This project
+Rules only (ours) | CORD photos forged by us, all categories | 0.729 | This project
+**CVP (zero-shot visual branch)** | CORD photos forged by us, all categories | **0.746** | This project
+**CVP (visual fine-tuned on crude edits)** | CORD photos forged by us, all categories | **0.838** | This project
+!end
+
+Beyond the numbers, CVP differs from these detectors in what it reports. It names the edited field, lists the rules that were broken and shows why the field was chosen, which makes its decisions easy to explain and to check by hand. It also needs no paid service and runs on an ordinary laptop.

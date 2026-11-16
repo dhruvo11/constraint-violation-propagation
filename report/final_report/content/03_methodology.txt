@@ -1,0 +1,154 @@
+# CHAPTER 3: METHODOLOGY
+
+## 3.1 PROPOSED SYSTEM ARCHITECTURE & HIGH-LEVEL DESIGN
+
+CVP has two branches that look at the same document in different ways, and a small head that combines them (Figure 3.1). The **constraint branch** reads the value of every field, checks the document's rules and turns the pattern of broken rules into a probability over groups of fields that could have been edited. The **visual branch** looks only at the pixels and produces a tamper heatmap, a map of how likely each pixel is to have been edited. The **attribution head** pools the heatmap inside the fields that the constraint branch suggests and picks the most suspicious one. A separate **detection head** decides whether the document is forged at all: it flags a document if a rule is broken or if the heatmap is strong enough.
+
+!figure report/final_report/figures/architecture.png | 5.6 | Figure 3.1: CVP System Architecture: Constraint Branch, Visual Branch and Fusion Heads
+
+The design follows from a simple split of the work. The rules are very reliable when they are broken, because a broken sum is a fact and not a guess, but they cannot always say which field caused the problem. The heatmap can point at a location, but it may be weak or wrong when the edit was done well. Using the rules to make a short list and the heatmap to choose within it gives each branch the job it is good at. One OCR model and one visual model are shared by all six document types; each type adds only its own list of fields, its rules, the positions of its fields on the page and two small heads.
+
+### EXECUTION LIFECYCLE
+
+When a document image is analysed, the following steps run in order:
+
+1. The page is aligned to its template by finding a horizontal header rule, which gives the offset of the whole page.
+2. Each field is cropped from its known slot and read by the CRNN, which returns the text, a confidence score and the tight box around the ink.
+3. The values are parsed (numbers, dates, codes) and every rule of the document type is evaluated, giving a violation vector w and a residual vector r.
+4. The class-posterior network turns w, r and the OCR confidences into a probability for each group of fields, plus a "coherent" group for documents with no violation.
+5. The visual network computes the heatmap H over the whole page from the image and its ELA.
+6. The attribution head combines the field prior from step 4 with the heat inside each field box and returns the most likely edited field.
+7. The detection head combines the probability of a violation with the visual evidence and returns the verdict, which the application shows together with the broken rules, the candidate fields and the heatmap.
+
+## 3.2 DOCUMENTS AS CONSTRAINT GRAPHS
+
+We describe a structured document as a set of fields F, each with a printed value and a bounding box on the page, and a set of rules C. Each rule is a condition on a few fields, called its scope. A document is coherent when every rule holds. Table 3.1 shows the rules of the academic transcript, which we use as a running example. It has ten fields (five subject marks, the total, the percentage, the grade, the issue date and the roll number) and ten rules of five kinds.
+
+!table Table 3.1: Rules (Constraint System) of the Academic Transcript
+!widths 10,15,45,30
+ID | Type | Rule | Fields involved (scope)
+c1 | Arithmetic | m1 + m2 + m3 + m4 + m5 = Total | the five marks, Total
+c2 | Arithmetic | Pct = 100 × Total / 500 | Total, Pct
+c3 | Logical | Grade = band(Pct): 90+ O, 80+ A+, 70+ A, 60+ B, 50+ C, 40+ D, else F | Pct, Grade
+c4(1)–c4(5) | Range | 0 ≤ mi ≤ 100, one rule per mark | one mark each
+c5 | Temporal | 2015 ≤ IssueDate ≤ today | IssueDate
+c6 | Format | roll number matches 1RUA, two digits, a branch code and four digits | RollNo
+!end
+
+Two design choices matter here. First, every rule is checked on the printed values. If c3 were checked against a percentage recomputed from the total, its scope would silently grow to include the total and the analysis below would change. Second, the range rule is kept separate for each mark, so that a broken range rule points at exactly one field.
+
+When a single field f is edited, the set of rules that break is called the **violation signature** of f. Only rules whose scope contains f can change, so the signature is always a subset of those rules. Table 3.2 lists the signatures for the transcript. Different kinds of fields give different signatures: editing a mark breaks only c1, because c2 and c3 read the printed total, which has not changed, while editing the total breaks c1 and c2 together.
+
+!table Table 3.2: Violation Signatures Under Single-Field Edits (Transcript)
+!widths 40,30,30
+Field edited | Rules broken (signature) | Group of fields
+Subject mark, value still in range | {c1} | all five marks
+Subject mark, value out of range | {c1, c4} | that mark alone
+Total | {c1, c2} | Total
+Percentage (same band / new band) | {c2} / {c2, c3} | Pct
+Grade | {c3} | Grade
+Issue date | {c5} | IssueDate
+Roll number | {c6} | RollNo
+!end
+
+The most important property of the signature is that it depends only on the values. A diffusion-inpainted edit and a rough copy-and-paste edit of the same field produce exactly the same signature. The signature therefore does not care how good the forgery looks, which is exactly where visual detectors are weak. Figure 3.2 confirms this on our test set: the rules broken by single-field edits, as read by our OCR, follow Table 3.2.
+
+!figure report/final_report/figures/signatures.png | 5.4 | Figure 3.2: How Often Each Transcript Rule Breaks for Single-Field Edits of Each Field (Test Set)
+
+## 3.3 MATHEMATICAL FORMULATION
+
+For a document D and its rules C, the violation vector w has one entry per rule, equal to 1 if the rule is broken and 0 otherwise, and the residual vector r records how far off each rule is (for c1, the sum of the marks minus the printed total).
+
+!eq w_j = 1 if rule c_j is broken, else 0;      r_1 = (m1 + m2 + m3 + m4 + m5) − Total
+
+### WHAT THE RULES CANNOT DO (PROPOSITION 1)
+
+Call a rule exchangeable in two fields if it depends on them only through their sum. **Proposition 1** states: if two fields fa and fb appear together in every rule other than their own range rules, and every such rule is exchangeable in them, then adding the same amount δ to either field (keeping both in range) gives exactly the same violation vector w and the same residual vector r. So no method that looks only at w and r can tell an edit of fa from an edit of fb better than chance.
+
+The proof is short. Rules that contain neither field do not change. The range rules hold in both cases by assumption. Every other rule contains both fields and sees them only through their sum, which both edits increase by the same δ, so its truth value and residual are the same in both cases. Since w and r are identical, any rule-based method gives both edits the same answer.
+
+On the transcript, the five marks appear only in c1 (a sum) and in their own range rules. For any in-range edit, the rules can tell that some mark was changed but not which one, and finding the edited mark needs evidence from outside the rules. This is a structural result: it does not depend on how much data or how large a model we use. Out-of-range edits are the exception, because the broken range rule names the field by itself.
+
+### SIGNATURE INTERVALS AND THE CONSISTENT SET
+
+Proposition 1 groups fields into equivalence classes K. A second source of ambiguity is overlap between the signatures of different classes. An edit can leave an inequality satisfied (a cash amount can change and still cover the total) or keep a percentage in the same grade band, so the signature of a class is really an interval. Its necessary signature holds the rules every edit of the class breaks, and its possible signature holds the rules it could break. An observed set of broken rules V fits a class when it lies between the two, and the consistent set is the union of the candidate fields of every class that fits:
+
+!eq C(V) = ⋃ { Cand(K, w) : necessary(K) ⊆ V ⊆ possible(K) }
+
+On a receipt, editing the change breaks only "cash − total = change". Editing the cash breaks the same rule and, only if the cash drops below the total, the tender rule as well. Both intervals contain V = {change}, so C(V) = {cash, change}, even though the two fields are not exchangeable. Whenever C(V) holds more than one field, a method that uses only the rules is at chance, 1/|C(V)|. These are exactly the edits on which a second source of evidence is needed.
+
+### HOW MUCH THE RULES NARROW THE SEARCH
+
+We measure how much of the attribution search space the rules remove with the reduction factor ρ, where K(f) is the class of field f and f is chosen uniformly:
+
+!eq ρ = 1 − E[ |K(f)| ] / |F|
+
+On the transcript, five fields share a class of size five and five fields are on their own, so E|K(f)| = (5 × 5 + 5 × 1) / 10 = 3.0 and ρ = 0.70. In other words, the rules alone remove 70% of the search space before any training. The other document types reach ρ = 0.86 to 0.96 because their larger rule systems leave fewer exchangeable fields.
+
+## 3.4 FUSING THE TWO BRANCHES
+
+The class-posterior network gives a probability p(K) for each class, and the field prior spreads each class's probability evenly over its candidate fields:
+
+!eq π(f) = Σ_K p(K) · 1[f ∈ Cand(K, w)] / |Cand(K, w)|
+
+The attribution head pools the heatmap inside each field box (maximum, mean and 90th percentile) and scores each field with a weighted sum, then picks the field with the highest score:
+
+!eq s(f) = θᵀ [ log π(f), max H(b_f), mean H(b_f), p90 H(b_f) ],      f̂ = argmax_f s(f)
+
+The four weights θ are kept non-negative through a softplus, so more heat or a higher constraint probability can only make a field more suspicious, never less. The weights are fitted with a softmax over fields on validation data, with both branches frozen.
+
+For detection, a logistic regression on the top pooled heat values gives a visual probability p_vis, and the document score is a noisy-OR of the two branches, so that the evidence of one branch is not watered down when the other sees nothing:
+
+!eq score = 1 − p_coherent · (1 − p_vis)
+
+We also report the special case **CVP (rule)**, in which the decision is restricted to the single most likely class and the field with the highest maximum heat inside it is chosen. This is the algorithm as we first wrote it down; the learned head above was chosen over it on separate validation data.
+
+## 3.5 DATASETS AND EVALUATION PROTOCOL
+
+### SIX SYNTHETIC DOCUMENT TYPES
+
+Real documents with known edits are hard to obtain, and real personal documents could not be used, so we built six document types with fictional issuers (Table 3.3). Each type has a template, a schema of fields and rules, and its own forger. Because the box of every field is recorded at render time, every document comes with exact per-field ground truth and no manual labelling is needed.
+
+!table Table 3.3: The Six Synthetic Document Types
+!widths 20,7,7,46,8,12
+!opts firstbold
+Type | Fields | Rules | What the rules check | ρ | Ambiguous test edits
+Academic transcript | 10 | 10 | marks add up to the total; percentage; grade band; mark ranges; issue date; roll-number format | 0.70 | 244
+GST tax invoice | 24 | 19 | quantity × rate; taxable value; CGST + SGST or IGST by place of supply; round-off; grand total; amount in words; GSTIN check character; financial year | 0.94 | 264
+Shop receipt | 27 | 18 | quantity × rate; item count; total quantity; subtotal; 2.5% CGST and SGST; total; cash − total = change; GSTIN; bill-number month | 0.96 | 77
+Certificate of completion | 10 | 10 | duration matches the dates; issue window; grade matches the score; check letter; verification code; USN format | 0.90 | 359
+Passport (Utopia specimen) | 10 | 18 | each printed field equals its MRZ copy; ICAO 9303 check digits; expiry follows from issue date and age | 0.90 | 396
+Student ID card | 7 | 8 | USN encodes branch and year; four-year batch; validity; age at admission; issue window | 0.86 | 456
+!end
+
+### FORGERY TYPES
+
+We use four kinds of forgery, chosen so that the two kinds of evidence can be present or absent independently (Table 3.4). **T1 (crude)** fills the field with the background colour and types the new value in a different font. **T2 (blended)** imitates generative inpainting: the new value is rendered in the document's own font and compression, smoothed and with less noise, and blended in with a soft mask. **T3 (coherent)** changes a field and also fixes every field that depends on it, so no rule breaks. **T4 (complete)** is T3 with blended rendering, which leaves neither a broken rule nor a strong visual trace.
+
+!table Table 3.4: Forgery Types and Test-Set Composition (1,500 Test Documents per Type)
+!widths 26,18,18,18,20
+!opts center
+Category | Visual trace | Rule violation | Transcript | All six types
+Genuine | none | none | 478 | 2,683
+T1 crude | strong | yes | 293 | 1,836
+T2 blended | weak | yes | 290 | 1,775
+T3 coherent | strong | no | 215 | 1,329
+T4 complete | weak | no | 224 | 1,377
+!end
+
+### AN UNSEEN GENERATOR AT TEST TIME
+
+Published detectors fail on generative forgeries mainly because they meet a generator they were never trained on. We set up the same situation on purpose. No part of the system that judges tampering ever sees a T2 or T4 document. In the main setting the visual branch is trained on genuine documents, crude edits and 1,000 documents per type blended by an **older generator G1**, which smooths more and uses a hard-edged mask. The test edits are made by a **newer, subtler generator G2**. This mimics a detector that was built before the current generator came out. We also run a zero-shot setting (crude edits only) and an oracle setting (trained on G2 itself) to see how much visual evidence the system needs.
+
+### SPLITS AND THE AMBIGUITY SPLIT
+
+Each type has 2,000 training, 500 validation and 1,500 test documents from separate random seeds, plus 1,000 G1-blended training documents and 500 G1-blended validation documents used only to choose the attribution head. The **ambiguity split** contains the single-field test edits whose broken rules fit more than one field. By Proposition 1, the rules alone cannot do better than chance on these edits, which makes this split the main test of the design.
+
+### REAL DATASETS
+
+- **CORD v2:** 1,000 receipt photographs from Indonesian shops and restaurants with every printed value labelled (800 training, 100 validation, 100 test; CC BY 4.0). We use it to check whether real receipts follow our rules and to test CVP on real photos forged with known ground truth.
+- **Find it again!:** 988 scanned receipts from Malaysian shops (from SROIE), of which 163 were forged by people with ordinary image editors. We use it to test whether real human forgeries break receipt rules.
+
+### METRICS AND HYPOTHESES
+
+Detection is measured with AUC and with F1 at the threshold that gives the best F1 on validation data. Attribution is the share of tampered documents for which the top-ranked field is an edited field, with only exact ties sharing credit. Before the experiments we fixed four hypotheses: **H1**, the visual detector degrades from crude to blended edits while the rules do not; **H2**, the rules alone are at chance on the ambiguity split; **H3**, CVP beats both single-modality baselines on the ambiguity split by a larger margin than overall; and **H4**, candidate pooling beats simple concatenation of the two branches, mainly in attribution. We compare against five baselines: ELA, the visual branch alone, the rules alone, concatenation fusion and CVP (rule).

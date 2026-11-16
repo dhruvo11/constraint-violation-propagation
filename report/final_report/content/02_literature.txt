@@ -1,0 +1,107 @@
+# CHAPTER 2: BACKGROUND AND LITERATURE SURVEY
+
+## 2.1 HOW DOCUMENT FORGERY IS DETECTED TODAY
+
+Document forgery detection has mostly been treated as an image forensics problem. When a region of an image is edited and the image is saved again, the edited region usually carries a different compression history from the rest of the page. Error Level Analysis (ELA) makes this visible by re-saving the image at a known JPEG quality and looking at the difference: regions that were saved a different number of times respond differently. Other cues include the noise pattern of the camera or scanner, which a pasted region does not share, and small inconsistencies in the shape, weight and spacing of characters when text is retyped in a slightly different font.
+
+Deep learning moved these ideas into trained networks. Modern detectors take the image, often together with its JPEG frequency coefficients, and produce a pixel-level map that marks the regions they think were edited. They are trained on large datasets of tampered documents, such as DocTamper, and they work well on the kinds of edits they were trained on: copy and paste, splicing, and text replaced with ordinary image editors.
+
+## 2.2 WHY GENERATIVE EDITING BREAKS THESE DETECTORS
+
+Generative inpainting does not paste a region from somewhere else; it synthesises new pixels conditioned on the surroundings. The new pixels inherit the local texture, noise and compression, so the cues that ELA and frequency-based detectors rely on are mostly absent. Two recent benchmarks show how serious this is:
+
+- **AIForge-Doc (2026):** numbers on receipts and forms from the CORD, WildReceipt, SROIE and XFUND datasets were repainted with two commercial AI editors. TruFor reached 0.751 AUC, the DocTamper detector 0.563 with a pixel IoU of only 0.020, and a zero-shot GPT-4o judge 0.509.
+- **DOCFORGE-BENCH (2026):** 14 forensic methods were applied zero-shot to eight document datasets, all of which predate generative editing. None of them worked reliably across document types, largely because their decision thresholds were badly calibrated when the edited area covered less than 5% of the image.
+
+The common lesson is that a visual detector meets trouble whenever the test-time manipulation differs from what it saw in training, and generative editing makes this the normal case.
+
+## 2.3 LITERATURE REVIEW
+
+The following review covers the work this project builds on, roughly in the order in which it appeared.
+
+**Graves et al. (2006)** introduced Connectionist Temporal Classification (CTC), which lets a recurrent network learn to read a sequence of characters from an image without knowing where each character starts and ends. CTC is the training loss of the field reader in this project.
+
+**Krawetz (2007)** popularised Error Level Analysis as a simple and explainable way to find regions of an image with a different compression history. We use ELA both as a baseline and as an extra input channel to our visual network.
+
+**Ronneberger et al. (2015) and He et al. (2016)** proposed the U-Net, an encoder-decoder network for pixel-level prediction, and residual networks (ResNets), which made deep networks easy to train. Our visual branch is a U-Net with a ResNet-18 encoder.
+
+**Shi et al. (2017)** combined convolutional layers, recurrent layers and CTC into the CRNN, an end-to-end text recogniser. Our OCR is a CRNN trained on crops of our own documents.
+
+**Huang et al. (2019) and Park et al. (2019)** released SROIE and CORD, two receipt datasets with labelled fields for OCR and information extraction. CORD provides the real receipt photos for our real-data experiments.
+
+**Zhong et al. (2019)** built PubLayNet by using the structure of documents to obtain layout labels automatically. We use the same idea to get exact per-field ground truth from our own rendering code.
+
+**Xu et al. (2020)** proposed LayoutLM, a language model that reads a document as text together with the position of each word. It is the kind of reader we suggest for future work, to link amounts to their labels more reliably.
+
+**Luo et al. (2021)** showed with NewsCLIPpings that the disagreement between an image and its caption can itself reveal misinformation. Our method uses a related idea: disagreement between the values in a document and its rules.
+
+**Rombach et al. (2022)** introduced latent diffusion models, the basis of today's image generators and inpainting tools.
+
+**Wang et al. (2022)** studied tampered text in natural scenes, one of the first works on detecting edited text rather than general image edits.
+
+**Qu et al. (2023)** released DocTamper, a dataset of 170,000 tampered document images, together with the DTD detector, which combines a frequency branch with a multi-view decoder. DTD is one of the detectors whose performance falls sharply on AI-inpainted documents.
+
+**Shao et al. (2023)** proposed HAMMER, which detects and grounds manipulation jointly in the image and the text of news posts. Its notion of consistency is about meaning rather than arithmetic.
+
+**Guillaro et al. (2023)** proposed TruFor, a general image forgery detector that combines RGB and noise features and reports a reliability map with its prediction.
+
+**Martínez Tornés et al. (2023)** released Find it again!, 988 scanned SROIE receipts of which 163 were forged by people with ordinary image editors, with the edited regions annotated. We use it to test whether real forgeries break receipt rules.
+
+**Chen et al. (2024)** improved tampered-text detection by fusing and decomposing frequency features (FFDN).
+
+**Qu et al. (2024)** proposed TextSleuth, which uses a multimodal language model to explain its tampered-text detections in words.
+
+**Qu et al. (2025)** revisited tampered scene-text detection now that generative editing is common, and **Wong et al. (2025)** proposed ADCD-Net, which uses adaptive DCT features that remain useful after compression.
+
+**Wang et al. (2025)** proposed TLANet for complex personnel documents, using an image stream and a gradient stream, both of which are visual.
+
+**Liang et al. (2025)** benchmarked multimodal LLMs on detecting manipulated transaction documents and found that the models look at cues such as inconsistent sums, although they do not locate the edit.
+
+**Liu et al. (2025)** proposed MIMoE-FND, which routes each news post to different experts depending on whether its image and text agree.
+
+**Wu et al. (2026)** built AIForge-Doc, the benchmark of AI-inpainted receipts and forms described in Section 2.2, and **Zhao et al. (2026)** built DOCFORGE-BENCH, the zero-shot benchmark of 14 methods.
+
+**Zhang et al. (2026)** created GPT4o-Receipt, a set of receipts generated entirely by GPT-4o, and found that arithmetic errors were the strongest sign of a fake: LLMs can check them, while human annotators mostly cannot see them.
+
+**Kumar et al. (2026)** proposed FLiD, which finds the face and text fields of identity documents and classifies each field separately from its visual features. **Devi and Fatima (2026)** proposed ForenXAI, which combines a ResNet-50 image stream with an attention LSTM over the text. **Saha et al. (2026)** combined text and arithmetic logic to find anomalies in invoices, with no image input. **Dhouib et al. (2026)** proposed an efficient tampering localiser based on DCT and quantisation features.
+
+Table 2.1 summarises how the closest approaches compare with CVP.
+
+!table Table 2.1: Comparison of Existing Approaches Against CVP
+!widths 27,12,12,14,15,20
+!opts firstbold
+Approach | Uses pixels | Uses text | Checks explicit rules | Names the edited field | Result on generative edits
+DocTamper / DTD (2023) | Yes | No | No | Region only | 0.563 AUC (AIForge-Doc)
+TruFor (2023) | Yes | No | No | Region only | 0.751 AUC (AIForge-Doc)
+ADCD-Net (2025) | Yes | No | No | Region only | Not reported
+FLiD (2026) | Yes | No | No | Yes (visual) | Not reported
+ForenXAI (2026) | Yes | Yes (learned) | No | Not reported | Not reported
+Prompted MLLMs (2025) | Yes | Yes | Implicitly | No | 0.509 AUC (GPT-4o, AIForge-Doc)
+Text–logic invoice model (2026) | No | Yes | Yes | No | Not reported
+**CVP (this project)** | **Yes** | **Yes** | **Yes** | **Yes** | **0.746 AUC zero-shot on our forged real receipts**
+!end
+
+## 2.4 IDENTIFIED RESEARCH GAPS
+
+From this survey we identified the following gaps, which this project addresses:
+
+- **Visual detectors ignore the content:** they look only at pixels and fail when the manipulation leaves no pixel-level trace or comes from an unseen generator.
+- **Text-aware methods do not check explicit rules:** they learn patterns from the text, so they cannot guarantee that a broken total is noticed.
+- **Rule checking exists only in prompted LLMs or text-only models:** these do not locate the edit and, in the LLM case, depend on paid APIs.
+- **No method uses the structure of the violation to find the edited field:** field-level attribution has only been tried with visual features.
+- **No theory of what rules can and cannot do:** there was no account of when rule checking alone is enough and when it must be combined with other evidence.
+
+## 2.5 TOOLS AND CORE TECHNOLOGIES
+
+The project was built entirely with free and open-source tools:
+
+- **Python 3.12:** the programming language for the whole project, managed with the uv package manager and a locked list of 87 packages.
+- **PyTorch 2.14 and torchvision 0.29:** training and running the OCR and visual networks on the Apple-silicon GPU (MPS).
+- **NumPy, SciPy and scikit-learn:** numerical work, the class-posterior network, logistic regression and evaluation metrics.
+- **Pillow and OpenCV:** image rendering, document templates and the forgery renderers.
+- **docTR 1.1.0:** an open-source OCR toolkit used to read real receipts.
+- **Gradio 6.31:** the interactive web application.
+- **Matplotlib:** all graphs in this report and in the paper.
+- **pytest 9.2:** the automated test suite.
+- **LaTeX (IEEEtran class, built with Tectonic):** the IEEE research paper.
+- **Git:** version control, with one branch per project phase.

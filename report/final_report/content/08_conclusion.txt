@@ -1,0 +1,20 @@
+# CHAPTER 8: CONCLUSION AND FUTURE SCOPE
+
+## 8.1 PROJECT CONCLUSION
+
+This project set out to detect forged structured documents, and to find the edited field, in a world where generative editing leaves little visual evidence behind. Our answer, Constraint Violation Propagation, rests on a simple observation and a simple result. The observation is that a local edit cannot respect the arithmetic and logical rules that tie a document's fields together. The result, Proposition 1, is that these rules can tell which kind of field was changed but, in general, not which field. Together they suggest a clear division of work: the rules narrow down the candidates, and the visual evidence chooses between them.
+
+We built this into a complete system with six synthetic document types, a shared OCR reader, a shared visual network, a fusion head chosen on separate validation data, an interactive application and a full test suite. On 9,000 synthetic test documents with edits from an unseen generator, CVP named the edited field for 87.6% to 92.4% of tampered documents, ahead of every baseline, and caught 97.6% to 100% of blended edits that the visual branch alone mostly missed. On real receipt photographs it added 13 points of attribution to a zero-shot visual model and still improved on a visual model that had seen the forger, and on real forgeries made by people, the rules separated forged from genuine receipts where the visual model could not. We have also reported clearly where CVP falls short: forgeries that keep every rule, a head that can trust weak evidence too much, and false alarms caused by reading errors. We believe this is a useful and honest step towards forgery detection that does not depend on pixels alone.
+
+## 8.2 EXTENSIONS AND DEPLOYMENT ROADMAP
+
+- **Real diffusion forgeries:** evaluate CVP on documents edited by real generative models, such as the AIForge-Doc benchmark, whose access requires accepting its terms on Hugging Face.
+- **A calibrated attribution head:** make the head's trust in the heatmap depend on the quality of the heatmap, for example by conditioning its weights on image statistics, to remove the failures under downscaling and on the receipt's cash/change ambiguity.
+- **Better reading of real documents:** replace the row-based reader with a layout-aware language model such as LayoutLM to link amounts to their labels more reliably and lower the false-alarm floor.
+- **Learning the rules:** induce constraint systems automatically from collections of genuine documents instead of writing them by hand for each document type.
+- **More document types and languages:** add bank statements, salary slips and utility bills, and documents printed in Indian languages.
+- **Deployment:** package the system as a web service with an API for document-verification workflows, keeping all processing local so that sensitive documents never leave the organisation.
+
+## 8.3 LONG-TERM RESEARCH VISION
+
+In the long run, we see document verification moving from asking "do these pixels look edited?" to asking "is this document consistent with everything we know about documents of its kind?". Arithmetic rules are only the start. Cross-document consistency (an invoice that matches a purchase order and a bank transfer), external records (a certificate number that can be looked up) and knowledge about how real documents are produced can all be combined in the same way: each source narrows down what could have been changed, and the remaining evidence decides. Building verification systems that explain their decisions in these terms, and that keep working as generative tools improve, is the direction we would most like to continue.

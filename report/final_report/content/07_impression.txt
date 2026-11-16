@@ -1,0 +1,36 @@
+# CHAPTER 7: IMPRESSION REPORT
+
+## 7.1 PERSONAL LEARNING EXPERIENCE
+
+This project taught us that a research idea only becomes real when it is tested against its own failure cases. The core idea, that a forger does not know a document's arithmetic, fits in a sentence, but turning it into a working system meant answering many smaller questions: how to read a field without the reader "fixing" a forged value, how to make realistic forgeries with exact ground truth, how to measure attribution fairly when several fields can be guessed, and how to keep the test set honest when we were also the ones building the forger.
+
+The most valuable habit we picked up was writing down what we expected before running an experiment. Fixing the four hypotheses in advance, and choosing the attribution head on separate validation data, meant we could not quietly pick the numbers that looked best. It also meant reporting results we did not like: the shop receipt's cash/change ambiguity, the drop under downscaling and the high false-alarm rate on real receipts are all in this report because the protocol made us look at them.
+
+We also learned to work within limits. Everything in this project, including training the networks and running 9,000-document evaluations, was done on an 8 GB laptop with no paid services, which forced us to keep the models small, cache intermediate results and plan long jobs carefully.
+
+## 7.2 SKILL ENHANCEMENT & PROFESSIONAL GROWTH
+
+- **Deep learning in practice:** designing, training and debugging a CRNN text reader and a U-Net segmentation network in PyTorch, including data pipelines, losses and learning-rate schedules on Apple-silicon hardware.
+- **Image forensics:** JPEG compression, Error Level Analysis, why patch boundaries must align with the JPEG block grid, and how generative inpainting differs from classical editing.
+- **Probability and statistics:** class posteriors, the noisy-OR, AUC and F1, choosing thresholds on validation data, confidence intervals and significance tests.
+- **Formal reasoning:** stating and proving a proposition about the limits of rule checking and turning it into automated tests.
+- **Software engineering:** structuring a research code base as a package, writing 346 tests, making every result reproducible from scripts, and using Git branches for each phase.
+- **Working with real data:** handling public datasets with their own formats, licences and quirks, and building an OCR pipeline on top of an open-source toolkit.
+- **Scientific writing:** writing an IEEE-format paper in LaTeX, checking every reference, and presenting results with their limitations.
+
+## 7.3 INDUSTRY AND ACADEMIC RELEVANCE
+
+Document fraud is a practical problem in many fields. Banks and fintech companies check identity documents during onboarding, insurance companies and employers process receipts for claims and reimbursements, tax systems rely on invoices, and universities and employers verify mark sheets and certificates. As AI editing tools become easier to use, detectors that only look at pixels will become less reliable, and checks that use the content of the document will become more important. CVP's approach suits these settings well because the rules already exist (tax formulas, check digits, totals and grading schemes), and because its output is easy to explain: it names the field, lists the broken rules and shows the evidence, which a human reviewer can verify in seconds.
+
+Academically, the project connects image forensics with symbolic reasoning, two areas that are usually studied separately. The theory of what rule checking can and cannot achieve applies to any structured data with explicit constraints, and the evaluation protocol with an unseen generator reflects the situation that real detectors face.
+
+## 7.4 ENGINEERING CHALLENGES OVERCOME
+
+- **The OCR was "too clever".** An OCR trained only on valid documents tends to read a forged value as the value it expects. We solved this by training the reader on values drawn deliberately beyond the valid range, so that it reads what is printed rather than what is likely.
+- **ELA on patches did not match ELA on pages.** Training on random patches produced ELA maps that differed from the full-page ones, because JPEG works on 16-pixel blocks. Cutting patches on the block grid made the two identical.
+- **A scoring bug hid real wins.** An early version treated nearly equal scores as ties, which under-credited methods whose heatmaps were saturated. We changed the scoring to count only exact ties and added a test for it.
+- **The threshold flagged everything.** On real receipts, choosing the detection threshold by F1 picked a threshold that flagged every document, because most documents in the validation set were forged. Switching to Youden's J, which balances detection rate and false-alarm rate, fixed this.
+- **A small reading margin caused false alarms.** Widening the crop around each value on real receipts to catch longer numbers pulled in stray characters and raised the false-alarm rate on genuine receipts from 11 to 16 per 100. We removed the margin and made the forger keep the digit count of each value instead, as a careful forger would.
+- **The real-photo forger needed several fixes.** Early versions clipped leading digits, drew ink that was lighter than the receipt's, let longer values overflow their boxes and sometimes produced "edits" that did not change the value. Each case was fixed and covered by a test, and we checked that 98.6% of edited values read back exactly.
+- **Dependency and download problems.** The OCR toolkit for real receipts conflicted with another library and had to be installed carefully with its dependencies pinned, and large dataset downloads stalled on an unreliable connection until we used resumable, retrying downloads.
+- **Memory and time on an 8 GB laptop.** We cached the OCR and network outputs so that evaluation re-runs in seconds, ran heavy jobs one at a time, and kept the laptop awake during long training runs.
