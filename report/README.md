@@ -11,20 +11,10 @@ were checked against their arXiv or publisher pages.
   Overleaf's default settings (pdfLaTeX + BibTeX).
 - **On this laptop:** `./build.sh` runs `tectonic main.tex` and writes `main.pdf` and the zip.
 
-## Fill in before submitting
+## Author details
 
-At the top of `main.tex`, five commands hold the details only the authors know. They print
-in red until they are replaced:
-
-```latex
-\newcommand{\Institution}{\Fill{[Institution Name]}}
-\newcommand{\City}{\Fill{[City]}}
-\newcommand{\EmailHarshith}{\Fill{[e-mail]}}
-\newcommand{\EmailDhruv}{\Fill{[e-mail]}}
-\newcommand{\Supervisor}{\Fill{[Supervisor Name]}}
-```
-
-Replace, for example, `\Fill{[City]}` with `Bengaluru`.
+The paper names RV University (School of Computer Science and Engineering) and both USNs.
+To thank your guide by name, edit the Acknowledgments paragraph near the end of `main.tex`.
 
 ## Where the content comes from
 
