@@ -419,37 +419,29 @@ def front_matter(f, doc, pages, abstract, ack, abbrev):
         out.append(para(inline(p), after=120, line=360))
     out.append(para([], after=240, line=240))
     out.append(f["ack_sig"])
-    # table of contents and the lists of tables and figures: Word fields with a ready-made cached
-    # result (Word recomputes the page numbers when the document is opened; see settings updateFields)
+    # table of contents and the lists of tables and figures: plain, editable text, as in the template.
+    # Page numbers come from a rendering pass (scripts/report_pages.py); each sits on its entry's line at
+    # a right tab on the margin, with a dot leader.
     pg = lambda key: str(pages.get(key, ""))  # noqa: E731
 
-    def field(instr, entries):
-        """A field whose cached result is `entries` [(text, page, level)]."""
-        if not entries:
-            entries = [("", "", 1)]
-        paras = []
-        for k, (text, page, level) in enumerate(entries):
-            runs = []
-            if k == 0:
-                runs.append('<w:r><w:fldChar w:fldCharType="begin" w:dirty="true"/></w:r>'
-                            f'<w:r><w:instrText xml:space="preserve"> {escape(instr)} </w:instrText></w:r>'
-                            '<w:r><w:fldChar w:fldCharType="separate"/></w:r>')
-            runs.append(run(f"{text}\t{page}", bold=(level == 1), size=11))
-            if k == len(entries) - 1:
-                runs.append('<w:r><w:fldChar w:fldCharType="end"/></w:r>')
-            paras.append(para(runs, jc="left", after=30, before=100 if level == 1 else 0, line=264, tabs=[TEXT_W],
-                              ind={"left": 480 if level == 2 else 0, "right": 700, "firstLine": 0},
-                              style={1: "TOC1", 2: "TOC2", 3: "TOC3"}[level], leader="dot" if level == 3 else "none"))
-        return paras
+    def toc_line(text, page, level):
+        return para([run(f"{text}\t{page}", bold=(level == 1), size=11)], jc="left", line=264,
+                    after=40 if level == 1 else 30, before=100 if level == 1 else 0, tabs=[TEXT_W], leader="dot",
+                    ind={"left": 480 if level == 2 else 0, "right": 0, "firstLine": 0}, keep_lines=True)
     out.append(title("TABLE OF CONTENTS"))
     fixed = ["ABSTRACT", "ACKNOWLEDGEMENT", "TABLE OF CONTENTS", "LIST OF TABLES", "LIST OF FIGURES",
              "LIST OF SYMBOLS, ABBREVIATIONS AND NOMENCLATURE"]
-    entries = [(name, pg(name), 1) for name in fixed] + [(text, pg(text), level) for level, text in doc.toc]
-    out += field('TOC \\o "1-2" \\h \\z \\u', entries)
-    out.append(title("LIST OF TABLES"))
-    out += field('TOC \\h \\z \\t "Table Caption,3"', [(cap, pg(cap.split(":")[0]), 3) for cap in doc.tables])
-    out.append(title("LIST OF FIGURES"))
-    out += field('TOC \\h \\z \\t "Figure Caption,3"', [(cap, pg(cap.split(":")[0]), 3) for cap in doc.figures])
+    for name in fixed:
+        out.append(toc_line(name, pg(name), 1))
+    for level, text in doc.toc:
+        out.append(toc_line(text, pg(text), level))
+    for heading, items, word in [("LIST OF TABLES", doc.tables, "Table"), ("LIST OF FIGURES", doc.figures, "Figure")]:
+        out.append(title(heading))
+        rows = [[f"{word} No.", f"{word} Caption", "Page No."]]
+        for cap in items:
+            num, rest = cap.split(":", 1)
+            rows.append([num.replace(word + " ", ""), rest.strip(), pg(num)])
+        out.append(table(rows, [1300, 5906, 1100], size=11, center_cols=(0, 2)))
     out.append(title("LIST OF SYMBOLS, ABBREVIATIONS AND NOMENCLATURE"))
     out.append(table([["Abbreviation / Symbol", "Expansion and Meaning"]] + abbrev, [2400, 5906], size=11))
     sect2 = (f'<w:sectPr><w:footerReference r:id="{f["footers"]["footer2.xml"]}" w:type="default"/><w:type w:val="nextPage"/>'
@@ -515,7 +507,6 @@ def build(pages):
                          f'<w:rPr>{tnr}<w:b w:val="1"/><w:bCs w:val="1"/><w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:style>')
     styles = styles.replace("</w:styles>", extra_styles + "</w:styles>")
     settings = open(os.path.join(PARTS, "word", "settings.xml")).read()
-    settings = settings.replace("<w:compat>", '<w:updateFields w:val="true"/><w:compat>', 1)
     numbering = open(os.path.join(PARTS, "word", "numbering.xml")).read()
     extra = "".join(f'<w:num w:numId="{n}"><w:abstractNumId w:val="1"/><w:lvlOverride w:ilvl="0">'
                     '<w:startOverride w:val="1"/></w:lvlOverride></w:num>' for n in doc.lists)

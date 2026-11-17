@@ -33,4 +33,4 @@ C(V) | The consistent set: fields from which a single edit could produce the vio
 H | The tamper heatmap produced by the visual branch
 π(f) | The field prior given by the constraint branch
 θ | The weights of the attribution head (kept non-negative)
-g_φ, h_θ | The class-posterior network and the visual network
+gφ, hθ | The class-posterior network and the visual network

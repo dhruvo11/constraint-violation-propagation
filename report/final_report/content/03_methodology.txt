@@ -110,9 +110,9 @@ We also report the special case **CVP (rule)**, in which the decision is restric
 Real documents with known edits are hard to obtain, and real personal documents could not be used, so we built six document types with fictional issuers (Table 3.3). Each type has a template, a schema of fields and rules, and its own forger. Because the box of every field is recorded at render time, every document comes with exact per-field ground truth and no manual labelling is needed.
 
 !table Table 3.3: The Six Synthetic Document Types
-!widths 20,7,7,46,8,12
+!widths 19,9,9,41,8,14
 !opts firstbold
-Type | Fields | Rules | What the rules check | ρ | Ambiguous test edits
+Type | Fields | Rules | What the rules check | ρ | Ambiguous edits
 Academic transcript | 10 | 10 | marks add up to the total; percentage; grade band; mark ranges; issue date; roll-number format | 0.70 | 244
 GST tax invoice | 24 | 19 | quantity × rate; taxable value; CGST + SGST or IGST by place of supply; round-off; grand total; amount in words; GSTIN check character; financial year | 0.94 | 264
 Shop receipt | 27 | 18 | quantity × rate; item count; total quantity; subtotal; 2.5% CGST and SGST; total; cash − total = change; GSTIN; bill-number month | 0.96 | 77

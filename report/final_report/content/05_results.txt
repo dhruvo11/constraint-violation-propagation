@@ -5,7 +5,7 @@
 Before looking at accuracy, we checked that the code does what it is supposed to do. The test suite was run in full on the final version of the code (Table 5.1). All 346 tests ran: 345 passed and 1 was skipped by design, a randomly generated case of the Proposition 1 property test whose perturbation would push a mark outside the valid range, where the proposition does not apply. No test failed. The whole suite takes about 103 seconds, most of it spent loading and running the trained models.
 
 !table Table 5.1: Automated Test Suite Results
-!widths 24,40,9,9,9,9
+!widths 21,37,8,10,12,12
 !opts center
 Test file | What it checks | Tests | Passed | Skipped | Time (s)
 test_schema.py | Equivalence classes, signatures, consistent sets, ρ, Proposition 1 | 146 | 145 | 1 | 0.1
@@ -90,9 +90,9 @@ Figure 5.5 shows the mechanism on one transcript. The same subject mark is edite
 Six designs of the attribution head and CVP (rule) were compared on a separate validation set of blended edits from the older generator, with the rule for choosing fixed beforehand: the best mean attribution over the six types (Table 5.5). The per-class prior with heat used as probabilities won with 97.0%, against 91.1% for CVP (rule), and it is the CVP reported throughout. On the test set, the designs trade blended single-field edits against complete forgeries: the chosen design is best on blended edits (88.9% on average), the log-space designs are best on complete forgeries (up to 74.6%), and no design wins everywhere. CVP (rule) is better than the chosen head on the transcript (92.0% against 89.1%) and the ID card (88.9% against 87.6%) but much worse on the ambiguity split (76.0% against 88.1% on average), because choosing a single class throws away the true field whenever two classes fit the broken rules.
 
 !table Table 5.5: Choosing the Attribution Head on Validation Data (Attribution, %)
-!widths 22,10,10,10,10,10,10,10
+!widths 20,11,11,11,10,12,11,14
 !opts center
-Head design (prior / heat) | Transcript | Invoice | Receipt | Certificate | Passport | ID card | Mean
+Head design (prior / heat) | Trans. | Invoice | Receipt | Cert. | Passport | ID card | Mean
 class / prob (chosen) | **99.6** | **86.8** | **96.6** | **100.0** | **98.8** | **100.0** | **97.0**
 class / log | 99.4 | 86.4 | 88.6 | 100.0 | 98.8 | 100.0 | 95.5
 class / logmax | 99.6 | 85.3 | 88.6 | 99.6 | 98.8 | 99.2 | 95.2
