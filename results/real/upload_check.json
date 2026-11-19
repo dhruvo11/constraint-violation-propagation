@@ -1,0 +1,4152 @@
+{
+ "summary": {
+  "photos": 198,
+  "genuine": 100,
+  "forged": 98,
+  "false_alarm": 0.06,
+  "warning_genuine": 0.12,
+  "no_rule_checked": 0.15,
+  "no_bill_rule_checked": 0.4,
+  "caught": 0.2755102040816326,
+  "caught_or_warned": 0.5408163265306123,
+  "located": 0.42857142857142855,
+  "located_n": 49,
+  "per_field_genuine": {
+   "subtotal": {
+    "right": 48,
+    "wrong": 2,
+    "missing": 15
+   },
+   "tax": {
+    "right": 32,
+    "wrong": 4,
+    "missing": 5
+   },
+   "service": {
+    "right": 10,
+    "wrong": 1,
+    "missing": 1
+   },
+   "discount": {
+    "right": 5,
+    "wrong": 1,
+    "missing": 0
+   },
+   "total": {
+    "right": 72,
+    "wrong": 2,
+    "missing": 21
+   },
+   "cash": {
+    "right": 45,
+    "wrong": 4,
+    "missing": 18
+   },
+   "change": {
+    "right": 36,
+    "wrong": 3,
+    "missing": 17
+   }
+  }
+ },
+ "photos": [
+  {
+   "k": 0,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "discount": "wrong",
+    "total": "right"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 0,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "discount": "wrong",
+    "total": "right"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 1,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 1,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 1,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 2,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 2,
+   "category": "T2",
+   "edited": "change",
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 2,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": false,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 3,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 2,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 3,
+   "category": "T2",
+   "edited": "subtotal",
+   "fields": {
+    "subtotal": "missing",
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 1,
+   "located": false,
+   "notes": [
+    "The item lines add up to 4.00, far from the total (11,000.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 4,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "discount": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 4,
+   "category": "T2",
+   "edited": "price1",
+   "fields": {
+    "subtotal": "missing",
+    "discount": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 5,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 5,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [
+    "total",
+    "tender"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": true,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 6,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 6,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [
+    "sum",
+    "change",
+    "tender"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 7,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "tax": "missing",
+    "total": "right",
+    "cash": "missing"
+   },
+   "n_items": 4,
+   "true_items": 1,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 7,
+   "category": "T2",
+   "edited": "price1",
+   "fields": {
+    "subtotal": "missing",
+    "tax": "missing",
+    "total": "right",
+    "cash": "missing"
+   },
+   "n_items": 3,
+   "true_items": 1,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 8,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right"
+   },
+   "n_items": 3,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": [
+    "A rounding of +0.00 is printed: totals within one currency unit count as equal, so it is allowed for."
+   ]
+  },
+  {
+   "k": 8,
+   "category": "T2",
+   "edited": "price1",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 1,
+   "located": null,
+   "notes": [
+    "The item lines add up to 0.00, far from the subtotal (45,455.00). They were probably misread, so the rule that the items add up is not checked.",
+    "A rounding of +0.00 is printed: totals within one currency unit count as equal, so it is allowed for."
+   ]
+  },
+  {
+   "k": 9,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "cash": "missing",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 9,
+   "category": "T2",
+   "edited": "subtotal",
+   "fields": {
+    "subtotal": "missing",
+    "cash": "missing",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 10,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "missing",
+    "cash": "missing",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 10,
+   "category": "T2",
+   "edited": "change",
+   "fields": {
+    "subtotal": "right",
+    "total": "missing",
+    "cash": "missing",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 0,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 11,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "missing",
+    "change": "missing"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 11,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "total": "wrong",
+    "cash": "missing",
+    "change": "missing"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 12,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "change": "missing"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 12,
+   "category": "T2",
+   "edited": "qty",
+   "fields": {
+    "total": "right",
+    "change": "missing"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 13,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 3,
+   "true_items": 2,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 4,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 13,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "subtotal": "missing",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 0,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 1,
+   "located": false,
+   "notes": [
+    "The item lines add up to 3,000.00, far from the total (40,300.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 14,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 6,
+   "true_items": 6,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 14,
+   "category": "T2",
+   "edited": "subtotal",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 6,
+   "true_items": 6,
+   "violated": [
+    "sum",
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 15,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 15,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [
+    "tender"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 16,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 5,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": [
+    "A rounding of +0.00 is printed: totals within one currency unit count as equal, so it is allowed for."
+   ]
+  },
+  {
+   "k": 16,
+   "category": "T2",
+   "edited": "change",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 5,
+   "true_items": 2,
+   "violated": [
+    "change"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": true,
+   "notes": [
+    "A rounding of +0.00 is printed: totals within one currency unit count as equal, so it is allowed for."
+   ]
+  },
+  {
+   "k": 17,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "discount": "right",
+    "total": "right"
+   },
+   "n_items": 6,
+   "true_items": 6,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 17,
+   "category": "T2",
+   "edited": "price2",
+   "fields": {
+    "subtotal": "right",
+    "discount": "right",
+    "total": "right"
+   },
+   "n_items": 6,
+   "true_items": 6,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 18,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "missing",
+    "cash": "missing",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 18,
+   "category": "T2",
+   "edited": "unit1",
+   "fields": {
+    "total": "missing",
+    "cash": "missing",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 19,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "tax": "right",
+    "total": "right"
+   },
+   "n_items": 3,
+   "true_items": 2,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 19,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "subtotal": "missing",
+    "tax": "right",
+    "total": "right"
+   },
+   "n_items": 0,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": false,
+   "notes": [
+    "The item lines add up to 260,000.00, far from the total (121,000.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 20,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "total": "right"
+   },
+   "n_items": 5,
+   "true_items": 5,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 20,
+   "category": "T2",
+   "edited": "price5",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "total": "right"
+   },
+   "n_items": 5,
+   "true_items": 5,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 21,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "missing",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 21,
+   "category": "T2",
+   "edited": "unit1",
+   "fields": {
+    "total": "missing",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 22,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 22,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [
+    "sum",
+    "change"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 23,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 23,
+   "category": "T2",
+   "edited": "change",
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "wrong"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [
+    "change"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 24,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 5,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 24,
+   "category": "T2",
+   "edited": "unit1",
+   "fields": {
+    "total": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 25,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 25,
+   "category": "T2",
+   "edited": "price3",
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 26,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 5,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 26,
+   "category": "T2",
+   "edited": "cnt3",
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 4,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 27,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "missing"
+   },
+   "n_items": 3,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 27,
+   "category": "T2",
+   "edited": "price1",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "missing"
+   },
+   "n_items": 3,
+   "true_items": 2,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 28,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "discount": "right",
+    "total": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 28,
+   "category": "T2",
+   "edited": "service",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "discount": "right",
+    "total": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 29,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "tax": "right",
+    "total": "wrong"
+   },
+   "n_items": 8,
+   "true_items": 6,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 29,
+   "category": "T2",
+   "edited": "price3",
+   "fields": {
+    "subtotal": "missing",
+    "tax": "right",
+    "total": "wrong"
+   },
+   "n_items": 8,
+   "true_items": 6,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 30,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 30,
+   "category": "T2",
+   "edited": "change",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [
+    "change"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 31,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "total": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [
+    "sum",
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 31,
+   "category": "T2",
+   "edited": "tax",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "total": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [
+    "sum",
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 32,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 32,
+   "category": "T2",
+   "edited": "cnt1",
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 33,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "total": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [
+    "sum",
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 33,
+   "category": "T2",
+   "edited": "subtotal",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "total": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [
+    "sum",
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 34,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 34,
+   "category": "T2",
+   "edited": "price2",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 35,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 4,
+   "true_items": 4,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 35,
+   "category": "T2",
+   "edited": "price2",
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 4,
+   "true_items": 4,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 36,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "total": "missing",
+    "cash": "missing",
+    "change": "wrong"
+   },
+   "n_items": 4,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 36,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "subtotal": "missing",
+    "total": "missing",
+    "cash": "missing",
+    "change": "wrong"
+   },
+   "n_items": 4,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 37,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "cash": "missing",
+    "change": "missing"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 38,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "tax": "right",
+    "service": "right",
+    "total": "right"
+   },
+   "n_items": 10,
+   "true_items": 9,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 38,
+   "category": "T2",
+   "edited": "price1",
+   "fields": {
+    "subtotal": "missing",
+    "tax": "right",
+    "service": "right",
+    "total": "right"
+   },
+   "n_items": 10,
+   "true_items": 9,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 39,
+   "category": "genuine",
+   "edited": null,
+   "fields": {},
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 39,
+   "category": "T2",
+   "edited": "qty",
+   "fields": {},
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 40,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "wrong",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [
+    "sum",
+    "change"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 5,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 40,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "total": "wrong",
+    "cash": "right",
+    "change": "wrong"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [
+    "sum",
+    "change"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 5,
+   "checked_hard": 2,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 41,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "service": "right",
+    "total": "missing"
+   },
+   "n_items": 10,
+   "true_items": 10,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 41,
+   "category": "T2",
+   "edited": "price2",
+   "fields": {
+    "subtotal": "right",
+    "service": "right",
+    "total": "missing"
+   },
+   "n_items": 10,
+   "true_items": 10,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 42,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 42,
+   "category": "T2",
+   "edited": "change",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [
+    "change"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 43,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 43,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 1,
+   "violated": [
+    "change",
+    "tender"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 44,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 44,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "total": "missing",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 2,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 45,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "missing",
+    "cash": "wrong",
+    "change": "missing"
+   },
+   "n_items": 5,
+   "true_items": 4,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 45,
+   "category": "T2",
+   "edited": "price4",
+   "fields": {
+    "total": "missing",
+    "cash": "wrong",
+    "change": "missing"
+   },
+   "n_items": 5,
+   "true_items": 4,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 46,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 46,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [
+    "sum",
+    "change"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 47,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "discount": "right",
+    "total": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 47,
+   "category": "T2",
+   "edited": "price1",
+   "fields": {
+    "discount": "right",
+    "total": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 48,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 3,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 48,
+   "category": "T2",
+   "edited": "change",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [
+    "change"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 3,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 49,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "missing",
+    "cash": "wrong",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 49,
+   "category": "T2",
+   "edited": "price1",
+   "fields": {
+    "subtotal": "right",
+    "total": "missing",
+    "cash": "wrong",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 50,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "tax": "missing",
+    "total": "right",
+    "cash": "missing",
+    "change": "missing"
+   },
+   "n_items": 3,
+   "true_items": 1,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 50,
+   "category": "T2",
+   "edited": "change",
+   "fields": {
+    "subtotal": "missing",
+    "tax": "missing",
+    "total": "right",
+    "cash": "missing",
+    "change": "missing"
+   },
+   "n_items": 3,
+   "true_items": 1,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 51,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "tax": "missing",
+    "total": "right"
+   },
+   "n_items": 6,
+   "true_items": 4,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "A rounding of +334,011.00 is printed: totals within one currency unit count as equal, so it is allowed for."
+   ]
+  },
+  {
+   "k": 51,
+   "category": "T2",
+   "edited": "qty",
+   "fields": {
+    "subtotal": "missing",
+    "tax": "missing",
+    "total": "right"
+   },
+   "n_items": 6,
+   "true_items": 4,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "A rounding of +334,011.00 is printed: totals within one currency unit count as equal, so it is allowed for."
+   ]
+  },
+  {
+   "k": 52,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 52,
+   "category": "T2",
+   "edited": "price2",
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 53,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "total": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 53,
+   "category": "T2",
+   "edited": "qty",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "total": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 54,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 2,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 54,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "missing"
+   },
+   "n_items": 2,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 55,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 55,
+   "category": "T2",
+   "edited": "price2",
+   "fields": {
+    "total": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 56,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "missing",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 56,
+   "category": "T2",
+   "edited": "price1",
+   "fields": {
+    "subtotal": "wrong",
+    "tax": "right",
+    "total": "missing",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 57,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "cash": "right"
+   },
+   "n_items": 3,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 58,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 58,
+   "category": "T2",
+   "edited": "subtotal",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 3,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 59,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right"
+   },
+   "n_items": 9,
+   "true_items": 9,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 59,
+   "category": "T2",
+   "edited": "cnt9",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right"
+   },
+   "n_items": 9,
+   "true_items": 9,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 60,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "right"
+   },
+   "n_items": 0,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 1,
+   "located": null,
+   "notes": [
+    "The item lines add up to 1,265.00, far from the subtotal (26,250.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 60,
+   "category": "T2",
+   "edited": "unit1",
+   "fields": {
+    "subtotal": "right",
+    "total": "right"
+   },
+   "n_items": 0,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 1,
+   "located": null,
+   "notes": [
+    "The item lines add up to 1,265.00, far from the subtotal (26,250.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 61,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "right"
+   },
+   "n_items": 10,
+   "true_items": 6,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 61,
+   "category": "T2",
+   "edited": "cnt2",
+   "fields": {
+    "subtotal": "right",
+    "total": "right"
+   },
+   "n_items": 10,
+   "true_items": 6,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 62,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 62,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [
+    "sum",
+    "tender"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 63,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 63,
+   "category": "T2",
+   "edited": "price1",
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 2,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 64,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "missing",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 64,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "total": "right",
+    "cash": "missing",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 65,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "missing"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 65,
+   "category": "T2",
+   "edited": "price1",
+   "fields": {
+    "subtotal": "right",
+    "total": "missing"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 66,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "tax": "wrong",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 0,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 2,
+   "located": null,
+   "notes": [
+    "The item lines add up to 364.00, far from the total (40,000.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 66,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "subtotal": "missing",
+    "tax": "wrong",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 0,
+   "true_items": 2,
+   "violated": [
+    "change"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 2,
+   "located": true,
+   "notes": [
+    "The item lines add up to 364.00, far from the total (40,000.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 67,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 67,
+   "category": "T2",
+   "edited": "cnt1",
+   "fields": {
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 68,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 68,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "total": "wrong",
+    "cash": "missing",
+    "change": "missing"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": false,
+   "notes": [
+    "The item lines add up to 20,000.00, far from the total (90,000.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 69,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 69,
+   "category": "T2",
+   "edited": "price3",
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 70,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "total": "missing"
+   },
+   "n_items": 0,
+   "true_items": 10,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The item lines add up to 2,686,004.00, far from the subtotal (1,343,000.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 70,
+   "category": "T2",
+   "edited": "unit5",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "total": "missing"
+   },
+   "n_items": 0,
+   "true_items": 10,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The item lines add up to 2,686,004.00, far from the subtotal (1,343,000.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 71,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "missing",
+    "cash": "missing",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 71,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "total": "missing",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 72,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "tax": "missing",
+    "total": "missing",
+    "cash": "missing",
+    "change": "wrong"
+   },
+   "n_items": 4,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 72,
+   "category": "T2",
+   "edited": "subtotal",
+   "fields": {
+    "subtotal": "missing",
+    "tax": "missing",
+    "total": "missing",
+    "cash": "missing",
+    "change": "wrong"
+   },
+   "n_items": 4,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 73,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "missing",
+    "cash": "missing",
+    "change": "missing"
+   },
+   "n_items": 4,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 73,
+   "category": "T2",
+   "edited": "unit1",
+   "fields": {
+    "total": "missing",
+    "cash": "missing",
+    "change": "missing"
+   },
+   "n_items": 4,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 74,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "total": "right"
+   },
+   "n_items": 6,
+   "true_items": 4,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 74,
+   "category": "T2",
+   "edited": "price3",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "service": "right",
+    "total": "right"
+   },
+   "n_items": 6,
+   "true_items": 4,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 75,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right"
+   },
+   "n_items": 6,
+   "true_items": 6,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 75,
+   "category": "T2",
+   "edited": "price6",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right"
+   },
+   "n_items": 6,
+   "true_items": 6,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 76,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "cash": "missing"
+   },
+   "n_items": 2,
+   "true_items": 4,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 76,
+   "category": "T2",
+   "edited": "price4",
+   "fields": {
+    "cash": "missing"
+   },
+   "n_items": 2,
+   "true_items": 4,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 77,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 5,
+   "checked_hard": 3,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 77,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [
+    "change"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 5,
+   "checked_hard": 3,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 78,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 1,
+   "located": null,
+   "notes": [
+    "The item lines add up to 5,000.00, far from the total (30,000.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 78,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "total": "missing",
+    "cash": "right",
+    "change": "missing"
+   },
+   "n_items": 3,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 79,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "missing",
+    "cash": "missing"
+   },
+   "n_items": 4,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 79,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "total": "missing",
+    "cash": "missing"
+   },
+   "n_items": 4,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": false,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 80,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "missing",
+    "cash": "wrong",
+    "change": "missing"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The item lines add up to 1.00, far from the subtotal (25,000.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 80,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "subtotal": "right",
+    "total": "missing",
+    "cash": "missing",
+    "change": "missing"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": false,
+   "notes": [
+    "The item lines add up to 1.00, far from the subtotal (25,000.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 81,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 81,
+   "category": "T2",
+   "edited": "price1",
+   "fields": {
+    "total": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 2,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 82,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "change": "right"
+   },
+   "n_items": 4,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 5,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 82,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "change": "right"
+   },
+   "n_items": 4,
+   "true_items": 3,
+   "violated": [
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 5,
+   "checked_hard": 1,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 83,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 83,
+   "category": "T2",
+   "edited": "qty",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 84,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 84,
+   "category": "T2",
+   "edited": "unit1",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 85,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 11,
+   "true_items": 11,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 85,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "subtotal": "right",
+    "tax": "wrong",
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 11,
+   "true_items": 11,
+   "violated": [
+    "sum",
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 86,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "missing",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 86,
+   "category": "T2",
+   "edited": "cnt2",
+   "fields": {
+    "subtotal": "right",
+    "total": "missing",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 87,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 1,
+   "located": null,
+   "notes": [
+    "The item lines add up to 1.00, far from the subtotal (36,500.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 87,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 1,
+   "located": true,
+   "notes": [
+    "The item lines add up to 1.00, far from the subtotal (36,500.00). They were probably misread, so the rule that the items add up is not checked."
+   ]
+  },
+  {
+   "k": 88,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 88,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "subtotal": "right",
+    "total": "right",
+    "change": "right"
+   },
+   "n_items": 2,
+   "true_items": 2,
+   "violated": [
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 1,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 89,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "total": "right",
+    "cash": "missing",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 1,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 89,
+   "category": "T2",
+   "edited": "qty",
+   "fields": {
+    "subtotal": "missing",
+    "total": "right",
+    "cash": "missing",
+    "change": "right"
+   },
+   "n_items": 3,
+   "true_items": 1,
+   "violated": [
+    "sum"
+   ],
+   "alarm": false,
+   "warning": true,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 90,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": null,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 90,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "subtotal": "right",
+    "tax": "right",
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 3,
+   "checked_hard": 2,
+   "located": false,
+   "notes": [
+    "The printed item count is not checked: not every item line shows its count."
+   ]
+  },
+  {
+   "k": 91,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "missing",
+    "cash": "wrong",
+    "change": "missing"
+   },
+   "n_items": 4,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 91,
+   "category": "T2",
+   "edited": "price1",
+   "fields": {
+    "total": "missing",
+    "cash": "wrong",
+    "change": "missing"
+   },
+   "n_items": 4,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 92,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "missing",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 92,
+   "category": "T2",
+   "edited": "cnt1",
+   "fields": {
+    "total": "missing",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 1,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 93,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "wrong",
+    "tax": "right",
+    "total": "right"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 93,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "subtotal": "wrong",
+    "tax": "right",
+    "total": "missing"
+   },
+   "n_items": 0,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 94,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "wrong",
+    "service": "missing",
+    "total": "right"
+   },
+   "n_items": 4,
+   "true_items": 4,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 94,
+   "category": "T2",
+   "edited": "total",
+   "fields": {
+    "subtotal": "right",
+    "tax": "wrong",
+    "service": "missing",
+    "total": "right"
+   },
+   "n_items": 4,
+   "true_items": 4,
+   "violated": [
+    "total"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": true,
+   "notes": []
+  },
+  {
+   "k": 95,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "tax": "wrong",
+    "total": "missing",
+    "cash": "missing"
+   },
+   "n_items": 3,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 1,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 95,
+   "category": "T2",
+   "edited": "cnt1",
+   "fields": {
+    "subtotal": "missing",
+    "tax": "wrong",
+    "total": "missing",
+    "cash": "missing"
+   },
+   "n_items": 3,
+   "true_items": 2,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 96,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "missing",
+    "total": "missing",
+    "cash": "missing",
+    "change": "wrong"
+   },
+   "n_items": 3,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 96,
+   "category": "T2",
+   "edited": "cash",
+   "fields": {
+    "subtotal": "missing",
+    "total": "missing",
+    "cash": "missing",
+    "change": "wrong"
+   },
+   "n_items": 3,
+   "true_items": 1,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 97,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 97,
+   "category": "T2",
+   "edited": "unit1",
+   "fields": {
+    "total": "right",
+    "cash": "right"
+   },
+   "n_items": 3,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 2,
+   "checked_hard": 1,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 98,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "wrong",
+    "tax": "missing",
+    "service": "wrong",
+    "total": "missing"
+   },
+   "n_items": 0,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": null,
+   "notes": []
+  },
+  {
+   "k": 98,
+   "category": "T2",
+   "edited": "service",
+   "fields": {
+    "subtotal": "wrong",
+    "tax": "missing",
+    "service": "wrong",
+    "total": "missing"
+   },
+   "n_items": 0,
+   "true_items": 3,
+   "violated": [],
+   "alarm": false,
+   "warning": false,
+   "checked": 0,
+   "checked_hard": 0,
+   "located": false,
+   "notes": []
+  },
+  {
+   "k": 99,
+   "category": "genuine",
+   "edited": null,
+   "fields": {
+    "subtotal": "right",
+    "tax": "wrong",
+    "discount": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 7,
+   "true_items": 1,
+   "violated": [
+    "change",
+    "tender"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": [
+    "A rounding of +2.00 is printed: totals within one currency unit count as equal, so it is allowed for."
+   ]
+  },
+  {
+   "k": 99,
+   "category": "T2",
+   "edited": "price1",
+   "fields": {
+    "subtotal": "right",
+    "tax": "wrong",
+    "discount": "right",
+    "total": "right",
+    "cash": "right",
+    "change": "right"
+   },
+   "n_items": 7,
+   "true_items": 1,
+   "violated": [
+    "sum",
+    "change",
+    "tender"
+   ],
+   "alarm": true,
+   "warning": false,
+   "checked": 4,
+   "checked_hard": 3,
+   "located": null,
+   "notes": [
+    "A rounding of +2.00 is printed: totals within one currency unit count as equal, so it is allowed for."
+   ]
+  }
+ ]
+}
