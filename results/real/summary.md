@@ -1,4 +1,4 @@
-# Real-data results (Phase 2)
+# Real-data results (Phases 2 and 3)
 
 ## Do real receipts satisfy the rules? (CORD v2, 1,000 genuine receipts, true values)
 
@@ -49,3 +49,37 @@ Visual branch on the real forgeries (test scans): heat AUC, how often the hottes
 | visual_resunet.pt | 0.527 | 8.6% (0.6%) | 12.6% / 17.1% |
 | visual_cord_crude.pt | 0.508 | 2.9% (0.6%) | 12.6% / 17.1% |
 | visual_cord_all.pt | 0.504 | 8.6% (0.6%) | 12.6% / 17.1% |
+
+## Receipts edited by commercial AI editors (Phase 3: AIForge-Doc, CORD part)
+
+AIForge-Doc rewrites one field with an AI image editor and pastes only that field's box back
+(v1: Gemini 2.5 Flash Image 885, Ideogram v2 Edit 98; v2: GPT-Image-2 983, the same edits).
+Each forgery is paired with its CORD photo, pixel-identical outside the edit. Nothing is
+trained or tuned on AIForge-Doc (`scripts/real_aiforge.py`; 95% bootstrap intervals over
+receipts in `results/real/aiforge_<version>.json`).
+
+- 84.6% of the edits change a value some rule reads; with true values 95.4% of those break a rule.
+- docTR reads the requested value back: GPT-Image-2 91.0%, Gemini 74.5%, Ideogram 50.0%.
+- As read, a rule breaks on 82.9% (v2) / 82.2% (v1) of the AI edits and 12.2% of authentic receipts.
+
+| Visual branch | Method | v2 AUC | v2 attr. | v2 ambiguity | v1 AUC | v1 attr. | v1 ambiguity |
+|---|---|---|---|---|---|---|---|
+| synthetic only (983 receipts) | Visual-only | 0.499 | 13.9 | 16.2 | 0.523 | 35.5 | 31.9 |
+|  | Constraint-only | 0.846 | 64.1 | 42.2 | 0.843 | 64.5 | 43.9 |
+|  | CVP | 0.845 | 66.8 | 46.9 | 0.848 | 74.1 | 60.9 |
+| CORD, crude edits (99 test receipts) | Visual-only | 0.502 | 23.8 | 24.0 | 0.548 | 41.1 | 35.0 |
+|  | Constraint-only | 0.843 | 63.1 | 42.0 | 0.828 | 61.7 | 41.4 |
+|  | CVP | 0.843 | 72.0 | 57.0 | 0.845 | 73.8 | 60.0 |
+| CORD, every category (99 test receipts) | Visual-only | 0.518 | 22.6 | 26.0 | 0.560 | 48.8 | 49.0 |
+|  | Constraint-only | 0.843 | 63.1 | 42.0 | 0.828 | 61.7 | 41.4 |
+|  | CVP | 0.834 | 71.4 | 56.0 | 0.844 | 76.8 | 67.0 |
+
+Chance on the ambiguity split: 41.9% (983 receipts), 40.8% (99). Gain of CVP over the rules
+in attribution, 95% interval: v2 0.4 to 4.9 points, v1 7.1 to 12.0.
+
+The fine-tuned branches were built on photos saved once more as JPEG (quality 90), and
+AIForge-Doc's PNGs were not: at the validation thresholds CVP then raises alarms on 32.3% /
+20.2% of authentic receipts (14.3% / 17.3% on our own test set). With the same extra save of
+both images (`--jpeg`, test receipts), the alarms are 14.1% / 17.2% of authentic receipts and
+79.8-81.8% (v2) / 76.8-78.8% (v1) of AI edits, and the visual branches stay at chance
+(AUC 0.497-0.579).

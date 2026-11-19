@@ -15,7 +15,7 @@ Imaging | Pillow 12.3, OpenCV | Document templates, acquisition model, the four 
 Real-document OCR | docTR 1.1.0 | Reading values on real receipt photos and scans
 Application | Gradio 6.31 | Interactive web app for analysing and forging documents
 Plots | Matplotlib 3.11 | Every graph in this report and in the paper
-Testing | pytest 9.2 | 346 automated tests
+Testing | pytest 9.2 | 349 automated tests
 Paper | LaTeX (IEEEtran), Tectonic | IEEE Computer Society journal-format paper
 Versioning | Git | One branch per project phase, tagged demo versions
 !end
@@ -113,6 +113,6 @@ The application (`app.py`) is built with Gradio and runs locally in a browser. I
 
 ## 4.10 TESTING AND REPRODUCIBILITY
 
-The project includes 346 automated tests written with pytest. They check the theory (equivalence classes, signatures, consistent sets and the reduction factor, including a property test of Proposition 1), every rule of every document type, rendering and forgery generation, the scoring code, the trained models and the real-data pipeline. Results are covered in Section 5.1.
+The project includes 349 automated tests written with pytest. They check the theory (equivalence classes, signatures, consistent sets and the reduction factor, including a property test of Proposition 1), every rule of every document type, rendering and forgery generation, the scoring code, the trained models and the real-data pipeline. Results are covered in Section 5.1.
 
 Every result can be rebuilt from scratch. `scripts/reproduce.sh` generates the synthetic data, trains the OCR and visual networks, extracts features, fits the heads, evaluates every method and draws every table and figure, which takes a few hours on the laptop. `scripts/reproduce_real.sh` does the same for the real-data experiments from the public datasets. A setup script creates the Python environment, and a double-click launcher starts the application. The large generated files (datasets, features and model weights) are not stored in Git, while the small outputs (results, tables, figures and the paper) are.

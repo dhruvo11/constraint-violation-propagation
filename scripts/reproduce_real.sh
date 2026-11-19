@@ -1,6 +1,7 @@
 #!/bin/bash
-# Rebuild every real-data result (Phase 2) from the downloaded datasets:
+# Rebuild every real-data result (Phases 2 and 3) from the downloaded datasets:
 #   data/real/cord-v2   CORD v2 (Hugging Face naver-clova-ix/cord-v2, CC BY 4.0)
+#   data/real/aiforge   AIForge-Doc v1 and v2, CORD part (Hugging Face Scam-AI, gated; last step)
 # The synthetic models (scripts/reproduce.sh) must exist: the real visual branches are
 # fine-tuned from models/visual_resunet.pt. Logs go to logs/.
 #   ./scripts/reproduce_real.sh              all steps
@@ -46,4 +47,17 @@ step evaluate  bash -c "
   $PY scripts/real_evaluate_cord.py --split test &&
   $PY scripts/real_evaluate_cord.py --split test --tag _crude &&
   $PY scripts/real_evaluate_cord.py --split test --tag _all"
+# Receipts edited by commercial AI editors (AIForge-Doc v1 and v2, CC BY-NC-SA 4.0). The datasets
+# are gated on Hugging Face: accept their terms and log in (.venv/bin/hf auth login) first.
+# Nothing is trained or tuned on them. The --jpeg runs repeat the CORD test receipts with both
+# images saved once more as JPEG, the compression history of our own CORD forgeries.
+step aiforge   bash -c "
+  for v in v2 v1; do
+    $PY scripts/real_aiforge.py --version \$v --download &&
+    $PY scripts/real_aiforge.py --version \$v &&
+    $PY scripts/real_aiforge.py --version \$v --evaluate &&
+    $PY scripts/real_aiforge.py --version \$v --jpeg --split test &&
+    $PY scripts/real_aiforge.py --version \$v --jpeg --evaluate || exit 1
+  done &&
+  $PY scripts/real_aiforge.py --table"
 echo "[$(date +%H:%M)] done"

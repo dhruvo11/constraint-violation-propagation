@@ -144,6 +144,20 @@ that ranks fields by tiny heatmap differences gets credit for its arg-max like t
 Per-type tables are in `report/tables/<type>/`, figures in `report/figures/<type>/` (also in
 the app's Results tab), and the cross-type summary in `results/summary.md`.
 
+**Real documents.** The same system, with a free OCR (docTR) reading each value at its
+layout label and each receipt's own constraint graph:
+
+| Data | Question | Result |
+|---|---|---|
+| CORD v2, 1,000 genuine receipts | Do the six receipt rules hold? | 96.6-99.7% per rule; 6.7% of receipts break one (10.9% as read) |
+| CORD v2, 474 test photos forged by us | CVP, zero-shot visual branch | AUC 0.546 -> 0.746; attribution 60.0% -> 73.1% |
+| Find it again!, 987 scans | Do human forgeries break the rules? | 32.2% of forged vs 17.2% of genuine scans |
+| AIForge-Doc, 983 CORD receipts per version edited by GPT-Image-2 (v2) / Gemini and Ideogram (v1) | CVP on real AI edits, nothing trained on them | visual AUC 0.499 / 0.523; rules 0.846 / 0.843; attribution CVP 66.8% / 74.1% vs rules 64.1% / 64.5% |
+
+Against the AI editors every visual branch is at chance, as the published detectors nearly
+are, while the rules flag 82-83% of the edits against 12% of authentic receipts: the editors
+change one value and leave the totals alone. Details: `results/real/summary.md`.
+
 ## Adding a document type
 
 Create a module in `cvp/doctypes/` that subclasses `DocType`. Declare its fields and
@@ -175,3 +189,14 @@ control) and the synthetic models above:
 .venv/bin/hf download naver-clova-ix/cord-v2 --repo-type dataset --local-dir data/real/cord-v2
 ./scripts/reproduce_real.sh       # rule validity, OCR, forgeries, fine-tuning, evaluation
 ```
+
+The last step uses AIForge-Doc v1 and v2 (CC BY-NC-SA 4.0), which are gated on Hugging Face:
+accept their terms on the dataset pages, log in with `.venv/bin/hf auth login`, and the step
+downloads only the CORD part (about 3 GB for both versions).
+
+## Data credits
+
+No dataset is stored in this repository. Two figures show crops of dataset images:
+`report/figures/real/cord_example.*` a CORD v2 receipt (Park et al., CC BY 4.0), and
+`report/figures/real/aiforge_example.*` a CORD receipt edited by GPT-Image-2 from AIForge-Doc v2
+(Wu et al., 2026, CC BY-NC-SA 4.0); those two figures are shared under the same licences.

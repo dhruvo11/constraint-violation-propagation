@@ -35,7 +35,8 @@ Wang, P., Wang, B., Li, K., Zhou, B., & Guo, C. (2025). Trustworthy layout analy
 Wang, Y., Xie, H., Xing, M., Wang, J., Zhu, S., & Zhang, Y. (2022). Detecting tampered scene text in the wild. In *Proceedings of the European Conference on Computer Vision (ECCV)* (pp. 215–232).
 Wilson, E. B. (1927). Probable inference, the law of succession, and statistical inference. *Journal of the American Statistical Association, 22*(158), 209–212.
 Wong, K., Zhou, J., Wu, H., Si, Y.-W., & Zhou, J. (2025). ADCD-Net: Robust document image forgery localization via adaptive DCT feature and hierarchical content disentanglement. In *Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)*.
-Wu, J., Zhou, Y., Xu, M., Liang, Z., Ren, S., Xue, J., Yang, M., Chen, S., & Huan, J. (2026). AIForge-Doc: A benchmark for detecting AI-forged tampering in financial and form documents. arXiv:2602.20569.
+Wu, J., Zhou, Y., Xu, M., Liang, Z., Ren, S., Xue, J., Yang, M., Chen, S., & Huan, J. (2026a). AIForge-Doc: A benchmark for detecting AI-forged tampering in financial and form documents. arXiv:2602.20569.
+Wu, J., Zhou, Y., Ng, D. T., Shen, X., Zewde, K., Raj, A., Duong, T., & Ren, S. (2026b). When the forger is the judge: GPT-Image-2 cannot recognize its own faked documents. arXiv:2604.25213.
 Xu, Y., Li, M., Cui, L., Huang, S., Wei, F., & Zhou, M. (2020). LayoutLM: Pre-training of text and layout for document image understanding. In *Proceedings of the ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD)* (pp. 1192–1200).
 Youden, W. J. (1950). Index for rating diagnostic tests. *Cancer, 3*(1), 32–35.
 Zhang, J., Bargal, S. A., Lin, Z., Brandt, J., Shen, X., & Sclaroff, S. (2018). Top-down neural attention by excitation backprop. *International Journal of Computer Vision, 126*(10), 1084–1102.

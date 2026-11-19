@@ -9,6 +9,7 @@ The experiments support a small number of clear conclusions:
 - **CVP helps most when the visual evidence is weak but present.** The gain over the visual branch is large when the visual branch has seen an older generator or none at all, and it shrinks to a few points when the visual branch has seen the test generator itself.
 - **Where the heatmap is pooled matters more than what model fuses it.** A network that concatenates both branches globally detects forgeries almost as well as CVP but attributes 6.9 to 33.6 points worse.
 - **Real receipts follow the rules, and real forgers break them.** The six receipt rules hold on 96.6% to 99.7% of genuine CORD receipts, and real human forgeries break a rule almost twice as often as genuine receipts (32.2% against 17.2%).
+- **Against real AI editors, the pixels say almost nothing and the rules say a lot.** On 983 CORD receipts edited by GPT-Image-2, Gemini and Ideogram, every visual branch we trained was at chance (AUC 0.50 to 0.56), while the rules detected the edits with 0.84 to 0.85 AUC, and CVP still named the edited field more often than the rules alone (67% to 74% against 64% to 65%).
 - **The limits are clear and measurable.** Coherent forgeries that fix every dependent field are only caught by the visual branch; a learned head can trust a weak heatmap too much; and OCR errors set a floor of about 7% to 17% false alarms on real receipts.
 
 ## 6.2 FULFILLMENT OF PROJECT OBJECTIVES
@@ -22,8 +23,8 @@ Objective | Status | Evidence
 2. Build six document types with rules, renderers and forgers | Achieved | Transcript, GST invoice, receipt, certificate, passport and ID card; 9,000 test documents with exact ground truth (Sections 3.5, 4.3, 4.4)
 3. Implement the OCR and visual branches | Achieved | Shared CRNN reading 99.1–99.9% of fields; shared ResNet-18 U-Net heatmap network (Sections 4.5, 4.6)
 4. Design the fusion head and evaluate it under a strict protocol | Achieved | Unseen-generator protocol, five baselines, head chosen on validation data, four hypotheses: three supported, one partly (Sections 5.2–5.6)
-5. Test the idea on real documents | Achieved | Rule validity on 1,000 CORD receipts, CVP on 474 forged real photos, rule failures on Find it again! human forgeries (Sections 5.7, 5.8)
-6. Deliver an application, tests, reproducibility and a paper | Achieved | Four-tab application, 346 tests, rebuild scripts, IEEE-format paper (Sections 4.9, 4.10)
+5. Test the idea on real documents | Achieved | Rule validity on 1,000 CORD receipts, CVP on 474 forged real photos, rule failures on Find it again! human forgeries, and CVP on 1,966 receipts edited by commercial AI editors in AIForge-Doc (Sections 5.7 to 5.9)
+6. Deliver an application, tests, reproducibility and a paper | Achieved | Four-tab application, 349 tests, rebuild scripts, IEEE-format paper (Sections 4.9, 4.10)
 !end
 
 ## 6.3 ALGORITHMIC INFERENCES

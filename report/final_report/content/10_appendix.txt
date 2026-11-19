@@ -32,7 +32,7 @@ CVP-project/
 │   ├── ocr.py                  page registration + CRNN/CTC field reader
 │   ├── visual.py               ELA + ResNet-18 U-Net heatmap network
 │   ├── pipeline.py             features, field prior, heads, the CVP system
-│   └── real/                   real documents (CORD, Find it again!)
+│   └── real/                   real documents (CORD, Find it again!, AIForge-Doc)
 │       ├── cord.py, receipt_rules.py, receipt_schema.py
 │       ├── read.py, rows.py, forge.py, view.py
 │       └── system.py, demo.py, findit.py
@@ -40,10 +40,10 @@ CVP-project/
 │   ├── make_dataset.py, train_ocr.py, train_visual.py, extract.py
 │   ├── evaluate.py, select_head.py, ablate_head.py, summarize.py
 │   ├── make_figures.py, make_paper_figures.py, build_report.py
-│   ├── real_*.py               real-data experiments (CORD, Find it again!)
+│   ├── real_*.py               real-data experiments (CORD, Find it again!, AIForge-Doc)
 │   ├── reproduce.sh            rebuild every synthetic result
 │   └── reproduce_real.sh       rebuild every real-data result
-├── tests/                      346 pytest tests
+├── tests/                      349 pytest tests
 ├── samples/                    nine sample documents for the application
 ├── results/                    metrics of every experiment (JSON, summaries)
 ├── docs/how-it-works.html      an illustrated explainer of the method
@@ -63,10 +63,10 @@ The commands below are run from the project folder in a terminal. The first comm
 Command | What it does
 ./setup.sh | Creates the Python environment, installs the locked dependencies and runs the tests
 .venv/bin/python app.py | Starts the application at http://127.0.0.1:7860 (or double-click Start CVP.command)
-.venv/bin/python -m pytest | Runs all 346 automated tests
+.venv/bin/python -m pytest | Runs all 349 automated tests
 ./scripts/reproduce.sh | Rebuilds every synthetic-data result from scratch (a few hours)
 ./scripts/reproduce.sh evaluate | Re-runs only the evaluation and figures from cached features
-./scripts/reproduce_real.sh | Rebuilds every real-data result from the downloaded CORD and Find it again! data
+./scripts/reproduce_real.sh | Rebuilds every real-data result from the downloaded CORD, Find it again! and AIForge-Doc data
 report/build.sh | Builds the IEEE paper (PDF) and the zip for Overleaf
 .venv/bin/python scripts/build_report.py | Builds this report as a Word document
 !end

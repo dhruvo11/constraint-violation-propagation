@@ -10,7 +10,7 @@ Deep learning moved these ideas into trained networks. Modern detectors take the
 
 Generative inpainting does not paste a region from somewhere else; it synthesises new pixels conditioned on the surroundings. The new pixels inherit the local texture, noise and compression, so the cues that ELA and frequency-based detectors rely on are mostly absent. Two recent benchmarks show how serious this is:
 
-- **AIForge-Doc (2026):** numbers on receipts and forms from the CORD, WildReceipt, SROIE and XFUND datasets were repainted with two commercial AI editors. TruFor reached 0.751 AUC, the DocTamper detector 0.563 with a pixel IoU of only 0.020, and a zero-shot GPT-4o judge 0.509.
+- **AIForge-Doc (2026):** numbers on receipts and forms from the CORD, WildReceipt, SROIE and XFUND datasets were repainted with two commercial AI editors. TruFor reached 0.751 AUC, the DocTamper detector 0.563 with a pixel IoU of only 0.020, and a zero-shot GPT-4o judge 0.509. A second version repeated exactly the same edits with GPT-Image-2: people were at chance (0.501), TruFor and DocTamper reached 0.599 and 0.585 although they score 0.962 and 0.852 on traditional tampering of the same documents, and GPT-Image-2 could not recognise its own edits (0.532).
 - **DOCFORGE-BENCH (2026):** 14 forensic methods were applied zero-shot to eight document datasets, all of which predate generative editing. None of them worked reliably across document types, largely because their decision thresholds were badly calibrated when the edited area covered less than 5% of the image.
 
 The common lesson is that a visual detector meets trouble whenever the test-time manipulation differs from what it saw in training, and generative editing makes this the normal case.
@@ -59,7 +59,7 @@ The following review covers the work this project builds on, roughly in the orde
 
 **Liu et al. (2025)** proposed MIMoE-FND, which routes each news post to different experts depending on whether its image and text agree.
 
-**Wu et al. (2026)** built AIForge-Doc, the benchmark of AI-inpainted receipts and forms described in Section 2.2, and **Zhao et al. (2026)** built DOCFORGE-BENCH, the zero-shot benchmark of 14 methods.
+**Wu et al. (2026a, 2026b)** built AIForge-Doc and its GPT-Image-2 version, the benchmarks of AI-inpainted receipts and forms described in Section 2.2, on whose CORD receipts we test CVP in Section 5.9, and **Zhao et al. (2026)** built DOCFORGE-BENCH, the zero-shot benchmark of 14 methods.
 
 **Zhang et al. (2026)** created GPT4o-Receipt, a set of receipts generated entirely by GPT-4o, and found that arithmetic errors were the strongest sign of a fake: LLMs can check them, while human annotators mostly cannot see them.
 

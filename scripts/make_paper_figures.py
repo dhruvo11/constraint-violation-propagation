@@ -10,6 +10,8 @@ Real documents (report/figures/real/):
   cord_flags        what CVP flags on real photos at the validation threshold
   findit_rules      which rules real human forgeries break (Find it again!)
   cord_example      one real receipt, forged, and CVP's evidence (needs docTR and models)
+  aiforge_results   CVP on the CORD receipts edited by AI editors (AIForge-Doc), with intervals
+  aiforge_example   one of those receipts and CVP's evidence (needs docTR, models and AIForge-Doc)
 
   make_paper_figures.py               everything
   make_paper_figures.py --no-example  skip the panel that runs the models
@@ -246,6 +248,94 @@ def findit_rules():
     save(fig, OUT_REAL, "findit_rules")
 
 
+def aiforge_results():
+    """CVP on the CORD receipts of AIForge-Doc (zero-shot visual branch, 983 pairs per version),
+    with 95% bootstrap intervals over receipts."""
+    gens = [("v2", "GPT-\nImage-2"), ("v1", "Gemini /\nIdeogram")]
+    R = {v: json.load(open(os.path.join(REAL, f"aiforge_{v}.json")))["results"]["zero-shot"]["methods"] for v, _ in gens}
+    x = np.arange(len(gens))
+    fig, axes = plt.subplots(1, 3, figsize=(3.5, 1.95))
+    panels = [("AUC", "Detection AUC", 1), ("attr", "Attribution (%)", 100), ("attr_amb", "Ambiguity split (%)", 100)]
+    bw = 0.26
+    for ax, (key, title, scale) in zip(axes, panels):
+        for j, m in enumerate(METHODS):
+            vals = np.array([scale * R[v][m][key] for v, _ in gens])
+            cis = np.array([[scale * c for c in R[v][m][f"{key}_ci"]] for v, _ in gens])
+            xs = x + (j - 1) * bw
+            if key == "AUC":  # a dot, as in cord_regimes: AUC has no zero to grow a bar from
+                ax.plot(xs, vals, "o", ms=4, color=COLORS[m], markeredgecolor="white", markeredgewidth=0.6, label=m,
+                        zorder=3)
+            else:
+                ax.bar(xs, vals, bw, color=COLORS[m], edgecolor="white", linewidth=0.6, label=m)
+            ax.errorbar(xs, vals, yerr=[vals - cis[:, 0], cis[:, 1] - vals], fmt="none", ecolor=INK, elinewidth=0.7,
+                        capsize=1.5, zorder=4)
+        if key == "AUC":
+            ax.axhline(0.5, color=INK2, ls="--", lw=0.8)
+            ax.set_ylim(0.4, 1.0)
+        else:
+            ax.set_ylim(0, 100)
+        if key == "attr_amb":
+            ax.axhline(100 * R["v2"]["CVP"]["chance_amb"], color=INK2, ls="--", lw=0.8)
+        ax.set_xticks(x, [lab for _, lab in gens], fontsize=5.8)
+        ax.tick_params(axis="y", labelsize=5.8)
+        ax.set_title(title, fontsize=6.8, color=INK)
+        grid(ax)
+    handles, labels = axes[1].get_legend_handles_labels()
+    fig.legend(handles, labels, ncol=3, fontsize=6, loc="upper center", bbox_to_anchor=(0.5, 1.02), handlelength=1)
+    fig.subplots_adjust(wspace=0.45, left=0.08, right=0.99, bottom=0.17, top=0.8)
+    save(fig, OUT_REAL, "aiforge_results")
+
+
+def aiforge_example(version="v2"):
+    """One CORD test receipt edited by an AI editor (AIForge-Doc), through the system the app runs
+    with the zero-shot visual branch: the authentic and the edited value, the broken rules and the heat.
+    Chooses the first test forgery of the subtotal that docTR reads back and that the rules alone pin down."""
+    import pickle
+    import real_aiforge as RA
+    from cvp.real import cord, demo, view
+    from cvp.real.system import RealCVP
+    rows = pickle.load(open(os.path.join(paths.BASE, "features", "real", f"aiforge_{version}.pkl"), "rb"))
+    pick = next(d for d in rows if d["category"] == "ai" and d["split"] == "test" and d["edited"] == ["subtotal"]
+                and len(d["consistent"]) == 1 and d["consistent"] == d["edited"] and d["read_value"] is not None
+                and d["new_value"] is not None and abs(d["read_value"] - d["new_value"]) < 0.5)
+    row = next(r for r in RA.metadata(version) if r.get("spec_id") == pick["spec"])
+    split, k = RA.cord_index(row)
+    r = cord.receipt(split, k)
+    fake = RA.rgb(os.path.join(RA.local(version), row["image"]))
+    mask = RA.rgb(os.path.join(RA.local(version), row["mask"]))[..., 0] > 127
+    auth = fake.copy()
+    auth[mask] = RA.rgb(r.image)[mask]
+    sysm = RealCVP(visual_path=os.path.join(paths.MODELS, "visual_resunet.pt"))
+    res = sysm(r, fake)
+    v_a, s = view.visual_view(auth)
+    v_f, _ = view.visual_view(fake)
+    ys, xs = np.nonzero(mask)
+    rect = [int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())]
+    ev = np.asarray(demo.overlay(v_f, res, [rect], s))
+    shown = [f for f in res["consistent"] + ["total", "subtotal"] if f in res["boxes"]]
+    bx = np.array([view.scale_box(res["boxes"][f], s) for f in shown], float)
+    x0, y0, x1, y1 = bx[:, 0].min(), bx[:, 1].min(), bx[:, 2].max(), bx[:, 3].max()
+    h, w = ev.shape[:2]
+    rows_h = y1 - y0
+    x0, x1 = max(0, int(x1 - 0.82 * w)), min(w, int(x1 + 0.04 * w))
+    y0, y1 = max(0, int(y0 - 0.35 * rows_h - 8)), min(h, int(y1 + 0.2 * rows_h + 8))
+    fig = plt.figure(figsize=(3.5, 2.55))
+    gs = fig.add_gridspec(2, 2, width_ratios=[0.8, 1.45], wspace=0.04, hspace=0.28)
+    axes = [fig.add_subplot(gs[:, 0]), fig.add_subplot(gs[0, 1]), fig.add_subplot(gs[1, 1])]
+    old, new = demo.money(res["truth"]["subtotal"]), demo.money(pick["new_value"])
+    panels = [(ev, "(a) CVP evidence"), (v_a[y0:y1, x0:x1], "(b) authentic, zoomed"),
+              (ev[y0:y1, x0:x1], f"(c) edited: {old} → {new}")]
+    for ax, (im, title) in zip(axes, panels):
+        ax.imshow(im)
+        ax.set_title(title, fontsize=6.8, color=INK)
+        ax.axis("off")
+    axes[0].add_patch(plt.Rectangle((x0, y0), x1 - x0, y1 - y0, fill=False, ec="#0b0b0b", lw=0.8, ls="--"))
+    save(fig, OUT_REAL, "aiforge_example")
+    print(f"AIForge-Doc {version} spec {pick['spec']} (CORD {split} {k}): subtotal {old} -> {new}; violated "
+          f"{sorted(res['violated'])}; consistent {res['consistent']}; peak heat {float(res['heatmap'].max()):.3f}; "
+          f"attributed {res['field']} (tampered {res['tampered']})", flush=True)
+
+
 # ------------------------------------------------------------------ one real receipt
 def cord_example(k, field_label, cat):
     """Receipt k of the CORD test split, genuine and forged (category cat, at field_label), through
@@ -304,8 +394,12 @@ def main():
     cord_regimes()
     cord_flags()
     findit_rules()
+    if os.path.exists(os.path.join(REAL, "aiforge_v2.json")):
+        aiforge_results()
     if not a.no_example:
         cord_example(a.receipt, a.field, a.category)
+        if os.path.exists(os.path.join(paths.BASE, "features", "real", "aiforge_v2.pkl")):
+            aiforge_example()
     print("figures written to", FIG, "and", OUT_REAL)
 
 

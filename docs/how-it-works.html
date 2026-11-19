@@ -159,7 +159,7 @@ footer { color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--ru
     <p class="pitch">Generative inpainting removes the pixel traces that forensic detectors look for, but it does not know the document's arithmetic. CVP uses the rules a forged value breaks to shrink the list of suspect fields, then uses even weak visual evidence to pick the edited field within it.</p>
     <div class="facts">
       <span><b>6</b> document types</span><span><b>1,000</b> real receipts tested</span><span><b>987</b> real human forgeries</span>
-      <span><b>~7,100</b> lines of Python</span><span><b>346</b> automated tests</span><span>free, runs offline on a laptop</span>
+      <span><b>~8,500</b> lines of Python</span><span><b>349</b> automated tests</span><span>free, runs offline on a laptop</span>
     </div>
   </header>
 
@@ -299,7 +299,7 @@ footer { color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--ru
           <tr><td class="path">scripts/evaluate.py</td><td>Trains the small decision heads, runs every baseline, writes the results</td><td class="num">Heads.fit, metrics</td></tr>
           <tr><td class="path">cvp/real/</td><td>Real receipts: reading real photos, each receipt's own rules, forging real photos</td><td class="num">receipt_schema.py, read.py, forge.py</td></tr>
           <tr><td class="path">app.py</td><td>The web app you are demoing (Gradio, runs locally)</td><td class="num">forge(), the tabs at the bottom</td></tr>
-          <tr><td class="path">tests/</td><td>346 automated checks: the theory, every rule, rendering, forgeries, scoring, models</td><td class="num">.venv/bin/python -m pytest</td></tr>
+          <tr><td class="path">tests/</td><td>349 automated checks: the theory, every rule, rendering, forgeries, scoring, models</td><td class="num">.venv/bin/python -m pytest</td></tr>
         </tbody>
       </table>
     </div>
@@ -379,7 +379,7 @@ footer { color: var(--muted); font-size: 0.88rem; border-top: 1px solid var(--ru
     <h2 id="run">Commands</h2>
     <div class="cols">
       <div class="card"><h3>Start the app</h3><pre class="cmd">./"Start CVP.command"</pre><p class="muted">Or double-click it in Finder. It opens http://127.0.0.1:7860.</p></div>
-      <div class="card"><h3>Run the tests</h3><pre class="cmd">.venv/bin/python -m pytest</pre><p class="muted">346 checks, a few minutes.</p></div>
+      <div class="card"><h3>Run the tests</h3><pre class="cmd">.venv/bin/python -m pytest</pre><p class="muted">349 checks, a few minutes.</p></div>
       <div class="card"><h3>Rebuild every result</h3><pre class="cmd">./scripts/reproduce.sh</pre><p class="muted">Then <code>./scripts/reproduce_real.sh</code> for the real data.</p></div>
     </div>
   </section>

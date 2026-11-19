@@ -1,0 +1,22 @@
+\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{3}{c}{GPT-Image-2} & \multicolumn{3}{c}{Gemini / Ideogram}\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Method & AUC & Attr. & Amb. & AUC & Attr. & Amb.\\
+\midrule
+\multicolumn{7}{l}{\emph{Visual branch: synthetic only (983 receipts)}}\\
+Visual-only & 0.499 & 13.9 & 16.2 & 0.523 & 35.5 & 31.9\\
+Constraint-only & 0.846 & 64.1 & 42.2 & 0.843 & 64.5 & 43.9\\
+CVP & 0.845 & 66.8 & 46.9 & 0.848 & 74.1 & 60.9\\
+\midrule
+\multicolumn{7}{l}{\emph{Visual branch: CORD, crude edits (99 receipts)}}\\
+Visual-only & 0.502 & 23.8 & 24.0 & 0.548 & 41.1 & 35.0\\
+Constraint-only & 0.843 & 63.1 & 42.0 & 0.828 & 61.7 & 41.4\\
+CVP & 0.843 & 72.0 & 57.0 & 0.845 & 73.8 & 60.0\\
+\midrule
+\multicolumn{7}{l}{\emph{Visual branch: CORD, every category (99 receipts)}}\\
+Visual-only & 0.518 & 22.6 & 26.0 & 0.560 & 48.8 & 49.0\\
+Constraint-only & 0.843 & 63.1 & 42.0 & 0.828 & 61.7 & 41.4\\
+CVP & 0.834 & 71.4 & 56.0 & 0.844 & 76.8 & 67.0\\
+\bottomrule
+\end{tabular}

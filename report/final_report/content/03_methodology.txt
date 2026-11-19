@@ -148,6 +148,7 @@ Each type has 2,000 training, 500 validation and 1,500 test documents from separ
 
 - **CORD v2:** 1,000 receipt photographs from Indonesian shops and restaurants with every printed value labelled (800 training, 100 validation, 100 test; CC BY 4.0). We use it to check whether real receipts follow our rules and to test CVP on real photos forged with known ground truth.
 - **Find it again!:** 988 scanned receipts from Malaysian shops (from SROIE), of which 163 were forged by people with ordinary image editors. We use it to test whether real human forgeries break receipt rules.
+- **AIForge-Doc v1 and v2:** receipts and forms in which one field was rewritten by a commercial AI editor (Gemini 2.5 Flash Image and Ideogram v2 Edit in version 1, GPT-Image-2 in version 2), with a pixel mask of the edit (CC BY-NC-SA 4.0, access after accepting its terms). We use the 983 forgeries in each version that were made from CORD receipts, whose printed values we know. Nothing is trained or tuned on it.
 
 ### METRICS AND HYPOTHESES
 
