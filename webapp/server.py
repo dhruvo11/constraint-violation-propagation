@@ -13,7 +13,7 @@ from contextlib import asynccontextmanager
 
 import numpy as np
 from fastapi import Body, FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps
 
@@ -57,7 +57,11 @@ app.mount("/figures", StaticFiles(directory=os.path.join(paths.REPORT, "final_re
 
 @app.get("/")
 def index():
-    return FileResponse(os.path.join(STATIC, "index.html"))
+    """The page, with its script and stylesheet stamped by version so a browser never keeps an old one."""
+    html = open(os.path.join(STATIC, "index.html")).read()
+    for name in ("app.js", "app.css"):
+        html = html.replace(f"/static/{name}", f"/static/{name}?v={int(os.path.getmtime(os.path.join(STATIC, name)))}")
+    return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/explainer")
