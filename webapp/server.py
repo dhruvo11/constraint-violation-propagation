@@ -110,6 +110,20 @@ def _run(fn, *a, **k):
             raise HTTPException(500, f"The analysis failed: {type(e).__name__}: {e}")
 
 
+def _missing(sid, s):
+    """Why an example cannot run on this computer (its dataset or models are missing), or None."""
+    card = next((i for g in samples.catalogue(ENGINE.availability()) for i in g["items"] if i["id"] == sid), None)
+    if card is None or card["available"]:
+        return None
+    if s["kind"] == "aiforge":
+        return ("This example needs AIForge-Doc, which is not on this computer. It is gated on Hugging Face: "
+                "request access there, then download it as the README explains.")
+    if s["kind"] in ("cord", "receipt-cord"):
+        return ("This example needs the CORD v2 receipt photos, which are not on this computer. "
+                "The README says how to download them (free, about 2 GB).")
+    return "This example needs data or models that are not on this computer; the README says how to get them."
+
+
 @app.post("/api/sample/{sid}")
 def run_sample(sid: str):
     if sid in ENGINE.cache:
@@ -118,6 +132,9 @@ def run_sample(sid: str):
         s = samples.find(sid)
     except KeyError:
         raise HTTPException(404, "No such example.")
+    why = _missing(sid, s)
+    if why:
+        raise HTTPException(409, why)
     out = _run(samples.run, ENGINE, s)
     ENGINE.cache[sid] = out
     return out

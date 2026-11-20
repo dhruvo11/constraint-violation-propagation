@@ -75,13 +75,29 @@ def test_the_page_and_the_catalogue(client):
     assert set(cat["categories"]) == {"genuine", "T1", "T2", "T3", "T4"}
 
 
-def test_bad_requests_are_refused(client):
+def test_bad_requests_are_refused(client, monkeypatch):
     assert client.post("/api/upload", files={"file": ("x.png", b"not an image", "image/png")},
                        data={"kind": "receipt"}).status_code == 400
     assert client.post("/api/forge", json={"doctype": "nope", "seed": 1, "category": "T2"}).status_code == 400
     assert client.post("/api/forge", json={"doctype": "transcript", "seed": 1, "category": "T9"}).status_code == 400
     assert client.post("/api/sample/no-such-example").status_code == 404
     assert client.post("/api/recheck", json={"id": "expired", "values": {"total": "1"}}).status_code == 404
+    # an example whose dataset is missing says which one
+    from cvp import doctypes
+    from webapp import server
+    av = dict(synthetic={n: True for n in doctypes.names()}, cord=False, aiforge=dict(v1=False, v2=False),
+              receipt=True, cord_receipts=0)  # a laptop without the CORD and AIForge-Doc datasets
+    monkeypatch.setattr(server.ENGINE, "availability", lambda: av)
+    for sid in ("cord-7-T2", "ai-905", "rx-cord-14"):
+        monkeypatch.delitem(server.ENGINE.cache, sid, raising=False)
+    r = client.post("/api/sample/cord-7-T2")
+    assert r.status_code == 409 and "CORD v2" in r.json()["detail"]
+    r = client.post("/api/sample/ai-905")
+    assert r.status_code == 409 and "AIForge-Doc" in r.json()["detail"]
+    assert client.post("/api/sample/rx-cord-14").status_code == 409
+    cat = client.get("/api/catalog").json()
+    off = {i["id"] for g in cat["groups"] for i in g["items"] if not i["available"]}
+    assert {"tour-5", "tour-6", "cord-7-T2", "ai-905", "rx-cord-14"} <= off and "tour-3" not in off
 
 
 @pytest.mark.skipif(not os.path.exists(pipeline.heads_path("transcript")), reason="needs the trained models")
