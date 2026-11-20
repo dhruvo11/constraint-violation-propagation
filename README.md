@@ -221,7 +221,10 @@ downloads only the CORD part (about 3 GB for both versions).
 
 ## Data credits
 
-No dataset is stored in this repository. Two figures show crops of dataset images:
+No dataset is stored in this repository. A few figures show dataset images:
 `report/figures/real/cord_example.*` a CORD v2 receipt (Park et al., CC BY 4.0), and
-`report/figures/real/aiforge_example.*` a CORD receipt edited by GPT-Image-2 from AIForge-Doc v2
-(Wu et al., 2026, CC BY-NC-SA 4.0); those two figures are shared under the same licences.
+`report/figures/real/aiforge_example.*` and the web-app screenshot
+`report/final_report/figures/app_tour.png` a CORD receipt edited by GPT-Image-2 from AIForge-Doc v2
+(Wu et al., 2026, CC BY-NC-SA 4.0), with their copies in `report/final_report/figures/`; these
+figures are shared under the same licences. The web app reads the AIForge-Doc examples from the
+local, gated copy of the data; none of its images are committed beyond these figures.
