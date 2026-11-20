@@ -14,13 +14,26 @@ built by `scripts/build_report.py` from `report/final_report/content/`.
 
 ## Quick start
 
+You need [uv](https://docs.astral.sh/uv/) (`brew install uv`) and an internet connection for the
+first setup. Download the project (green **Code** button, or
+`git clone https://github.com/dhruvo11/constraint-violation-propagation`), then in its folder:
+
 ```bash
-./setup.sh                # one-time: Python environment, dependencies, tests
+./setup.sh                # one-time: Python environment, dependencies, trained models, tests
 ```
 
-Then double-click **Start CVP.command** (or run `.venv/bin/python -m webapp`). The web app
-opens in your browser at http://127.0.0.1:7860; keep the Terminal window open while you use it.
-Everything runs on the laptop and nothing you upload leaves it.
+`setup.sh` downloads the trained models (110 MB, checked against their SHA-256) from the
+[models-v1 release](https://github.com/dhruvo11/constraint-violation-propagation/releases/tag/models-v1),
+so nothing has to be retrained. Then double-click **Start CVP.command** (or run
+`.venv/bin/python -m webapp`). The web app opens in your browser at http://127.0.0.1:7860; keep the
+Terminal window open while you use it. Everything runs on the laptop and nothing you upload leaves it.
+
+The six document types, forging, uploads and the experimental receipt reader work straight away
+(the receipt reader downloads docTR's own weights the first time). The real-receipt examples also
+need the CORD v2 dataset (free, 2.5 GB:
+`.venv/bin/hf download naver-clova-ix/cord-v2 --repo-type dataset --local-dir data/real/cord-v2`), and
+the AI-forgery examples need AIForge-Doc, which each user must request on Hugging Face; examples
+whose data is missing are shown greyed out.
 
 The web app (`webapp/`) has four views:
 

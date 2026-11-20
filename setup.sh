@@ -20,13 +20,16 @@ echo "Installing what reads real documents (docTR OCR and dataset readers; see r
 uv pip install --python .venv/bin/python -c requirements-lock.txt -r requirements-real.txt
 uv pip install --python .venv/bin/python --no-deps "python-doctr==1.1.0"
 
+echo "Getting the trained models ..."
+./scripts/get_models.sh || echo "Could not download the trained models (no internet?); the app needs them."
+
 echo "Running the tests ..."
 .venv/bin/python -m pytest
 
 if [ ! -f models/visual_resunet.pt ] || [ ! -f models/ocr_crnn.pt ]; then
   echo
-  echo "Setup done, but the trained models are missing. Train everything with:"
-  echo "  ./scripts/reproduce.sh"
+  echo "Setup done, but the trained models are missing. Download them with ./scripts/get_models.sh,"
+  echo "or train everything yourself with ./scripts/reproduce.sh (a few hours)."
 else
   echo
   echo "Setup done. Start the app by double-clicking 'Start CVP.command' or running:"
