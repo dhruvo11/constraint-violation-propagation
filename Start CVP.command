@@ -1,6 +1,7 @@
 #!/bin/bash
-# Double-click to start the CVP app. It opens in your browser once it is ready;
+# Double-click to start the CVP web app. It opens in your browser once it is ready;
 # keep this window open while you use it, and close it (or press Ctrl+C) to stop.
+# (The earlier Gradio demo still runs with: .venv/bin/python app.py)
 cd "$(dirname "$0")"
 PORT=${PORT:-7860}
 URL="http://127.0.0.1:$PORT"
@@ -17,8 +18,8 @@ if curl -s -o /dev/null "$URL"; then
   exit 0
 fi
 
-echo "Starting CVP (the first start takes about 15 seconds while the models load) ..."
-PORT=$PORT .venv/bin/python app.py &
+echo "Starting CVP (the page opens in a few seconds; the models finish loading in the background) ..."
+PORT=$PORT CVP_NO_BROWSER=1 .venv/bin/python -m webapp &
 APP=$!
 trap 'kill $APP 2>/dev/null' EXIT INT TERM
 until curl -s -o /dev/null "$URL"; do

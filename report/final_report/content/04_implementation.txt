@@ -13,9 +13,9 @@ Deep learning | PyTorch 2.14, torchvision 0.29 | CRNN reader and ResNet-18 U-Net
 Classical ML | scikit-learn 1.9, NumPy 2.5, SciPy 1.18 | Class-posterior MLP, logistic regression, AUC and other metrics
 Imaging | Pillow 12.3, OpenCV | Document templates, acquisition model, the four forgery renderers
 Real-document OCR | docTR 1.1.0 | Reading values on real receipt photos and scans
-Application | Gradio 6.31 | Interactive web app for analysing and forging documents
+Web application | FastAPI 0.162, Uvicorn, hand-written HTML/CSS/JavaScript | The CVP web app: examples, forging on request, uploads, guided tour
 Plots | Matplotlib 3.11 | Every graph in this report and in the paper
-Testing | pytest 9.2 | 349 automated tests
+Testing | pytest 9.2 | 367 automated tests
 Paper | LaTeX (IEEEtran), Tectonic | IEEE Computer Society journal-format paper
 Versioning | Git | One branch per project phase, tagged demo versions
 !end
@@ -36,9 +36,10 @@ cvp/doctypes/*.py | One module per document type: fields, rules, template, forge
 cvp/ocr.py | Page registration and the CRNN/CTC slot reader
 cvp/visual.py | ELA and the ResNet-18 U-Net heatmap network
 cvp/pipeline.py | Constraint features, field prior, attribution and detection heads, the end-to-end CVP system
-cvp/real/*.py | Real receipts: CORD loader, receipt rules, per-receipt schema, reader, forger, Find it again! reader
+cvp/real/*.py | Real receipts: CORD loader, receipt rules, per-receipt schema, reader, forger, Find it again! reader, AIForge-Doc helpers, and the experimental reader of any receipt photo (upload.py)
 scripts/*.py | Dataset creation, training, feature extraction, evaluation, figures and real-data experiments
-app.py | The Gradio application with four tabs
+webapp/*.py, webapp/static/ | The web app: server (FastAPI), analysis engine, plain-English explanations, examples and guided tour, and the page itself
+app.py | The earlier Gradio demo, kept for reference
 tests/*.py | The pytest suite (theory, rules, rendering, forgeries, scoring, models, real data)
 !end
 
@@ -100,19 +101,27 @@ Real receipts needed their own pipeline because every shop prints different fiel
 - **Visual branch:** each photo is resized so that its longer side is at most 1,600 pixels. The synthetic model is used as it is (zero-shot) or fine-tuned for 3,000 steps on 3,859 training images made from the 800 training receipts, either with crude edits only or with every category.
 - **Decision:** because each receipt has its own schema, CVP uses the deterministic signature lookup: the broken rules give the consistent set and the heatmap picks a field within it. The detection threshold maximises Youden's J on the 489 validation images.
 
-## 4.9 INTERACTIVE APPLICATION
+## 4.9 THE WEB APPLICATION
 
-The application (`app.py`) is built with Gradio and runs locally in a browser. It has four tabs:
+The CVP web app (`webapp/`) is what a user, or an evaluator, actually sees. A small FastAPI server runs CVP on the laptop and answers the page's requests with plain data; the page itself is hand-written HTML, CSS and JavaScript with no build step, so it works offline. Nothing that is uploaded leaves the computer. When the server starts, the models load in the background and the examples are computed in advance, so that clicking one is instant during a demonstration. The double-click launcher `Start CVP.command` starts it at http://127.0.0.1:7860.
 
-- **Forge & analyse:** choose a document type, a random seed, a forgery type and a field; the app generates the document, forges it and runs CVP. It shows the document as received, the evidence image (heatmap in red, candidate fields in orange, the blamed field in red, the true edit in green) and a plain-English report with the verdict, the broken rules and a table of every rule and field (Figure 4.2).
-- **Analyse an image:** upload any image of one of the six document types; the app reads it, checks the rules and shows the same evidence. Nine ready-made sample documents are included for demonstrations.
-- **Real receipt:** pick one of the 100 CORD test receipts, choose a forgery type and a field, and see CVP's evidence on the real photograph.
-- **Results:** the graphs and tables of every experiment, per document type.
+The app has four views:
 
-!figure report/final_report/figures/app_forge.png | 5.6 | Figure 4.2: The CVP Application: Forging a Document and Analysing It
+- **Analyse:** run a ready-made example, forge a document on request (any of the six types or a real CORD receipt photo, any kind of forgery, any field), or upload an image.
+- **Guided tour:** seven steps for a demonstration, each with what to notice: a genuine mark sheet, an obvious edit, a smooth AI-style edit, a case the rules cannot decide, a real receipt photo, a real GPT-Image-2 forgery and, last, an edit that keeps every rule, which shows the limit of the method (Figure 4.2).
+- **How it works:** the method in five steps, the architecture figure and the illustrated explainer.
+- **Results:** the headline numbers of the evaluation, read from the saved results, with the figures of Chapter 5.
+
+Every result is shown the same way. A verdict card gives the decision (tampered, genuine, a warning, or cannot verify), the field that was edited and one sentence of reasons. Five numbered steps then explain the decision in plain English: what was read, which rules were checked and which broke, which fields the broken rules fit (with a pointer to Proposition 1 when several fit equally), how much edit evidence the pixels show on each suspect, and the decision. Every rule is listed with its actual numbers, for example "82,000 + 61,000 + 51,000 = 194,000; the subtotal says 109,293". The document is shown with layers that can be switched on and off: the heatmap, the fields the broken rules fit, the blamed field and, when the forgery is ours or from AIForge-Doc, the field that was really edited, with an answer key that says whether CVP was right. Hovering over a field shows what was read there and its heat.
+
+**Any receipt photo (experimental).** Uploaded receipts and bills have no layout labels, so `cvp/real/upload.py` reads them end to end: docTR finds and reads every word, the words are grouped into printed rows, and each row is classified as an item (a name and a price above the bill's summary) or as a bill line (subtotal, tax, service charge, discount, rounding, total, cash, other payment, change, item count) by its keywords. It handles Indian GST bills (CGST and SGST lines are added together, amounts such as 1,23,456.00 are read whole, quantity × rate lines are checked) as well as Indonesian and Malaysian receipts, corrects near-misses of the keywords that the OCR produces ("SUB_TSTAL", "Servi Charge"), and treats an unnamed amount between the subtotal and the total as a charge. The values then fill the same receipt structure as a CORD receipt, so the receipt gets its own constraint graph and the theory applies unchanged. Because item lines are much harder to read than the bill's own lines, only the bill-level rules (subtotal + tax = total, cash − total = change, and the payment covers the total) raise an alarm; the item-level rules only raise a warning, and the heatmap only ranks the suspects. If the OCR misreads a value, the user can type what the photo shows and re-check the rules (Figure 4.3). On the 100 CORD test photos read without their labels, it raises a false alarm on 6% of genuine receipts, close to the 6.7% of genuine receipts that break a rule even when every value is read correctly, and warns on another 12%; it alarms or warns on 54% of our smooth single-field edits of the same photos (`scripts/real_upload_check.py`).
+
+!figure report/final_report/figures/app_tour.png | 6.0 | Figure 4.2: The Web App's Guided Tour: a Real GPT-Image-2 Forgery Caught by the Rules Alone
+
+!figure report/final_report/figures/app_receipt.png | 5.4 | Figure 4.3: A GST Receipt Read by the Experimental Reader, With Its Rules, Reasons and Evidence
 
 ## 4.10 TESTING AND REPRODUCIBILITY
 
-The project includes 349 automated tests written with pytest. They check the theory (equivalence classes, signatures, consistent sets and the reduction factor, including a property test of Proposition 1), every rule of every document type, rendering and forgery generation, the scoring code, the trained models and the real-data pipeline. Results are covered in Section 5.1.
+The project includes 367 automated tests written with pytest. They check the theory (equivalence classes, signatures, consistent sets and the reduction factor, including a property test of Proposition 1), every rule of every document type, rendering and forgery generation, the scoring code, the trained models and the real-data pipeline. Results are covered in Section 5.1.
 
 Every result can be rebuilt from scratch. `scripts/reproduce.sh` generates the synthetic data, trains the OCR and visual networks, extracts features, fits the heads, evaluates every method and draws every table and figure, which takes a few hours on the laptop. `scripts/reproduce_real.sh` does the same for the real-data experiments from the public datasets. A setup script creates the Python environment, and a double-click launcher starts the application. The large generated files (datasets, features and model weights) are not stored in Git, while the small outputs (results, tables, figures and the paper) are.

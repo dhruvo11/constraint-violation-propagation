@@ -2,20 +2,22 @@
 
 ## 5.1 AUTOMATED TEST SUITE & CODE QUALITY
 
-Before looking at accuracy, we checked that the code does what it is supposed to do. The test suite was run in full on the final version of the code (Table 5.1). All 349 tests ran: 348 passed and 1 was skipped by design, a randomly generated case of the Proposition 1 property test whose perturbation would push a mark outside the valid range, where the proposition does not apply. No test failed. The whole suite takes about 79 seconds, most of it spent loading and running the trained models.
+Before looking at accuracy, we checked that the code does what it is supposed to do. The test suite was run in full on the final version of the code (Table 5.1). All 367 tests ran: 366 passed and 1 was skipped by design, a randomly generated case of the Proposition 1 property test whose perturbation would push a mark outside the valid range, where the proposition does not apply. No test failed. The whole suite takes about two minutes, most of it spent loading and running the trained models.
 
 !table Table 5.1: Automated Test Suite Results
 !widths 21,37,8,10,12,12
 !opts center
 Test file | What it checks | Tests | Passed | Skipped | Time (s)
 test_schema.py | Equivalence classes, signatures, consistent sets, ρ, Proposition 1 | 146 | 145 | 1 | <0.1
-test_doctypes.py | Fields, rules, templates and forgers of all six types | 84 | 84 | 0 | 19.4
-test_real.py | Real receipts: parsing, rules, reader, forger | 63 | 63 | 0 | 0.1
+test_doctypes.py | Fields, rules, templates and forgers of all six types | 84 | 84 | 0 | 22.4
+test_real.py | Real receipts: parsing, rules, reader, forger | 63 | 63 | 0 | 0.2
 test_rules.py | Check digits, money, amounts in words, dates | 22 | 22 | 0 | <0.1
-test_models.py | OCR and visual networks, heads, end-to-end system | 19 | 19 | 0 | 54.9
+test_models.py | OCR and visual networks, heads, end-to-end system | 19 | 19 | 0 | 83.5
 test_render_tamper.py | Rendering and the four forgery renderers | 9 | 9 | 0 | 0.7
-test_evaluate.py | Scoring, exact ties, and AIForge-Doc scored like our own forgeries | 6 | 6 | 0 | 0.2
-**Total** | | **349** | **348** | **1** | **78.9**
+test_evaluate.py | Scoring, exact ties, and AIForge-Doc scored like our own forgeries | 6 | 6 | 0 | 0.5
+test_upload.py | The experimental reader: amounts, Indian bills, alarms and warnings, coupons, misreadings | 10 | 10 | 0 | <0.1
+test_webapp.py | The web app: plain-English reasons, the answer key, the API, a forgery end to end | 8 | 8 | 0 | 4.5
+**Total** | | **367** | **366** | **1** | **116.0**
 !end
 
 ## 5.2 MAIN RESULTS ON THE SIX DOCUMENT TYPES

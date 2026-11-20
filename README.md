@@ -18,8 +18,29 @@ built by `scripts/build_report.py` from `report/final_report/content/`.
 ./setup.sh                # one-time: Python environment, dependencies, tests
 ```
 
-Then double-click **Start CVP.command** (or run `.venv/bin/python app.py`). The app opens
-in your browser once it is ready; keep the Terminal window open while you use it.
+Then double-click **Start CVP.command** (or run `.venv/bin/python -m webapp`). The web app
+opens in your browser at http://127.0.0.1:7860; keep the Terminal window open while you use it.
+Everything runs on the laptop and nothing you upload leaves it.
+
+The web app (`webapp/`) has four views:
+
+- **Analyse**: run a ready-made example, forge a document on request (any of the six types or a
+  real CORD receipt photo, any kind of forgery, any field), or upload one. Each result shows the
+  verdict and the edited field, the reasoning in five plain-English steps, every rule with its
+  numbers ("82,000 + 61,000 + 51,000 = 194,000; the subtotal says 109,293"), the document with
+  switchable layers (heatmap, suspects, blamed field, the true edit) and what was read.
+- **Guided tour**: seven steps for a demonstration, from a genuine mark sheet to a real
+  GPT-Image-2 forgery and an edit that keeps every rule (CVP's limit).
+- **How it works** and **Results**: the method and the headline numbers with the paper's figures.
+
+Uploads of any receipt or bill photo use an experimental reader (`cvp/real/upload.py`): docTR
+reads the whole photo, each printed row becomes an item or a bill line (Indian GST bills
+included: CGST + SGST, amounts like 1,23,456.00), and the receipt gets its own rules. Only the
+bill-level arithmetic (subtotal + tax = total, cash - total = change) raises an alarm; item lines
+only warn, because they are often misread, and a misread value can be corrected on the page and
+re-checked. On 100 genuine CORD photos read without their labels it raises false alarms on 6%
+and warnings on 12% (`scripts/real_upload_check.py`). The earlier Gradio demo still runs with
+`.venv/bin/python app.py`.
 
 To explain how it works, open `docs/how-it-works.html` in a browser: the pipeline, a worked
 example, the theory in code, a map of which file does what, results and likely questions.
@@ -53,7 +74,11 @@ cvp/                      the library
     read.py               how CVP reads a real receipt (docTR at the layout labels)
     forge.py              the T1-T4 forgeries on real photos, with ground truth
     view.py               what the visual branch sees of a real photo (same in training and testing)
-    system.py, demo.py    CVP end to end on one real photo; the app's "Real receipt" tab
+    system.py, demo.py    CVP end to end on one real photo; the Gradio demo's "Real receipt" tab
+    upload.py             the experimental reader of any receipt photo (the web app's uploads)
+    aiforge.py            AIForge-Doc: the CORD receipts edited by commercial AI editors
+webapp/                   the web app (Phase 4): server.py (FastAPI), engine.py (runs CVP, plain data),
+                          explain.py (the reasoning in words), samples.py (examples, guided tour), static/
 scripts/
   train_ocr.py            train the OCR on synthetic slot crops
   make_dataset.py         build data/<type>/{train,val,test,train_g1}
@@ -71,7 +96,7 @@ scripts/
                           threshold; make_real_dataset.py builds real-photo training data
   reproduce_real.sh       rebuild every real-data result from the downloaded datasets
 tests/                    pytest suite (theory, rules, rendering, forgeries, scoring, models)
-app.py                    the app
+app.py                    the earlier Gradio demo (the web app is webapp/)
 report/                   the paper (IEEE Computer Society journal format); report/build.sh
                           builds main.pdf and a zip to upload to Overleaf
 ```

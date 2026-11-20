@@ -14,7 +14,7 @@ We also learned to work within limits. Everything in this project, including tra
 - **Image forensics:** JPEG compression, Error Level Analysis, why patch boundaries must align with the JPEG block grid, and how generative inpainting differs from classical editing.
 - **Probability and statistics:** class posteriors, the noisy-OR, AUC and F1, choosing thresholds on validation data, confidence intervals and significance tests.
 - **Formal reasoning:** stating and proving a proposition about the limits of rule checking and turning it into automated tests.
-- **Software engineering:** structuring a research code base as a package, writing 349 tests, making every result reproducible from scripts, and using Git branches for each phase.
+- **Software engineering:** structuring a research code base as a package, writing 367 tests, making every result reproducible from scripts, and using Git branches for each phase.
 - **Working with real data:** handling public datasets with their own formats, licences and quirks, and building an OCR pipeline on top of an open-source toolkit.
 - **Scientific writing:** writing an IEEE-format paper in LaTeX, checking every reference, and presenting results with their limitations.
 

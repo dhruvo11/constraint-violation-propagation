@@ -159,10 +159,15 @@ async def _in_thread(fn):
 
 @app.post("/api/recheck")
 def recheck(id: str = Body(...), values: dict = Body(...)):
-    try:
-        return _run(ENGINE.recheck, id, values)
-    except KeyError as e:
-        raise HTTPException(404, str(e))
+    if id not in ENGINE._kept:
+        raise HTTPException(404, "This reading has expired; analyse the photo again.")
+    for f, v in values.items():
+        try:
+            if v not in (None, ""):
+                float(str(v).replace(",", ""))
+        except ValueError:
+            raise HTTPException(400, f"“{v}” is not a number.")
+    return _run(ENGINE.recheck, id, values)
 
 
 @app.get("/api/results")

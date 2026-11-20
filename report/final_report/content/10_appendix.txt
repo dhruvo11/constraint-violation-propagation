@@ -12,9 +12,10 @@ The repository has one branch per phase of the work; the default branch, phase2/
 
 !code 7.5
 CVP-project/
-├── app.py                      the Gradio application (four tabs)
+├── webapp/                     the web app: server, engine, explanations, examples, page
+├── app.py                      the earlier Gradio demo
 ├── setup.sh                    one-time setup: environment, packages, tests
-├── Start CVP.command           double-click launcher for the application
+├── Start CVP.command           double-click launcher for the web app
 ├── requirements-lock.txt       exact versions of all 87 Python packages
 ├── cvp/                        the library
 │   ├── core/
@@ -43,7 +44,7 @@ CVP-project/
 │   ├── real_*.py               real-data experiments (CORD, Find it again!, AIForge-Doc)
 │   ├── reproduce.sh            rebuild every synthetic result
 │   └── reproduce_real.sh       rebuild every real-data result
-├── tests/                      349 pytest tests
+├── tests/                      367 pytest tests
 ├── samples/                    nine sample documents for the application
 ├── results/                    metrics of every experiment (JSON, summaries)
 ├── docs/how-it-works.html      an illustrated explainer of the method
@@ -62,8 +63,8 @@ The commands below are run from the project folder in a terminal. The first comm
 !opts firstbold
 Command | What it does
 ./setup.sh | Creates the Python environment, installs the locked dependencies and runs the tests
-.venv/bin/python app.py | Starts the application at http://127.0.0.1:7860 (or double-click Start CVP.command)
-.venv/bin/python -m pytest | Runs all 349 automated tests
+.venv/bin/python -m webapp | Starts the web app at http://127.0.0.1:7860 (or double-click Start CVP.command)
+.venv/bin/python -m pytest | Runs all 367 automated tests
 ./scripts/reproduce.sh | Rebuilds every synthetic-data result from scratch (a few hours)
 ./scripts/reproduce.sh evaluate | Re-runs only the evaluation and figures from cached features
 ./scripts/reproduce_real.sh | Rebuilds every real-data result from the downloaded CORD, Find it again! and AIForge-Doc data

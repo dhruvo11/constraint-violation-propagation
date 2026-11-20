@@ -18,14 +18,24 @@ async function api(url, body, isForm) {
 }
 
 const state = { catalog: null, tour: [], tourAt: 0, ready: false };
+// ?theme=light forces the light theme (screenshots for print); otherwise the system's choice
+if (new URLSearchParams(location.search).get("theme") === "light") document.documentElement.dataset.theme = "light";
 
 /* ---------------------------------------------------------------- views */
 function route() {
-  const v = (location.hash || "#analyse").slice(1);
-  const view = ["analyse", "tour", "how", "results"].includes(v) ? v : "analyse";
+  // #analyse, #tour, #how, #results; direct links: #tour/6 (a tour step), #example/ai-905 (an example)
+  const [v, arg] = (location.hash || "#analyse").slice(1).split("/");
+  const view = v === "example" ? "analyse" : ["analyse", "tour", "how", "results"].includes(v) ? v : "analyse";
   $$(".view").forEach((s) => (s.hidden = s.id !== `view-${view}`));
   $$(".views a").forEach((a) => a.classList.toggle("on", a.dataset.view === view));
-  if (view === "tour" && state.catalog && !$("#tour-card").childElementCount) openTourStep(state.tourAt);
+  if (view === "tour" && state.catalog) {
+    if (arg) openTourStep(+arg - 1);
+    else if (!$("#tour-card").childElementCount) openTourStep(state.tourAt);
+  }
+  if (v === "example" && arg && state.catalog) {
+    $$(".example").forEach((x) => x.classList.toggle("on", x.dataset.id === arg));
+    runInto($("#result"), () => api(`/api/sample/${arg}`, {}));
+  }
   if (view === "results" && !$("#tiles").childElementCount) renderResultsPage();
   window.scrollTo({ top: 0 });
 }
@@ -517,7 +527,7 @@ async function renderResultsPage() {
       `On ${x.genuine} genuine CORD photos read without labels; ${pct(x.warning_genuine)} more get a warning. It flags ${pct(x.caught_or_warned)} of smooth single-field edits.`]);
   }
   tiles.innerHTML = items.map(([k, big, unit, p]) => `<div class="tile"><div class="k">${esc(k)}</div><div class="big">${esc(big)} <small>${esc(unit)}</small></div><p>${esc(p)}</p></div>`).join("");
-  $("#figs").innerHTML = FIGS.map(([f, c]) => `<figure class="fig"><img src="/figures/${f}" alt="${esc(c)}" loading="lazy"><figcaption>${esc(c)}</figcaption></figure>`).join("");
+  $("#figs").innerHTML = FIGS.map(([f, c]) => `<figure class="fig"><img src="/figures/${f}" alt="${esc(c)}"><figcaption>${esc(c)}</figcaption></figure>`).join("");
   $$("#figs img").forEach((img) => img.addEventListener("click", () => openLightbox(img)));
 }
 

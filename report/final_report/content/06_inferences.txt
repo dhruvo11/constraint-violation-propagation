@@ -24,7 +24,7 @@ Objective | Status | Evidence
 3. Implement the OCR and visual branches | Achieved | Shared CRNN reading 99.1–99.9% of fields; shared ResNet-18 U-Net heatmap network (Sections 4.5, 4.6)
 4. Design the fusion head and evaluate it under a strict protocol | Achieved | Unseen-generator protocol, five baselines, head chosen on validation data, four hypotheses: three supported, one partly (Sections 5.2–5.6)
 5. Test the idea on real documents | Achieved | Rule validity on 1,000 CORD receipts, CVP on 474 forged real photos, rule failures on Find it again! human forgeries, and CVP on 1,966 receipts edited by commercial AI editors in AIForge-Doc (Sections 5.7 to 5.9)
-6. Deliver an application, tests, reproducibility and a paper | Achieved | Four-tab application, 349 tests, rebuild scripts, IEEE-format paper (Sections 4.9, 4.10)
+6. Deliver an application, tests, reproducibility and a paper | Achieved | Web app with a guided tour and an experimental reader for any receipt photo, 367 tests, rebuild scripts, IEEE-format paper (Sections 4.9, 4.10)
 !end
 
 ## 6.3 ALGORITHMIC INFERENCES

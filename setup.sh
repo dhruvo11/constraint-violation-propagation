@@ -30,5 +30,5 @@ if [ ! -f models/visual_resunet.pt ] || [ ! -f models/ocr_crnn.pt ]; then
 else
   echo
   echo "Setup done. Start the app by double-clicking 'Start CVP.command' or running:"
-  echo "  .venv/bin/python app.py"
+  echo "  .venv/bin/python -m webapp"
 fi

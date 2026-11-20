@@ -286,3 +286,4 @@ details.tech dt { color: var(--muted); } details.tech dd { margin: 0; }
 @media (max-width: 760px) {
   .views { order: 3; width: 100%; overflow-x: auto; margin: 0; }
 }
+.tile .big small { display: block; margin-top: 2px; }
